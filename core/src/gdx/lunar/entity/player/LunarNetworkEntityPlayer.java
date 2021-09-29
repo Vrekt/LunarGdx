@@ -19,7 +19,7 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
     /**
      * Default distance that player will interpolate to if they are too far away from server position.
      */
-    protected float interpolateDesyncDistance = 3.0f;
+    protected float interpolateDesyncDistance = 3.0f, worldStepTime;
 
     public LunarNetworkEntityPlayer(int entityId, float playerScale, float playerWidth, float playerHeight, Rotation rotation) {
         super(entityId, playerScale, playerWidth, playerHeight, rotation);
@@ -37,6 +37,7 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
     public void spawnEntityInWorld(LunarWorld world, float x, float y) {
         super.spawnEntityInWorld(world, x, y);
         world.setPlayerInWorld(this);
+        this.worldStepTime = world.getStepTime();
     }
 
     /**
@@ -82,7 +83,7 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
             // update body position.
             final float diffX = position.x - interpolateToX;
             final float diffY = position.y - interpolateToY;
-            body.setLinearVelocity(diffX * (1 / 60.0f), diffY * (1 / 60.0f));
+            body.setLinearVelocity(diffX * worldStepTime, diffY * worldStepTime);
             setPosition(interpolateToX, interpolateToY);
             doPositionInterpolation = false;
             return;

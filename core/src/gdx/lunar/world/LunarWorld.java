@@ -69,6 +69,10 @@ public abstract class LunarWorld implements Disposable {
         this.stepTime = stepTime;
     }
 
+    public float getStepTime() {
+        return stepTime;
+    }
+
     public void setMaxFrameTime(float maxFrameTime) {
         this.maxFrameTime = maxFrameTime;
     }
