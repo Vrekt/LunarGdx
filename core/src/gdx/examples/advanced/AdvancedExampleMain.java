@@ -49,6 +49,7 @@ public final class AdvancedExampleMain extends Game {
     public void create() {
         // create a new lunar instance.
         final Lunar lunar = new Lunar();
+        lunar.setGdxInitialized(true);
 
         // Set up the local client server.
         final LunarClientServer server = new LunarClientServer(lunar, "localhost", 6969);

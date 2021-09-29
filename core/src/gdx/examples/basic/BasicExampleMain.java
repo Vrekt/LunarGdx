@@ -22,6 +22,8 @@ import gdx.lunar.world.BasicLunarWorld;
 
 public final class BasicExampleMain extends Game {
 
+    private LunarClientServer server;
+
     private BasicLunarWorld lunarWorld;
     private TextureAtlas atlas;
 
@@ -38,9 +40,10 @@ public final class BasicExampleMain extends Game {
     public void create() {
         // create a new lunar instance.
         final Lunar lunar = new Lunar();
+        lunar.setGdxInitialized(true);
 
         // connect to remote server.
-        final LunarClientServer server = new LunarClientServer(lunar, "localhost", 6969);
+        server = new LunarClientServer(lunar, "localhost", 6969);
         server.connect().join();
 
         // get our connection
@@ -132,5 +135,6 @@ public final class BasicExampleMain extends Game {
         lunarWorld.dispose();
         atlas.dispose();
         batch.dispose();
+        server.dispose();
     }
 }

@@ -6,12 +6,9 @@ import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.entity.player.impl.LunarNetworkPlayer;
-import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -23,7 +20,6 @@ public class PlayerConnection extends AbstractConnection {
     private LunarEntityPlayer player;
 
     private Consumer<LunarNetworkEntityPlayer> joinWorldListener;
-    private final Map<Integer, Consumer<Packet>> packetHandlers = new HashMap<>();
 
     public PlayerConnection(Lunar lunar, Channel channel) {
         super(channel);
@@ -52,9 +48,9 @@ public class PlayerConnection extends AbstractConnection {
     @Override
     public void handleAuthentication(SPacketAuthentication packet) {
         if (packet.isAllowed()) {
-            System.err.println("Successfully authenticated with remote server.");
+            Lunar.log("PlayerConnection", "Successfully authenticated with remote server.");
         } else {
-            System.err.println("Failed to authenticate with server: " + packet.getNotAllowedReason());
+            Lunar.log("PlayerConnection", "Failed to authenticate with server: " + packet.getNotAllowedReason());
             this.close();
         }
     }
@@ -64,7 +60,7 @@ public class PlayerConnection extends AbstractConnection {
         if (packet.getEntityId() == player.getEntityId()) return;
 
         // TODO: Maybe default global rotation.
-        System.err.println("Spawning a new player with eid " + packet.getEntityId() + " and username " + packet.getUsername());
+        Lunar.log("PlayerConnection", "Spawning a new player with eid " + packet.getEntityId() + " and username " + packet.getUsername());
         final LunarNetworkPlayer player = new LunarNetworkPlayer(
                 packet.getEntityId(),
                 lunar.getPlayerProperties().scale,
@@ -84,7 +80,7 @@ public class PlayerConnection extends AbstractConnection {
         if (player.getWorldIn() == null) return;
 
         Gdx.app.postRunnable(() -> player.getWorldIn().removePlayerFromWorld(packet.entityId()));
-        System.err.println("Removed player: " + packet.entityId());
+        Lunar.log("PlayerConnection", "Removed player: " + packet.entityId());
     }
 
     @Override
@@ -102,9 +98,9 @@ public class PlayerConnection extends AbstractConnection {
     @Override
     public void handleJoinWorld(SPacketJoinWorld packet) {
         if (packet.isAllowed()) {
-            System.err.println("Allowed to join requested world.");
+            Lunar.log("PlayerConnection", "Allowed to join requested world.");
         } else {
-            System.err.println("Failed to join the requested world because: " + packet.getNotAllowedReason());
+            Lunar.log("PlayerConnection", "Failed to join the requested world because: " + packet.getNotAllowedReason());
         }
     }
 
