@@ -12,7 +12,19 @@ Lunar is a networking library for LibGDX. With lunar you can easily create multi
 - A very basic protocol with SSL encryption.
 - Very customizable and extendable.
 
-### A Peek
+### Get A Taste
+```java
+// apply force to another player and send it to others since they were attacked.
+this.player.getWorldIn().applyForceToOtherPlayerNetwork(somePlayer, player.getConnection(), fx, fy, px, py, true);
+
+// apply a knock-back force to ourselves.
+this.player.getWorldIn().applyForceToPlayerNetwork(player.getConnection(), fx, fy, point.x, point.y, true);
+```
+
+```java
+// register a unique custom packet.
+this.connection.registerPacket(99, MyCustomPacket::new, packet -> handleEntityPropertiesPacket(packet));
+```
 
 ```java
 // Create a networked world for others to join us.
