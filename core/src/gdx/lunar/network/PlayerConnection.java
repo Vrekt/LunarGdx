@@ -77,10 +77,11 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleRemovePlayer(SPacketRemovePlayer packet) {
-        if (player.getWorldIn() == null) return;
+        if (player.getWorldIn() == null
+                || packet.getEntityId() == this.player.getEntityId()) return;
 
-        Gdx.app.postRunnable(() -> player.getWorldIn().removePlayerFromWorld(packet.entityId()));
-        Lunar.log("PlayerConnection", "Removed player: " + packet.entityId());
+        Gdx.app.postRunnable(() -> player.getWorldIn().removePlayerFromWorld(packet.getEntityId()));
+        Lunar.log("PlayerConnection", "Removed player: " + packet.getEntityId());
     }
 
     @Override
@@ -98,9 +99,18 @@ public class PlayerConnection extends AbstractConnection {
     @Override
     public void handleJoinWorld(SPacketJoinWorld packet) {
         if (packet.isAllowed()) {
+            this.player.setEntityId(packet.getEntityId());
             Lunar.log("PlayerConnection", "Allowed to join requested world.");
         } else {
             Lunar.log("PlayerConnection", "Failed to join the requested world because: " + packet.getNotAllowedReason());
+        }
+    }
+
+    @Override
+    public void handleBodyForce(SPacketBodyForce packet) {
+        final LunarNetworkEntityPlayer other = this.player.getWorldIn().getPlayer(packet.getEntityId());
+        if (other != null) {
+            other.getBody().applyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY(), true);
         }
     }
 

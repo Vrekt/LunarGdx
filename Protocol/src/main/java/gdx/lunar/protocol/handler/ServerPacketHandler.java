@@ -56,4 +56,11 @@ public interface ServerPacketHandler {
      */
     void handleJoinWorld(SPacketJoinWorld packet);
 
+    /**
+     * Handle apply body force
+     *
+     * @param packet packet
+     */
+    void handleBodyForce(SPacketBodyForce packet);
+
 }

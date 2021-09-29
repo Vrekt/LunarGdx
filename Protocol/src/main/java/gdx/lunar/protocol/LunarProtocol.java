@@ -107,6 +107,7 @@ public final class LunarProtocol {
         SERVER_PACKETS.put(SPacketPlayerPosition.PID, (buf, handler) -> SPacketPlayerPosition.handle(handler, buf));
         SERVER_PACKETS.put(SPacketPlayerVelocity.PID, (buf, handler) -> SPacketPlayerVelocity.handle(handler, buf));
         SERVER_PACKETS.put(SPacketJoinWorld.PID, (buf, handler) -> SPacketJoinWorld.handle(handler, buf));
+        SERVER_PACKETS.put(SPacketBodyForce.PID, (buf, handler) -> SPacketBodyForce.handle(handler, buf));
     }
 
     /**
@@ -119,6 +120,7 @@ public final class LunarProtocol {
         CLIENT_PACKETS.put(CPacketVelocity.PID, (buf, handler) -> CPacketVelocity.handle(handler, buf));
         CLIENT_PACKETS.put(CPacketJoinWorld.PID, (buf, handler) -> CPacketJoinWorld.handle(handler, buf));
         CLIENT_PACKETS.put(CPacketWorldLoaded.PID, (buf, handler) -> CPacketWorldLoaded.handle(handler, buf));
+        CLIENT_PACKETS.put(CPacketBodyForce.PID, (buf, handler) -> CPacketBodyForce.handle(handler, buf));
     }
 
     /**

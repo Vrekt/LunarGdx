@@ -23,20 +23,21 @@ public final class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDeco
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) {
+        ByteBuf buf = null;
         try {
-            final ByteBuf buf = (ByteBuf) super.decode(ctx, in);
+            buf = (ByteBuf) super.decode(ctx, in);
             if (buf != null) {
                 // ignore the length of the packet.
                 buf.readInt();
                 // retrieve packet from PID
                 final int pid = buf.readByte() & 0xFF;
                 if (LunarProtocol.isClientPacket(pid)) LunarProtocol.handleClientPacket(pid, buf, handler, ctx);
-
-                buf.release();
             }
         } catch (Exception any) {
             any.printStackTrace();
             ctx.fireExceptionCaught(any);
+        } finally {
+            if (buf != null) buf.release();
         }
         return null;
     }

@@ -1,11 +1,14 @@
 package gdx.lunar.world;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
+import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.protocol.packet.client.CPacketBodyForce;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -129,6 +132,74 @@ public abstract class LunarWorld implements Disposable {
      */
     public void removePlayerFromWorld(int player) {
         this.players.remove(player);
+    }
+
+    /**
+     * Get the position of a player
+     *
+     * @param player entity ID
+     * @return the position or {@code null} if no player matching the ID was found.
+     */
+    public Vector2 getPositionOfPlayer(int player) {
+        final LunarNetworkEntityPlayer p = this.players.get(player);
+        if (p == null) return null;
+        return p.getPosition();
+    }
+
+    /**
+     * @param player the player
+     * @return the player or {@code null} if no player matching the ID was found.
+     */
+    public LunarNetworkEntityPlayer getPlayer(int player) {
+        return this.players.get(player);
+    }
+
+    /**
+     * Apply force to the local players body and send over the network.
+     *
+     * @param connection the connection
+     * @param fx         force X
+     * @param fy         force Y
+     * @param px         point X
+     * @param py         point Y
+     * @param wake       wake
+     */
+    public void applyForceToPlayerNetwork(AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
+        connection.send(new CPacketBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
+        this.player.getBody().applyForce(fx, fy, px, py, wake);
+    }
+
+    /**
+     * Apply a force to another players body and send that over the network to others.
+     *
+     * @param player     the player
+     * @param connection the connection
+     * @param fx         force X
+     * @param fy         force Y
+     * @param px         point X
+     * @param py         point Y
+     * @param wake       wake
+     */
+    public void applyForceToOtherPlayerNetwork(int player, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
+        applyForceToOtherPlayerNetwork(this.players.get(player), connection, fx, fy, px, py, wake);
+    }
+
+    /**
+     * Apply a force to another players body and send that over the network to others.
+     *
+     * @param player     the player
+     * @param connection the connection to use
+     * @param fx         force X
+     * @param fy         force Y
+     * @param px         point X
+     * @param py         point Y
+     * @param wake       wake
+     */
+    public void applyForceToOtherPlayerNetwork(LunarNetworkEntityPlayer player, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
+        if (player == null) return;
+
+        connection.send(new CPacketBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
+        player.getBody().applyForce(fx, fy, px, py, wake);
     }
 
     /**

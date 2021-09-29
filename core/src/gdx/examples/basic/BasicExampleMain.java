@@ -2,6 +2,7 @@ package gdx.examples.basic;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -101,6 +102,7 @@ public final class BasicExampleMain extends Game {
         // update our camera
         camera.position.set(player.getInterpolated().x, player.getInterpolated().y, 0f);
         camera.update();
+        update();
 
         // clear screen.
         Gdx.gl.glClearColor(69 / 255f, 8f / 255f, 163f / 255, 0.5f);
@@ -121,6 +123,17 @@ public final class BasicExampleMain extends Game {
 
         // done :)
         batch.end();
+    }
+
+    private void update() {
+        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+            System.err.println("APPLYING FORCE");
+            // test apply forces over the network.
+            final Vector2 point = player.getBody().getWorldPoint(new Vector2(5.0f, -5));
+            final float fx = player.getBody().getMass() * (player.getX() * 150);
+            final float fy = player.getBody().getMass() * (player.getY() * 150);
+            this.player.getWorldIn().applyForceToPlayerNetwork(player.getConnection(), fx, fy, point.x, point.y, true);
+        }
     }
 
     @Override

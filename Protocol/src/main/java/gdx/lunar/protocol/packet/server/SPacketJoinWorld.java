@@ -17,15 +17,17 @@ public class SPacketJoinWorld extends Packet {
 
     private boolean isAllowed;
     private String notAllowedReason;
+    private int entityId;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleJoinWorld(new SPacketJoinWorld(buf));
     }
 
-    public SPacketJoinWorld(ByteBufAllocator allocator, boolean isAllowed, String notAllowedReason) {
+    public SPacketJoinWorld(ByteBufAllocator allocator, boolean isAllowed, String notAllowedReason, int entityId) {
         super(allocator);
         this.isAllowed = isAllowed;
         this.notAllowedReason = notAllowedReason;
+        this.entityId = entityId;
     }
 
     private SPacketJoinWorld(ByteBuf buffer) {
@@ -40,6 +42,10 @@ public class SPacketJoinWorld extends Packet {
         return notAllowedReason;
     }
 
+    public int getEntityId() {
+        return entityId;
+    }
+
     @Override
     public int getId() {
         return PID;
@@ -49,12 +55,20 @@ public class SPacketJoinWorld extends Packet {
     public void encode() {
         writeId();
         buffer.writeBoolean(isAllowed);
-        if (notAllowedReason != null) writeString(notAllowedReason);
+        if (notAllowedReason != null) {
+            writeString(notAllowedReason);
+        } else {
+            buffer.writeInt(entityId);
+        }
     }
 
     @Override
     public void decode() {
         isAllowed = buffer.readBoolean();
-        if (!isAllowed) notAllowedReason = readString();
+        if (!isAllowed) {
+            notAllowedReason = readString();
+        } else {
+            entityId = buffer.readInt();
+        }
     }
 }

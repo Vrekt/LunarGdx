@@ -122,8 +122,8 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
      * @param alpha alpha
      */
     public void interpolate(float alpha) {
-        interpolated.x = Interpolation.linear.apply(prevX, currentX, alpha);
-        interpolated.y = Interpolation.linear.apply(prevY, currentY, alpha);
+        interpolated.x = Interpolation.linear.apply(prevX, position.x, alpha);
+        interpolated.y = Interpolation.linear.apply(prevY, position.y, alpha);
     }
 
     /**
@@ -133,8 +133,8 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
      * @param alpha alpha
      */
     public void interpolate(Interpolation i, float alpha) {
-        interpolated.x = i.apply(prevX, currentX, alpha);
-        interpolated.y = i.apply(prevY, currentY, alpha);
+        interpolated.x = i.apply(prevX, position.x, alpha);
+        interpolated.y = i.apply(prevY, position.y, alpha);
     }
 
     @Override
@@ -144,8 +144,7 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
         // set initial positions
         prevX = x;
         prevY = y;
-        currentX = x;
-        currentY = y;
+        position.set(x, y);
         interpolated.set(x, y);
 
         // default body def for all player types (network + local)

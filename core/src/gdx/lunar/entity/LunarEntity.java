@@ -17,12 +17,12 @@ public abstract class LunarEntity implements Disposable {
     /**
      * The interpolated position and velocity of this entity.
      */
-    protected final Vector2 interpolated, velocity;
+    protected final Vector2 interpolated, velocity, position;
 
     /**
      * Previous and current positions.
      */
-    protected float prevX, prevY, currentX, currentY;
+    protected float prevX, prevY;
 
     /**
      * The world this entity is in.
@@ -33,6 +33,7 @@ public abstract class LunarEntity implements Disposable {
         this.entityId = entityId;
         this.interpolated = new Vector2();
         this.velocity = new Vector2();
+        this.position = new Vector2();
     }
 
     public LunarEntity() {
@@ -62,6 +63,10 @@ public abstract class LunarEntity implements Disposable {
         return entityId;
     }
 
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
+    }
+
     /**
      * @return previous X
      */
@@ -80,22 +85,22 @@ public abstract class LunarEntity implements Disposable {
      * @return current X
      */
     public float getX() {
-        return currentX;
+        return position.x;
     }
 
     /**
      * @return current Y
      */
     public float getY() {
-        return currentY;
+        return position.y;
     }
 
     public void setX(float currentX) {
-        this.currentX = currentX;
+        this.position.x = currentX;
     }
 
     public void setY(float currentY) {
-        this.currentY = currentY;
+        this.position.y = currentY;
     }
 
     public void setPosition(float x, float y) {
@@ -115,6 +120,13 @@ public abstract class LunarEntity implements Disposable {
      */
     public Vector2 getVelocity() {
         return velocity;
+    }
+
+    /**
+     * @return current position
+     */
+    public Vector2 getPosition() {
+        return position;
     }
 
     /**

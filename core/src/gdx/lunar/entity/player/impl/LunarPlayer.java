@@ -21,7 +21,7 @@ public class LunarPlayer extends LunarEntityPlayer {
      * The move speed
      */
     protected float moveSpeed = 6.5f;
-    private AbstractConnection connection;
+    protected AbstractConnection connection;
 
     public LunarPlayer(int entityId, float playerScale, float playerWidth, float playerHeight, Rotation rotation) {
         super(entityId, playerScale, playerWidth, playerHeight, rotation);
@@ -33,6 +33,10 @@ public class LunarPlayer extends LunarEntityPlayer {
 
     public void setConnection(AbstractConnection connection) {
         this.connection = connection;
+    }
+
+    public AbstractConnection getConnection() {
+        return connection;
     }
 
     public long getPositionSendRate() {
@@ -79,7 +83,7 @@ public class LunarPlayer extends LunarEntityPlayer {
     /**
      * Poll the input
      */
-    private void pollInput() {
+    protected void pollInput() {
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             velocity.set(-moveSpeed, 0f);
             rotation = Rotation.FACING_LEFT;
@@ -116,7 +120,7 @@ public class LunarPlayer extends LunarEntityPlayer {
         }
 
         if (now - lastPositionSend >= positionSendRateMs) {
-            connection.sendPlayerPosition(rotation, currentX, currentY);
+            connection.sendPlayerPosition(rotation, position.x, position.y);
             lastPositionSend = now;
         }
     }

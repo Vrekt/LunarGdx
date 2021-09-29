@@ -49,4 +49,11 @@ public interface ClientPacketHandler {
      */
     void handleWorldLoaded(CPacketWorldLoaded packet);
 
+    /**
+     * Handle a body force
+     *
+     * @param packet the placket
+     */
+    void handleBodyForce(CPacketBodyForce packet);
+
 }

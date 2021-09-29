@@ -56,7 +56,7 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
      */
     public void updatePositionFromNetwork(float x, float y, Rotation rotation) {
         this.rotation = rotation;
-        final float dst = Vector2.dst2(this.currentX, this.currentY, x, y);
+        final float dst = Vector2.dst2(this.position.x, this.position.y, x, y);
 
         // interpolate to position if too far away (de sync)
         if (dst >= interpolateDesyncDistance) {
@@ -69,8 +69,8 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
     @Override
     public void update(float delta) {
         if (doPositionInterpolation) {
-            interpolated.x = Interpolation.linear.apply(currentX, interpolateToX, 0.5f);
-            interpolated.y = Interpolation.linear.apply(currentY, interpolateToY, 0.5f);
+            interpolated.x = Interpolation.linear.apply(position.x, interpolateToX, 0.5f);
+            interpolated.y = Interpolation.linear.apply(position.y, interpolateToY, 0.5f);
             doPositionInterpolation = false;
             return;
         }

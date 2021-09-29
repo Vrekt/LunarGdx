@@ -38,7 +38,7 @@ public class SPacketRemovePlayer extends Packet {
     /**
      * @return the ID
      */
-    public int entityId() {
+    public int getEntityId() {
         return entityId;
     }
 

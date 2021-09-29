@@ -5,6 +5,7 @@ import gdx.examples.advanced.AdvancedExampleMain;
 import gdx.examples.advanced.entity.NetworkPlayer;
 import gdx.examples.advanced.entity.Player;
 import gdx.examples.advanced.packet.MyCustomPositionPacketServer;
+import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
@@ -54,10 +55,10 @@ public class AdvancedPlayerConnection extends AbstractConnection {
         if (player.getWorldIn() == null) return;
 
         Gdx.app.postRunnable(() -> {
-            main.handlePlayerLeave((NetworkPlayer) player.getWorldIn().getPlayers().get(packet.entityId()));
-            player.getWorldIn().removePlayerFromWorld(packet.entityId());
+            main.handlePlayerLeave((NetworkPlayer) player.getWorldIn().getPlayers().get(packet.getEntityId()));
+            player.getWorldIn().removePlayerFromWorld(packet.getEntityId());
         });
-        System.err.println("Removed player: " + packet.entityId());
+        System.err.println("Removed player: " + packet.getEntityId());
     }
 
     @Override
@@ -79,6 +80,14 @@ public class AdvancedPlayerConnection extends AbstractConnection {
         } else {
             System.err.println("Failed to join the requested world because: " + packet.getNotAllowedReason());
             main.notifyCantJoinWorld();
+        }
+    }
+
+    @Override
+    public void handleBodyForce(SPacketBodyForce packet) {
+        final LunarNetworkEntityPlayer other = this.player.getWorldIn().getPlayer(packet.getEntityId());
+        if (other != null) {
+            other.getBody().applyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY(), true);
         }
     }
 
