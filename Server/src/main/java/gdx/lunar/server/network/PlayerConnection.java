@@ -2,7 +2,6 @@ package gdx.lunar.server.network;
 
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
-import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.client.*;
 import gdx.lunar.protocol.packet.server.SPacketAuthentication;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
@@ -89,11 +88,6 @@ public final class PlayerConnection extends AbstractConnection implements Client
             player.setLoaded(true);
             player.getWorld().spawnPlayerInWorld(player);
         }
-    }
-
-    @Override
-    public void handle(Packet packet) {
-        System.err.println("Unknown packet: " + packet.getId());
     }
 
     @Override
