@@ -22,9 +22,18 @@ public abstract class AbstractConnection extends ChannelInboundHandlerAdapter im
      * If we are connected in any way.
      */
     protected boolean isConnected;
+    private long lastPacketReceived;
 
     public AbstractConnection(Channel channel) {
         this.channel = channel;
+    }
+
+    public long getLastPacketReceived() {
+        return lastPacketReceived;
+    }
+
+    public void setLastPacketReceived(long lastPacketReceived) {
+        this.lastPacketReceived = lastPacketReceived;
     }
 
     public ByteBufAllocator alloc() {

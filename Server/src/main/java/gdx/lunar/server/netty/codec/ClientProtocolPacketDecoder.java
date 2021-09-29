@@ -1,7 +1,7 @@
 package gdx.lunar.server.netty.codec;
 
 import gdx.lunar.protocol.LunarProtocol;
-import gdx.lunar.protocol.handler.ClientPacketHandler;
+import gdx.lunar.server.network.AbstractConnection;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -14,9 +14,9 @@ public final class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDeco
     /**
      * The local session packet handler
      */
-    private final ClientPacketHandler handler;
+    private final AbstractConnection handler;
 
-    public ClientProtocolPacketDecoder(ClientPacketHandler handler) {
+    public ClientProtocolPacketDecoder(AbstractConnection handler) {
         super(Integer.MAX_VALUE, 0, 4);
         this.handler = handler;
     }
@@ -31,7 +31,10 @@ public final class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDeco
                 buf.readInt();
                 // retrieve packet from PID
                 final int pid = buf.readByte() & 0xFF;
-                if (LunarProtocol.isClientPacket(pid)) LunarProtocol.handleClientPacket(pid, buf, handler, ctx);
+                if (LunarProtocol.isClientPacket(pid)) {
+                    handler.setLastPacketReceived(System.currentTimeMillis());
+                    LunarProtocol.handleClientPacket(pid, buf, handler, ctx);
+                }
             }
         } catch (Exception any) {
             any.printStackTrace();

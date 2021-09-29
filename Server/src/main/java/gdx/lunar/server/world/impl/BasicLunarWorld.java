@@ -20,7 +20,22 @@ public final class BasicLunarWorld extends World {
         int packets = 0;
 
         // flush previous tick packets.
-        for (Player value : players.values()) value.getConnection().flush();
+        final long now = System.currentTimeMillis();
+        for (Player value : players.values()) {
+            value.getConnection().flush();
+
+            // update timed out players.
+            if (System.currentTimeMillis() - value.getConnection().getLastPacketReceived()
+                    >= 3000) {
+
+                // time out.
+                if (value.getWorld() != null) {
+                    value.getWorld().removePlayerInWorld(value);
+                }
+                value.getServer().handlePlayerDisconnect(value);
+                value.getConnection().disconnect();
+            }
+        }
 
         while (queuedPackets.peek() != null) {
             final QueuedPacket packet = queuedPackets.poll();
@@ -28,6 +43,7 @@ public final class BasicLunarWorld extends World {
 
             if (packets++ >= maxPacketsPerTick) break;
         }
+
 
         total += packets;
 

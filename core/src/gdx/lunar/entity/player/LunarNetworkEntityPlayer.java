@@ -19,7 +19,7 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
     /**
      * Default distance that player will interpolate to if they are too far away from server position.
      */
-    protected float interpolateDesyncDistance = 10f;
+    protected float interpolateDesyncDistance = 3.0f;
 
     public LunarNetworkEntityPlayer(int entityId, float playerScale, float playerWidth, float playerHeight, Rotation rotation) {
         super(entityId, playerScale, playerWidth, playerHeight, rotation);
@@ -27,6 +27,10 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
 
     public LunarNetworkEntityPlayer(float playerScale, float playerWidth, float playerHeight, Rotation rotation) {
         super(playerScale, playerWidth, playerHeight, rotation);
+    }
+
+    public void setInterpolateDesyncDistance(float interpolateDesyncDistance) {
+        this.interpolateDesyncDistance = interpolateDesyncDistance;
     }
 
     @Override
@@ -56,7 +60,7 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
      */
     public void updatePositionFromNetwork(float x, float y, Rotation rotation) {
         this.rotation = rotation;
-        final float dst = Vector2.dst2(this.position.x, this.position.y, x, y);
+        final float dst = Vector2.dst(this.position.x, this.position.y, x, y);
 
         // interpolate to position if too far away (de sync)
         if (dst >= interpolateDesyncDistance) {
@@ -64,6 +68,9 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
             interpolateToX = x;
             interpolateToY = y;
         }
+
+        this.position.x = x;
+        this.position.y = y;
     }
 
     @Override
@@ -71,6 +78,12 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
         if (doPositionInterpolation) {
             interpolated.x = Interpolation.linear.apply(position.x, interpolateToX, 0.5f);
             interpolated.y = Interpolation.linear.apply(position.y, interpolateToY, 0.5f);
+
+            // update body position.
+            final float diffX = position.x - interpolateToX;
+            final float diffY = position.y - interpolateToY;
+            body.setLinearVelocity(diffX * (1 / 60.0f), diffY * (1 / 60.0f));
+            setPosition(interpolateToX, interpolateToY);
             doPositionInterpolation = false;
             return;
         }
