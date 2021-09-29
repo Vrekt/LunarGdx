@@ -1,0 +1,90 @@
+
+character2.png
+size: 256, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+character_down
+  rotate: false
+  xy: 38, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: 2
+character_down
+  rotate: false
+  xy: 74, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: 1
+character_down_idle
+  rotate: false
+  xy: 92, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: -1
+character_left
+  rotate: false
+  xy: 20, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: 1
+character_left
+  rotate: false
+  xy: 146, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: 2
+character_left_idle
+  rotate: false
+  xy: 164, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: -1
+character_right
+  rotate: false
+  xy: 56, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: 2
+character_right
+  rotate: false
+  xy: 200, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: 1
+character_right_idle
+  rotate: false
+  xy: 182, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: -1
+character_up
+  rotate: false
+  xy: 2, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: 1
+character_up
+  rotate: false
+  xy: 110, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: 2
+character_up_idle
+  rotate: false
+  xy: 128, 2
+  size: 16, 18
+  orig: 16, 18
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+group 'me.vrekt'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
+    compile project(":Protocol")
+}
