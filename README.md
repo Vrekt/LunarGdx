@@ -43,6 +43,8 @@ server.connect().join();
 final PlayerConnection connection = (PlayerConnection) server.getConnection();
 ```
 
+Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt/LunarGdx/wiki/Getting-Started-Guide:-Building-a-simple-game)
+
 # Documentation and Examples
 
 [Examples](https://github.com/Vrekt/LunarGdx/tree/main/core/src/gdx/examples)
