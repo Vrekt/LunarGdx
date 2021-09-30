@@ -28,6 +28,7 @@ public abstract class LunarEntity implements Disposable {
      * The world this entity is in.
      */
     protected LunarWorld worldIn;
+    protected String name;
 
     public LunarEntity(int entityId) {
         this.entityId = entityId;
@@ -55,6 +56,14 @@ public abstract class LunarEntity implements Disposable {
      * @param y     Y
      */
     public abstract void spawnEntityInWorld(LunarWorld world, float x, float y);
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     /**
      * @return this entities unique ID.

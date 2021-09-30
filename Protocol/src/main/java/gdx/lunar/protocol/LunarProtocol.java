@@ -108,6 +108,8 @@ public final class LunarProtocol {
         SERVER_PACKETS.put(SPacketPlayerVelocity.PID, (buf, handler) -> SPacketPlayerVelocity.handle(handler, buf));
         SERVER_PACKETS.put(SPacketJoinWorld.PID, (buf, handler) -> SPacketJoinWorld.handle(handler, buf));
         SERVER_PACKETS.put(SPacketBodyForce.PID, (buf, handler) -> SPacketBodyForce.handle(handler, buf));
+        SERVER_PACKETS.put(SPacketSpawnEntity.PID, (buf, handler) -> SPacketSpawnEntity.handle(handler, buf));
+        SERVER_PACKETS.put(SPacketSpawnEntityDenied.PID, (buf, handler) -> SPacketSpawnEntityDenied.handle(handler, buf));
     }
 
     /**
@@ -121,6 +123,7 @@ public final class LunarProtocol {
         CLIENT_PACKETS.put(CPacketJoinWorld.PID, (buf, handler) -> CPacketJoinWorld.handle(handler, buf));
         CLIENT_PACKETS.put(CPacketWorldLoaded.PID, (buf, handler) -> CPacketWorldLoaded.handle(handler, buf));
         CLIENT_PACKETS.put(CPacketBodyForce.PID, (buf, handler) -> CPacketBodyForce.handle(handler, buf));
+        CLIENT_PACKETS.put(CPacketRequestSpawnEntity.PID, (buf, handler) -> CPacketRequestSpawnEntity.handle(handler, buf));
     }
 
     /**

@@ -5,6 +5,7 @@ import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
 import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
+import gdx.lunar.server.game.entity.Entity;
 import gdx.lunar.server.game.entity.player.Player;
 import gdx.lunar.server.game.utilities.Disposable;
 import io.netty.buffer.ByteBuf;
@@ -19,13 +20,14 @@ import java.util.concurrent.ThreadLocalRandom;
  * Represents a separate world or instance with players.
  */
 public abstract class World implements Disposable {
-    /**
-     * The players in this lobby
-     */
+
     protected final ConcurrentMap<Integer, Player> players = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<Integer, Entity> entities = new ConcurrentHashMap<>();
 
     protected final String worldName;
     protected final int maxPacketsPerTick, capacity;
+
+    protected int maxEntities, maxEntityRequests;
 
     /**
      * Queued packet updates
@@ -38,11 +40,15 @@ public abstract class World implements Disposable {
      * @param worldName         the name of this world.
      * @param maxPacketsPerTick the max packets to process per tick.
      * @param capacity          max capacity.
+     * @param maxEntities       the max amount of entities allowed in this world
+     * @param maxEntityRequests the max amount of  requests allowed per second.
      */
-    public World(String worldName, int maxPacketsPerTick, int capacity) {
+    public World(String worldName, int maxPacketsPerTick, int capacity, int maxEntities, int maxEntityRequests) {
         this.worldName = worldName;
         this.maxPacketsPerTick = maxPacketsPerTick;
         this.capacity = capacity;
+        this.maxEntities = maxEntities;
+        this.maxEntityRequests = maxEntityRequests;
     }
 
     /**
@@ -52,12 +58,30 @@ public abstract class World implements Disposable {
         return worldName;
     }
 
+    public int getMaxEntities() {
+        return maxEntities;
+    }
+
+    public int getMaxEntityRequests() {
+        return maxEntityRequests;
+    }
+
+    public ConcurrentMap<Integer, Entity> getEntities() {
+        return entities;
+    }
+
+    public ConcurrentMap<Integer, Player> getPlayers() {
+        return players;
+    }
+
     /**
      * Assign an entity ID within this world.
+     * <p>
+     * Sync this to ensure entity IDs aren't duplicated?
      *
      * @return the new entity ID.
      */
-    public int assignEntityId() {
+    public synchronized int assignEntityId() {
         return players.size() + 1 + ThreadLocalRandom.current().nextInt(111, 999);
     }
 

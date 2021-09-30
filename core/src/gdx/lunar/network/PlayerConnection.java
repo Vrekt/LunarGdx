@@ -3,6 +3,7 @@ package gdx.lunar.network;
 import com.badlogic.gdx.Gdx;
 import gdx.lunar.Lunar;
 import gdx.lunar.entity.drawing.Rotation;
+import gdx.lunar.entity.network.NetworkEntity;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.entity.player.impl.LunarNetworkPlayer;
@@ -68,7 +69,7 @@ public class PlayerConnection extends AbstractConnection {
                 lunar.getPlayerProperties().height,
                 Rotation.FACING_UP);
 
-        player.setUsername(packet.getUsername());
+        player.setName(packet.getUsername());
         Gdx.app.postRunnable(() -> {
             player.spawnEntityInWorld(this.player.getWorldIn(), packet.getX(), packet.getY());
             this.joinWorldListener.accept(player);
@@ -112,6 +113,23 @@ public class PlayerConnection extends AbstractConnection {
         if (other != null) {
             other.getBody().applyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY(), true);
         }
+    }
+
+    @Override
+    public void handleSpawnEntity(SPacketSpawnEntity packet) {
+        if (!player.getWorldIn().resetTemporaryEntityIfExists(packet.getTemporaryEntityId(), packet.getEntityId())) {
+            // entity is not already in the world so spawn it.
+            final NetworkEntity entity = new NetworkEntity(packet.getEntityName(), packet.getEntityId());
+            entity.setPosition(packet.getX(), packet.getY());
+
+            player.getWorldIn().setEntityInWorld(entity);
+        }
+    }
+
+    @Override
+    public void handleSpawnEntityDenied(SPacketSpawnEntityDenied packet) {
+        player.getWorldIn().removeTemporaryEntity(packet.getTemporaryEntityId());
+        Lunar.log("PlayerConnection", "Request to spawn an entity was denied because: " + packet.getReason());
     }
 
     @Override

@@ -48,16 +48,6 @@ public abstract class Packet {
     }
 
     /**
-     * Encode this packet now
-     *
-     * @return the byte buf contents
-     */
-    public ByteBuf encodeNow() {
-        this.encode();
-        return buffer;
-    }
-
-    /**
      * @return contents of this packet.
      */
     public ByteBuf getBuffer() {

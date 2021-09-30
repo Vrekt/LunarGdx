@@ -56,4 +56,11 @@ public interface ClientPacketHandler {
      */
     void handleBodyForce(CPacketBodyForce packet);
 
+    /**
+     * Handle a request to spawn an entity in the world
+     *
+     * @param packet the packet
+     */
+    void handleRequestSpawnEntity(CPacketRequestSpawnEntity packet);
+
 }

@@ -4,29 +4,32 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import gdx.lunar.entity.LunarEntity;
 import gdx.lunar.entity.drawing.Rotation;
+import gdx.lunar.entity.network.NetworkEntity;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.client.CPacketBodyForce;
+import gdx.lunar.protocol.packet.client.CPacketRequestSpawnEntity;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Represents a networked game world.
  */
 public abstract class LunarWorld implements Disposable {
 
-    /**
-     * All players within this world.
-     */
     protected final ConcurrentMap<Integer, LunarNetworkEntityPlayer> players = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<Integer, LunarEntity> entities = new ConcurrentHashMap<>();
 
     protected final LunarEntityPlayer player;
     protected final World world;
     protected float worldScale;
     protected boolean handlePhysics, updatePlayer, updateNetworkPlayers;
+    protected boolean updateEntities;
 
     protected float stepTime = 1.0f / 60.0f;
     protected float maxFrameTime = 0.25f;
@@ -43,15 +46,18 @@ public abstract class LunarWorld implements Disposable {
      * @param handlePhysics        if true, this world will manage updating the Box2d world.
      * @param updatePlayer         if the local player should be updated.
      * @param updateNetworkPlayers if network players should be updated.
+     * @param updateEntities       if entities should be updated.
      */
     public LunarWorld(LunarEntityPlayer player, World world, float worldScale,
-                      boolean handlePhysics, boolean updatePlayer, boolean updateNetworkPlayers) {
+                      boolean handlePhysics, boolean updatePlayer, boolean updateNetworkPlayers,
+                      boolean updateEntities) {
         this.player = player;
         this.world = world;
         this.worldScale = worldScale;
         this.handlePhysics = handlePhysics;
         this.updatePlayer = updatePlayer;
         this.updateNetworkPlayers = updateNetworkPlayers;
+        this.updateEntities = updateEntities;
     }
 
     /**
@@ -63,6 +69,11 @@ public abstract class LunarWorld implements Disposable {
     public LunarWorld(LunarEntityPlayer player, World world) {
         this.player = player;
         this.world = world;
+
+        this.handlePhysics = true;
+        this.updatePlayer = true;
+        this.updateNetworkPlayers = true;
+        this.updateEntities = true;
     }
 
     public void setStepTime(float stepTime) {
@@ -121,6 +132,62 @@ public abstract class LunarWorld implements Disposable {
     }
 
     /**
+     * Set an entity in this world
+     *
+     * @param entity the entity
+     */
+    public void setEntityInWorld(LunarEntity entity) {
+        this.entities.put(entity.getEntityId(), entity);
+    }
+
+    /**
+     * Set an entity in this world and broadcast to others.
+     *
+     * @param entity the entity
+     */
+    public void setEntityInWorldNetwork(AbstractConnection connection, LunarEntity entity) {
+        // ensure we have a temporary entity ID before continuing.
+        if (entity.getEntityId() == 0) {
+            entity.setEntityId(ThreadLocalRandom.current().nextInt());
+        }
+        setEntityInWorld(entity);
+        connection.send(new CPacketRequestSpawnEntity(connection.alloc(), entity.getName(), entity.getX(), entity.getY(), entity.getEntityId()));
+    }
+
+    /**
+     * Check if a temporary entity exists by ID
+     *
+     * @param temporaryEntityId the temporary ID
+     * @param entityId          the new entity ID
+     * @return {@code true} if so
+     */
+    public boolean resetTemporaryEntityIfExists(int temporaryEntityId, int entityId) {
+        if (this.entities.containsKey(temporaryEntityId)) {
+            this.entities.get(temporaryEntityId).setEntityId(entityId);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * The request was denied from the server, so remove it.
+     *
+     * @param temporaryEntityId the entity ID.
+     */
+    public void removeTemporaryEntity(int temporaryEntityId) {
+
+    }
+
+    /**
+     * Set a networked entity in this world.
+     *
+     * @param entity the entity
+     */
+    public void setEntityInWorld(NetworkEntity entity) {
+        this.entities.put(entity.getEntityId(), entity);
+    }
+
+    /**
      * Remove a player from this world
      *
      * @param player the player
@@ -136,6 +203,24 @@ public abstract class LunarWorld implements Disposable {
      */
     public void removePlayerFromWorld(int player) {
         this.players.remove(player);
+    }
+
+    /**
+     * Remove an entity from this world
+     *
+     * @param entity the entity
+     */
+    public void removeEntityFromWorld(LunarEntity entity) {
+        this.entities.remove(entity.getEntityId(), entity);
+    }
+
+    /**
+     * Remove an entity from this world
+     *
+     * @param entity the entity ID
+     */
+    public void removeEntityFromWorld(int entity) {
+        this.entities.remove(entity);
     }
 
     /**
@@ -206,6 +291,18 @@ public abstract class LunarWorld implements Disposable {
         player.getBody().applyForce(fx, fy, px, py, wake);
     }
 
+    public void applyForceToEntityNetwork(int entityId, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
+        applyForceToEntityNetwork(this.entities.get(entityId), connection, fx, fy, px, py, wake);
+    }
+
+
+    public void applyForceToEntityNetwork(LunarEntity entity, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
+        if (entity == null) return;
+
+        connection.send(new CPacketBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
+        player.getBody().applyForce(fx, fy, px, py, wake);
+    }
+
     /**
      * Update a players position
      *
@@ -258,6 +355,7 @@ public abstract class LunarWorld implements Disposable {
                 accumulator -= stepTime;
             }
         }
+        if (updateEntities) for (LunarEntity value : entities.values()) value.update(delta);
 
         if (updatePlayer) {
             player.update(delta);

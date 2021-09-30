@@ -63,4 +63,18 @@ public interface ServerPacketHandler {
      */
     void handleBodyForce(SPacketBodyForce packet);
 
+    /**
+     * Spawn an entity
+     *
+     * @param packet the packet
+     */
+    void handleSpawnEntity(SPacketSpawnEntity packet);
+
+    /**
+     * A request to spawn an entity was denied
+     *
+     * @param packet the packet
+     */
+    void handleSpawnEntityDenied(SPacketSpawnEntityDenied packet);
+
 }

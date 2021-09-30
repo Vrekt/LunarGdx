@@ -25,11 +25,6 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
     private final float scale, width, height;
 
     /**
-     * The username of this player.
-     */
-    protected String username;
-
-    /**
      * renderer this player is using.
      */
     protected LunarPlayerRenderer renderer;
@@ -92,14 +87,6 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
      */
     public void initializePlayerRendererWith(LunarPlayerRenderer renderer) {
         this.renderer = renderer;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     @Override
@@ -171,6 +158,5 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
         if (this.renderer != null) renderer.dispose();
         renderer = null;
         worldIn = null;
-        username = null;
     }
 }

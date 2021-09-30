@@ -3,9 +3,7 @@ package gdx.lunar.server.network;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.client.*;
-import gdx.lunar.protocol.packet.server.SPacketAuthentication;
-import gdx.lunar.protocol.packet.server.SPacketBodyForce;
-import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
+import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.server.LunarServer;
 import gdx.lunar.server.game.entity.player.Player;
 import gdx.lunar.server.world.World;
@@ -21,6 +19,9 @@ public final class PlayerConnection extends AbstractConnection implements Client
      */
     private Player player;
     private boolean disconnected;
+
+    private long lastEntityRequestReset = System.currentTimeMillis();
+    private int totalEntityRequests;
 
     public PlayerConnection(Channel channel) {
         super(channel);
@@ -98,6 +99,38 @@ public final class PlayerConnection extends AbstractConnection implements Client
     public void handleBodyForce(CPacketBodyForce packet) {
         if (player != null && player.getWorld() != null) {
             player.getWorld().broadcastPacketInWorld(new SPacketBodyForce(alloc(), packet));
+        }
+    }
+
+    @Override
+    public void handleRequestSpawnEntity(CPacketRequestSpawnEntity packet) {
+        if (player != null && player.getWorld() != null) {
+            if (player.getWorld().getEntities().size() + 1 >= player.getWorld().getMaxEntities()) {
+                // too many entities in the players world.
+                send(new SPacketSpawnEntityDenied(channel.alloc(), packet.getTemporaryEntityId(),
+                        "Too many entities in this world."));
+            } else {
+                totalEntityRequests++;
+                if (totalEntityRequests >= player.getWorld().getMaxEntityRequests()) {
+                    // too many requests.
+                    send(new SPacketSpawnEntityDenied(channel.alloc(), packet.getTemporaryEntityId(),
+                            "Too many requests within a short period of time."));
+                } else {
+                    // player is good to go.
+                    final int entityId = player.getWorld().assignEntityId();
+                    send(new SPacketSpawnEntity(alloc(),
+                            packet.getEntityName(),
+                            packet.getX(),
+                            packet.getY(),
+                            packet.getTemporaryEntityId(),
+                            entityId));
+                }
+
+                if (System.currentTimeMillis() - lastEntityRequestReset >= 1000) {
+                    totalEntityRequests = 0;
+                    lastEntityRequestReset = System.currentTimeMillis();
+                }
+            }
         }
     }
 
