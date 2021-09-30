@@ -78,7 +78,7 @@ public final class BasicExampleMain extends Game {
 
         // Create a networked world for others to join us.
         // We tell the world to handle physics updates and local player updates for us.
-        lunarWorld = new BasicLunarWorld(player, world, scaling, true, true, true);
+        lunarWorld = new BasicLunarWorld(player, world, scaling, true, true, true, true);
         // Spawn our player in the world.
         player.spawnEntityInWorld(lunarWorld, 2.0f, 2.0f);
 

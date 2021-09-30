@@ -10,8 +10,8 @@ import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
  */
 public final class BasicLunarWorld extends LunarWorld {
 
-    public BasicLunarWorld(LunarEntityPlayer player, World world, float worldScale, boolean handlePhysics, boolean updatePlayer, boolean updateNetworkPlayers) {
-        super(player, world, worldScale, handlePhysics, updatePlayer, updateNetworkPlayers);
+    public BasicLunarWorld(LunarEntityPlayer player, World world, float worldScale, boolean handlePhysics, boolean updatePlayer, boolean updateNetworkPlayers, boolean updateEntities) {
+        super(player, world, worldScale, handlePhysics, updatePlayer, updateNetworkPlayers, updateEntities);
     }
 
     public BasicLunarWorld(LunarEntityPlayer player, World world) {

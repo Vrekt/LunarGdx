@@ -42,7 +42,7 @@ public class AdvancedPlayerConnection extends AbstractConnection {
         if (packet.getEntityId() == player.getEntityId()) return;
 
         final NetworkPlayer player = new NetworkPlayer(packet.getEntityId());
-        player.setUsername(packet.getUsername());
+        player.setName(packet.getUsername());
 
         Gdx.app.postRunnable(() -> {
             player.spawnEntityInWorld(this.player.getWorldIn(), packet.getX(), packet.getY());
@@ -89,6 +89,16 @@ public class AdvancedPlayerConnection extends AbstractConnection {
         if (other != null) {
             other.getBody().applyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY(), true);
         }
+    }
+
+    @Override
+    public void handleSpawnEntity(SPacketSpawnEntity packet) {
+
+    }
+
+    @Override
+    public void handleSpawnEntityDenied(SPacketSpawnEntityDenied packet) {
+
     }
 
     public void handleCustomPacket(MyCustomPositionPacketServer packet) {

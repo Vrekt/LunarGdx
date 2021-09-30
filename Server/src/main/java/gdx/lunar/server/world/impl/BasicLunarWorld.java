@@ -12,7 +12,7 @@ public final class BasicLunarWorld extends World {
     private int total;
 
     public BasicLunarWorld() {
-        super("LunarWorld", 100, 200);
+        super("LunarWorld", 100, 200, 100, 1);
     }
 
     @Override
