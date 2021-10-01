@@ -61,6 +61,11 @@ Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt
 - Lobbies
 - ...
 
+# Known Issues
+- Random ghost player blinks next to networked player
+- Initial position seems to be de-synced some way
+- probably other stuff I don't know about.
+
 # Using Lunar
 You can find releases in the releases section. Both client and server rely on the Protocol dependency.
 
