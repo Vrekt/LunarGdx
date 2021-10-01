@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.protocol.packet.client.CPacketSetProperties;
 
 /**
  * Represents a player within the lunar system.
@@ -61,6 +62,18 @@ public class LunarPlayer extends LunarEntityPlayer {
 
     public void setMoveSpeed(float moveSpeed) {
         this.moveSpeed = moveSpeed;
+    }
+
+    /**
+     * override here to ensure we tell the server our username.
+     *
+     * @param name username
+     */
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+
+        if (connection != null) connection.send(new CPacketSetProperties(connection.alloc(), name));
     }
 
     @Override

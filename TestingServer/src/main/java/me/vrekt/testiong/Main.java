@@ -1,6 +1,6 @@
 package me.vrekt.testiong;
 
-import gdx.lunar.server.ImplLunarServer;
+import gdx.lunar.server.LunarGameServer;
 import gdx.lunar.server.LunarNettyServer;
 
 public class Main {
@@ -9,7 +9,7 @@ public class Main {
         final LunarNettyServer server = new LunarNettyServer("localhost", 6969);
         server.bind().join();
 
-        final ImplLunarServer s = new ImplLunarServer();
+        final LunarGameServer s = new LunarGameServer();
         s.start();
 
     }

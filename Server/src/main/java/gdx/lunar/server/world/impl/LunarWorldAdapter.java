@@ -4,15 +4,18 @@ import gdx.lunar.server.game.entity.player.Player;
 import gdx.lunar.server.world.World;
 
 /**
- * A basic game world.
+ * Represents a basic world with packet processing and a player capacity of 100, 100 max entities, and 1 entity request per second.
  */
-public final class BasicLunarWorld extends World {
+public class LunarWorldAdapter extends World {
 
     private int statistics;
     private int total;
 
-    public BasicLunarWorld() {
+    public LunarWorldAdapter() {
         super("LunarWorld", 100, 200, 100, 1);
+
+        setAllowedToSpawnEntities(true);
+        setPlayerTimeoutMs(3000);
     }
 
     @Override

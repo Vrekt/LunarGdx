@@ -12,7 +12,7 @@ import io.netty.channel.Channel;
 /**
  * Represents the default player connection handler.
  */
-public final class PlayerConnection extends AbstractConnection implements ClientPacketHandler {
+public class PlayerConnection extends AbstractConnection implements ClientPacketHandler {
 
     /**
      * The player who owns this connection.
@@ -27,10 +27,6 @@ public final class PlayerConnection extends AbstractConnection implements Client
         super(channel);
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
     @Override
     public void handleAuthentication(CPacketAuthentication packet) {
         System.err.println("Attempting to authenticate new client.");
@@ -38,9 +34,14 @@ public final class PlayerConnection extends AbstractConnection implements Client
         if (packet.getProtocolVersion() != LunarProtocol.protocolVersion) {
             // invalid protocol version, not allowed.
             send(new SPacketAuthentication(alloc(), false, "Outdated protocol version!"));
+            disconnect();
+        } else if (!LunarServer.getServer().canPlayerJoin()) {
+            send(new SPacketAuthentication(alloc(), false, "Server is full."));
+            disconnect();
         } else {
             System.err.println("New connection successfully authenticated.");
             send(new SPacketAuthentication(alloc(), true, null));
+            this.player = new Player(-1, LunarServer.getServer(), this);
         }
     }
 
@@ -79,7 +80,7 @@ public final class PlayerConnection extends AbstractConnection implements Client
         } else if (world.isFull()) {
             send(new SPacketJoinWorld(alloc(), false, "World is full.", -1));
         } else {
-            player = new Player("EntityName", world.assignEntityId(), LunarServer.getServer(), this);
+            player.setEntityId(world.assignEntityId());
             player.setWorldIn(world);
 
             // player will be set into world once they are actually loaded.
@@ -131,6 +132,33 @@ public final class PlayerConnection extends AbstractConnection implements Client
                     lastEntityRequestReset = System.currentTimeMillis();
                 }
             }
+        }
+    }
+
+    @Override
+    public void handleSetProperties(CPacketSetProperties packet) {
+        if (player != null) {
+            player.setName(packet.getUsername());
+
+            // broadcast this change.
+            this.player.getWorld().broadcast(player.getEntityId(), new SPacketSetEntityProperties(alloc(), player.getEntityId(), packet.getUsername()));
+        }
+    }
+
+    @Override
+    public void handleCreateLobby(CPacketCreateLobby packet) {
+        if (player.getServer().canCreateLobby()) {
+            final World lobby = player.getServer().createNewLobby();
+            player.setWorldIn(lobby);
+
+            final int entityId = lobby.assignEntityId();
+            player.setEntityId(entityId);
+            player.setLoaded(true);
+            player.getWorld().spawnPlayerInWorld(player);
+
+            send(new SPacketCreateLobby(alloc(), entityId, lobby.getWorldLobbyId()));
+        } else {
+            send(new SPacketCreateLobby(alloc(), "Too many lobbies within the server."));
         }
     }
 

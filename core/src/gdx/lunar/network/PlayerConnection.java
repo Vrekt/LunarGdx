@@ -7,7 +7,9 @@ import gdx.lunar.entity.network.NetworkEntity;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.entity.player.impl.LunarNetworkPlayer;
+import gdx.lunar.protocol.packet.client.CPacketSetProperties;
 import gdx.lunar.protocol.packet.server.*;
+import gdx.lunar.world.LunarWorld;
 import io.netty.channel.Channel;
 
 import java.util.function.Consumer;
@@ -21,6 +23,10 @@ public class PlayerConnection extends AbstractConnection {
     private LunarEntityPlayer player;
 
     private Consumer<LunarNetworkEntityPlayer> joinWorldListener;
+
+    // default lobby world this player would want to join
+    private Runnable joinLobbyHandler;
+    private LunarWorld lobbyWorld;
 
     public PlayerConnection(Lunar lunar, Channel channel) {
         super(channel);
@@ -39,6 +45,25 @@ public class PlayerConnection extends AbstractConnection {
      */
     public void setJoinWorldListener(Consumer<LunarNetworkEntityPlayer> joinWorldListener) {
         this.joinWorldListener = joinWorldListener;
+    }
+
+    /**
+     * Set the action to run when a player joins or creates a lobby.
+     *
+     * @param action the action
+     */
+    public void setJoinLobbyHandler(Runnable action) {
+        this.joinLobbyHandler = action;
+    }
+
+    /**
+     * Set the default lobby world that will be used when a player joins or creates a lobby.
+     * This is not needed, you could do this via {@code setJoinLobbyHandler} and handle it there.
+     *
+     * @param world the world.
+     */
+    public void setDefaultLobbyWorld(LunarWorld world) {
+        this.lobbyWorld = world;
     }
 
     @Override
@@ -101,6 +126,11 @@ public class PlayerConnection extends AbstractConnection {
     public void handleJoinWorld(SPacketJoinWorld packet) {
         if (packet.isAllowed()) {
             this.player.setEntityId(packet.getEntityId());
+
+            // send username of local player.
+            if (this.player.getName() != null) {
+                send(new CPacketSetProperties(alloc(), player.getName()));
+            }
             Lunar.log("PlayerConnection", "Allowed to join requested world.");
         } else {
             Lunar.log("PlayerConnection", "Failed to join the requested world because: " + packet.getNotAllowedReason());
@@ -130,6 +160,33 @@ public class PlayerConnection extends AbstractConnection {
     public void handleSpawnEntityDenied(SPacketSpawnEntityDenied packet) {
         player.getWorldIn().removeTemporaryEntity(packet.getTemporaryEntityId());
         Lunar.log("PlayerConnection", "Request to spawn an entity was denied because: " + packet.getReason());
+    }
+
+    @Override
+    public void handleSetEntityProperties(SPacketSetEntityProperties packet) {
+        final LunarNetworkEntityPlayer player = this.player.getWorldIn().getPlayer(packet.getEntityId());
+        if (player != null) player.setName(packet.getEntityName());
+    }
+
+    @Override
+    public void handleCreateLobby(SPacketCreateLobby packet) {
+        if (packet.isAllowed()) {
+            Lunar.log("PlayerConnection", "Creating a new lobby with the ID " + packet.getLobbyId());
+            if (this.lobbyWorld != null) {
+                lobbyWorld.setLobbyId(packet.getLobbyId());
+                this.player.setEntityId(packet.getEntityId());
+
+                // TODO: Were gonna need to decide where the player should be.
+                this.player.spawnEntityInWorld(lobbyWorld, 0.0f, 0.0f);
+            }
+
+            if (this.joinLobbyHandler != null) {
+                // post this sync.
+                Gdx.app.postRunnable(() -> joinLobbyHandler.run());
+            }
+        } else {
+            Lunar.log("PlayerConnection", "Cannot create a new lobby because: " + packet.getNotAllowedReason());
+        }
     }
 
     @Override

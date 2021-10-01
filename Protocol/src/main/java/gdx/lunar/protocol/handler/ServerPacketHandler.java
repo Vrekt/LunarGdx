@@ -77,4 +77,18 @@ public interface ServerPacketHandler {
      */
     void handleSpawnEntityDenied(SPacketSpawnEntityDenied packet);
 
+    /**
+     * Handle setting properties of an entity
+     *
+     * @param packet the packet
+     */
+    void handleSetEntityProperties(SPacketSetEntityProperties packet);
+
+    /**
+     * Handle creating a lobby (or denial)
+     *
+     * @param packet the packet
+     */
+    void handleCreateLobby(SPacketCreateLobby packet);
+
 }

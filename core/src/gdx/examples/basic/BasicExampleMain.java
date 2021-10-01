@@ -19,13 +19,15 @@ import gdx.lunar.entity.player.prop.PlayerProperties;
 import gdx.lunar.network.PlayerConnection;
 import gdx.lunar.protocol.packet.client.CPacketJoinWorld;
 import gdx.lunar.protocol.packet.client.CPacketWorldLoaded;
-import gdx.lunar.world.BasicLunarWorld;
+import gdx.lunar.world.LunarWorldAdapter;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class BasicExampleMain extends Game {
 
     private LunarClientServer server;
 
-    private BasicLunarWorld lunarWorld;
+    private LunarWorldAdapter lunarWorld;
     private TextureAtlas atlas;
 
     private LunarPlayer player;
@@ -78,9 +80,12 @@ public final class BasicExampleMain extends Game {
 
         // Create a networked world for others to join us.
         // We tell the world to handle physics updates and local player updates for us.
-        lunarWorld = new BasicLunarWorld(player, world, scaling, true, true, true, true);
+        lunarWorld = new LunarWorldAdapter(player, world, scaling, true, true, true, true);
         // Spawn our player in the world.
         player.spawnEntityInWorld(lunarWorld, 2.0f, 2.0f);
+        // set a random name for this player
+        // this MUST be set after sending the join world packet.
+        player.setName("Player" + ThreadLocalRandom.current().nextInt(111, 999));
 
         // Initialize our graphics for drawing.
         camera = new OrthographicCamera();

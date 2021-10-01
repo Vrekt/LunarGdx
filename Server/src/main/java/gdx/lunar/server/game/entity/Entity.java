@@ -16,21 +16,19 @@ public abstract class Entity implements Disposable {
     /**
      * The entity name
      */
-    protected final String entityName;
+    protected String entityName;
 
     /**
      * The ID of this entity
      */
-    protected final int entityId;
+    protected int entityId;
 
     /**
      * Initialize
      *
-     * @param entityName name
-     * @param entityId   ID
+     * @param entityId ID
      */
-    public Entity(String entityName, int entityId) {
-        this.entityName = entityName;
+    public Entity(int entityId) {
         this.entityId = entityId;
     }
 
@@ -42,10 +40,23 @@ public abstract class Entity implements Disposable {
     }
 
     /**
+     * Set this entities name
+     *
+     * @param entityName the name
+     */
+    public void setName(String entityName) {
+        this.entityName = entityName;
+    }
+
+    /**
      * @return the entity ID
      */
     public int getEntityId() {
         return entityId;
+    }
+
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
     }
 
     /**

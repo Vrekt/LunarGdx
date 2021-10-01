@@ -8,7 +8,6 @@ import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import gdx.lunar.server.game.entity.Entity;
 import gdx.lunar.server.game.entity.player.Player;
 import gdx.lunar.server.game.utilities.Disposable;
-import io.netty.buffer.ByteBuf;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +27,11 @@ public abstract class World implements Disposable {
     protected final int maxPacketsPerTick, capacity;
 
     protected int maxEntities, maxEntityRequests;
+    protected int worldLobbyId;
+
+    protected long playerTimeoutMs = 3000;
+    // if players can spawn entities here.
+    protected boolean allowedToSpawnEntities = true;
 
     /**
      * Queued packet updates
@@ -58,6 +62,14 @@ public abstract class World implements Disposable {
         return worldName;
     }
 
+    public void setAllowedToSpawnEntities(boolean allowedToSpawnEntities) {
+        this.allowedToSpawnEntities = allowedToSpawnEntities;
+    }
+
+    public void setPlayerTimeoutMs(long playerTimeoutMs) {
+        this.playerTimeoutMs = playerTimeoutMs;
+    }
+
     public int getMaxEntities() {
         return maxEntities;
     }
@@ -66,12 +78,41 @@ public abstract class World implements Disposable {
         return maxEntityRequests;
     }
 
+    public int getWorldLobbyId() {
+        return worldLobbyId;
+    }
+
+    public void setWorldLobbyId(int worldLobbyId) {
+        this.worldLobbyId = worldLobbyId;
+    }
+
     public ConcurrentMap<Integer, Entity> getEntities() {
         return entities;
     }
 
     public ConcurrentMap<Integer, Player> getPlayers() {
         return players;
+    }
+
+    /**
+     * @param player the player
+     * @return {@code true} if this player is timed out based on {@code playerTimeoutMs}
+     */
+    protected boolean isTimedOut(Player player) {
+        return System.currentTimeMillis() - player.getConnection().getLastPacketReceived() >= playerTimeoutMs;
+    }
+
+    /**
+     * Remove the player from worlds and disconnect the connection
+     *
+     * @param player the player
+     */
+    protected void timeoutPlayer(Player player) {
+        player.getConnection().disconnect();
+        if (player.inWorld()) {
+            player.getWorld().removePlayerInWorld(player);
+        }
+        player.getServer().handlePlayerDisconnect(player);
     }
 
     /**
@@ -177,17 +218,6 @@ public abstract class World implements Disposable {
                 value.getConnection().queue(direct);
             }
         }
-    }
-
-    /**
-     * Broadcast a packet to all players
-     *
-     * @param direct the direct
-     */
-    public void broadcast(ByteBuf direct) {
-        players.forEach((entityId, player) -> {
-            player.getConnection().queue(direct);
-        });
     }
 
     @Override

@@ -125,8 +125,6 @@ public final class LunarClientServer implements Disposable {
      * @param channel channel
      */
     private void handleSocketConnection(SocketChannel channel) {
-        System.err.println("Socket connection successful.");
-
         connection = this.provider == null
                 ? new PlayerConnection(lunar, channel)
                 : this.provider.createConnection(channel);

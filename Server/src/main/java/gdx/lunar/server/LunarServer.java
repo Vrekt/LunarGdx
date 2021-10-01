@@ -3,12 +3,16 @@ package gdx.lunar.server;
 import gdx.lunar.server.game.entity.player.Player;
 import gdx.lunar.server.world.World;
 import gdx.lunar.server.world.WorldManager;
-import gdx.lunar.server.world.impl.BasicWorldManager;
+import gdx.lunar.server.world.impl.WorldManagerAdapter;
+import gdx.lunar.server.world.lobby.LobbyWorldAdapter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -20,14 +24,15 @@ public abstract class LunarServer {
 
     /**
      * Max amount of worlds allowed per thread.
-     * Max amount of players per world.
      * Max amount of players in general.
      */
-    protected int maxWorldsPerThread, maxPlayersPerWorld, maxPlayers;
+    protected int maxWorldsPerThread, maxPlayers = 2000;
+
     /**
      * Max worlds allowed in general.
+     * Max lobbies allowed in general.
      */
-    protected int maxWorlds;
+    protected int maxWorlds = 100, maxLobbies = 100;
 
     /**
      * Default amount of time to sleep after each tick
@@ -38,8 +43,10 @@ public abstract class LunarServer {
     /**
      * All players connected to this server regardless of world or instance.
      */
-    protected final Map<String, Player> allPlayers = new HashMap<>();
-
+    // TODO: Probably low performance with a COW.
+    protected final List<Player> allPlayers = new CopyOnWriteArrayList<>();
+    // map of all lobbies
+    protected final Map<Integer, World> lobbies = new HashMap<>();
     /**
      * The last world tick time
      */
@@ -57,7 +64,7 @@ public abstract class LunarServer {
     public LunarServer() {
         instance = this;
         this.service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        this.worldManager = new BasicWorldManager();
+        this.worldManager = new WorldManagerAdapter();
     }
 
     /**
@@ -69,13 +76,80 @@ public abstract class LunarServer {
         this.worldManager = worldManager;
     }
 
+    public void setMaxWorldsPerThread(int maxWorldsPerThread) {
+        this.maxWorldsPerThread = maxWorldsPerThread;
+    }
+
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
+    public void setMaxWorlds(int maxWorlds) {
+        this.maxWorlds = maxWorlds;
+    }
+
+    public void setMaxLobbies(int maxLobbies) {
+        this.maxLobbies = maxLobbies;
+    }
+
     /**
      * Handle a player disconnect.
      * This could be caused by connection errors or kicking.
      *
      * @param player the player
      */
-    public abstract void handlePlayerDisconnect(Player player);
+    public void handlePlayerDisconnect(Player player) {
+        this.allPlayers.remove(player);
+    }
+
+    /**
+     * Test if server is at capacity.
+     *
+     * @return {@code true} if the player can join.
+     */
+    public boolean canPlayerJoin() {
+        return allPlayers.size() + 1 <= maxPlayers;
+    }
+
+    /**
+     * Set player joined
+     *
+     * @param player the player
+     */
+    public void setPlayerJoined(Player player) {
+        this.allPlayers.add(player);
+    }
+
+    /**
+     * @return {@code true} if the player can create a lobby.
+     */
+    public boolean canCreateLobby() {
+        return lobbies.size() + 1 <= maxLobbies;
+    }
+
+    /**
+     * Same concept as {@link World#assignEntityId()}
+     * Slightly larger ID range.
+     *
+     * @return the lobby id.
+     */
+    protected synchronized int assignLobbyId() {
+        return lobbies.size() + 1 + ThreadLocalRandom.current().nextInt(1111, 9999);
+    }
+
+    /**
+     * Create a new lobby within this server.
+     *
+     * @return if **not** overridden, returns {@link gdx.lunar.server.world.lobby.LobbyWorldAdapter} as default.
+     */
+    public World createNewLobby() {
+        final int id = assignLobbyId();
+        final World lobby = new LobbyWorldAdapter();
+        lobby.setWorldLobbyId(id);
+
+        this.lobbies.put(id, lobby);
+        return lobby;
+    }
 
     /**
      * Start this server.
@@ -84,7 +158,7 @@ public abstract class LunarServer {
         worldTickTime = 0;
 
         service.execute(() -> {
-            Thread.currentThread().setName("LunarWorldTick");
+            Thread.currentThread().setName("LunarServerTick");
             Thread.currentThread().setUncaughtExceptionHandler((t, e) -> e.printStackTrace());
 
             while (running.get()) {
@@ -144,11 +218,12 @@ public abstract class LunarServer {
     }
 
     /**
-     * Update worlds
+     * Update worlds and lobbies.
      */
-    private void worldTick() {
+    protected void worldTick() {
         final long now = System.currentTimeMillis();
         for (World value : worldManager.getWorlds()) value.tick();
+        for (World lobby : lobbies.values()) lobby.tick();
         worldTickTime = System.currentTimeMillis() - now;
     }
 

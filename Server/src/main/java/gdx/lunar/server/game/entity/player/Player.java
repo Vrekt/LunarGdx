@@ -16,21 +16,21 @@ public class Player extends Entity {
     private final PlayerConnection connection;
 
     protected World worldIn;
+
     protected boolean loaded;
+    protected boolean inLobby;
 
     /**
      * Initialize
      *
-     * @param entityName name
      * @param entityId   ID
      * @param server     the server.
      * @param connection the connection
      */
-    public Player(String entityName, int entityId, LunarServer server, PlayerConnection connection) {
-        super(entityName, entityId);
+    public Player(int entityId, LunarServer server, PlayerConnection connection) {
+        super(entityId);
         this.server = server;
         this.connection = connection;
-        this.connection.setPlayer(this);
     }
 
     /**
@@ -59,6 +59,13 @@ public class Player extends Entity {
      */
     public World getWorld() {
         return worldIn;
+    }
+
+    /**
+     * @return {@code true} if this player is in a world.
+     */
+    public boolean inWorld() {
+        return worldIn != null;
     }
 
     /**

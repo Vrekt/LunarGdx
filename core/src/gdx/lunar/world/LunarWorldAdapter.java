@@ -6,15 +6,16 @@ import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 
 /**
- * A basic lunar world.
+ * Represents a basic or default impl of {@link LunarWorld}
+ * Instead, this adapter handles rendering of local network players.
  */
-public final class BasicLunarWorld extends LunarWorld {
+public class LunarWorldAdapter extends LunarWorld {
 
-    public BasicLunarWorld(LunarEntityPlayer player, World world, float worldScale, boolean handlePhysics, boolean updatePlayer, boolean updateNetworkPlayers, boolean updateEntities) {
+    public LunarWorldAdapter(LunarEntityPlayer player, World world, float worldScale, boolean handlePhysics, boolean updatePlayer, boolean updateNetworkPlayers, boolean updateEntities) {
         super(player, world, worldScale, handlePhysics, updatePlayer, updateNetworkPlayers, updateEntities);
     }
 
-    public BasicLunarWorld(LunarEntityPlayer player, World world) {
+    public LunarWorldAdapter(LunarEntityPlayer player, World world) {
         super(player, world);
     }
 

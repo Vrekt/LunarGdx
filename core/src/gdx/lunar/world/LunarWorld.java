@@ -36,6 +36,8 @@ public abstract class LunarWorld implements Disposable {
     protected float accumulator;
 
     protected int velocityIterations = 8, positionIterations = 3;
+    // if this world is being used as a lobby.
+    protected int lobbyId;
 
     /**
      * Initialize a new game world.
@@ -108,6 +110,14 @@ public abstract class LunarWorld implements Disposable {
         this.updateNetworkPlayers = updateNetworkPlayers;
     }
 
+    public void setLobbyId(int lobbyId) {
+        this.lobbyId = lobbyId;
+    }
+
+    public int getLobbyId() {
+        return lobbyId;
+    }
+
     /**
      * @return the Box2d world.
      */
@@ -175,7 +185,7 @@ public abstract class LunarWorld implements Disposable {
      * @param temporaryEntityId the entity ID.
      */
     public void removeTemporaryEntity(int temporaryEntityId) {
-
+        this.entities.remove(temporaryEntityId);
     }
 
     /**
@@ -291,11 +301,32 @@ public abstract class LunarWorld implements Disposable {
         player.getBody().applyForce(fx, fy, px, py, wake);
     }
 
+    /**
+     * Apply a force to another entities body and send that over the network to others.
+     *
+     * @param entityId   the entities ID
+     * @param connection the connection to use
+     * @param fx         force X
+     * @param fy         force Y
+     * @param px         point X
+     * @param py         point Y
+     * @param wake       wake
+     */
     public void applyForceToEntityNetwork(int entityId, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
         applyForceToEntityNetwork(this.entities.get(entityId), connection, fx, fy, px, py, wake);
     }
 
-
+    /**
+     * Apply a force to another entities body and send that over the network to others.
+     *
+     * @param entity     the entity
+     * @param connection the connection to use
+     * @param fx         force X
+     * @param fy         force Y
+     * @param px         point X
+     * @param py         point Y
+     * @param wake       wake
+     */
     public void applyForceToEntityNetwork(LunarEntity entity, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
         if (entity == null) return;
 

@@ -82,6 +82,22 @@ public abstract class AbstractConnection implements ServerPacketHandler {
     }
 
     /**
+     * Send set username of local player
+     *
+     * @param username the username
+     */
+    public void sendSetUsername(String username) {
+        this.send(new CPacketSetProperties(channel.alloc(), username));
+    }
+
+    /**
+     * Send a request to create a lobby.
+     */
+    public void sendCreateLobby() {
+        this.send(new CPacketCreateLobby(channel.alloc()));
+    }
+
+    /**
      * @return if this connection is connected in any way.
      */
     public boolean isConnected() {

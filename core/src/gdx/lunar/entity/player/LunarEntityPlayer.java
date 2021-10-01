@@ -126,6 +126,10 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
 
     @Override
     public void spawnEntityInWorld(LunarWorld world, float x, float y) {
+        if (this.worldIn != null) {
+            this.worldIn.dispose();
+        }
+
         this.worldIn = world;
 
         // set initial positions

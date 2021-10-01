@@ -63,4 +63,18 @@ public interface ClientPacketHandler {
      */
     void handleRequestSpawnEntity(CPacketRequestSpawnEntity packet);
 
+    /**
+     * Handle setting entity/player properties
+     *
+     * @param packet packet
+     */
+    void handleSetProperties(CPacketSetProperties packet);
+
+    /**
+     * Handle creating a lobby.
+     *
+     * @param packet the packet
+     */
+    void handleCreateLobby(CPacketCreateLobby packet);
+
 }
