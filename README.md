@@ -6,10 +6,12 @@ Lunar is a networking library for LibGDX. With lunar you can easily create multi
 
 #### Features
 - Player and entity renderers with animation loading.
-- Networked Box2d worlds.
+- Partially Networked Box2d worlds.
 - Networked player moving and velocity.
 - Networked player creation/removing.
-- A very basic protocol with SSL encryption.
+- Game lobbies and worlds.
+- Basic entity support
+- A expandable protocol with SSL support.
 - Very customizable and extendable.
 
 ### Get A Taste
@@ -58,3 +60,17 @@ Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt
 - Networked entities and other map/world objects.
 - Lobbies
 - ...
+
+# Known Issues
+- Random ghost player blinks next to networked player
+- Initial position seems to be de-synced some way
+- probably other stuff I don't know about.
+
+# Using Lunar
+You can find releases in the releases section. Both client and server rely on the Protocol dependency.
+
+You must also add a dependency for netty-all.
+##### Gradle 6.7.2
+```java
+compile group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
+```
