@@ -4,6 +4,8 @@
 
 Lunar is a networking library for LibGDX. With lunar you can easily create multiplayer games quickly and efficiently. Lunar provides many common utilities such as entities, worlds, protocol, and box2d support!
 
+**Lunar is still very early, so please be nice :)**
+
 #### Features
 - Player and entity renderers with animation loading.
 - Partially Networked Box2d worlds.
