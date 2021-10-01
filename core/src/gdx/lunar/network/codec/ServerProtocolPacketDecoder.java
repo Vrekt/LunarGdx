@@ -10,7 +10,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 /**
  * Handles decoding local server packets
  */
-public final class ServerProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
+public class ServerProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
 
     /**
      * The handler

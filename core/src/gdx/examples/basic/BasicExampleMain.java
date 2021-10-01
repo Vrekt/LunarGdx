@@ -69,6 +69,7 @@ public final class BasicExampleMain extends Game {
         connection.setPlayer(player);
 
         // tell the server we want to join a world.
+        connection.sendSetUsername("ExamplePlayer" + System.currentTimeMillis());
         connection.send(new CPacketJoinWorld(connection.alloc(), "LunarWorld"));
 
         // Supply this player with our textures.

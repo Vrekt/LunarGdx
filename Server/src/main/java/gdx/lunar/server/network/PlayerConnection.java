@@ -47,8 +47,6 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
 
     @Override
     public void handleDisconnect(CPacketDisconnect packet) {
-        this.disconnected = true;
-
         System.err.println("Player disconnected.");
 
         if (player != null) {
@@ -79,6 +77,9 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
             send(new SPacketJoinWorld(alloc(), false, "Unknown world.", -1));
         } else if (world.isFull()) {
             send(new SPacketJoinWorld(alloc(), false, "World is full.", -1));
+        } else if (!LunarServer.getServer().getAllowJoinWorldBeforeSetUsername() && player.getName() == null) {
+            // player has no username.
+            send(new SPacketJoinWorld(alloc(), false, "No username set.", -1));
         } else {
             player.setEntityId(world.assignEntityId());
             player.setWorldIn(world);
@@ -141,7 +142,9 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
             player.setName(packet.getUsername());
 
             // broadcast this change.
-            this.player.getWorld().broadcast(player.getEntityId(), new SPacketSetEntityProperties(alloc(), player.getEntityId(), packet.getUsername()));
+            if (this.player.getWorld() != null) {
+                this.player.getWorld().broadcast(player.getEntityId(), new SPacketSetEntityProperties(alloc(), player.getEntityId(), packet.getUsername()));
+            }
         }
     }
 
@@ -176,6 +179,9 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
 
     @Override
     public void disconnect() {
+        if (disconnected) return;
+        this.disconnected = true;
+
         channel.pipeline().remove(this);
         channel.close();
     }

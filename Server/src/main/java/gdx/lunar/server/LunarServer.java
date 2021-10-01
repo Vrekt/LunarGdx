@@ -39,6 +39,8 @@ public abstract class LunarServer {
      * only if the server is not behind.
      */
     protected long tickSleepTime = 50;
+    // allow players to join worlds before setting their username.
+    protected boolean allowJoinWorldBeforeSetUsername = false;
 
     /**
      * All players connected to this server regardless of world or instance.
@@ -90,6 +92,14 @@ public abstract class LunarServer {
 
     public void setMaxLobbies(int maxLobbies) {
         this.maxLobbies = maxLobbies;
+    }
+
+    public void setAllowJoinWorldBeforeSetUsername(boolean allowJoinWorldBeforeSetUsername) {
+        this.allowJoinWorldBeforeSetUsername = allowJoinWorldBeforeSetUsername;
+    }
+
+    public boolean getAllowJoinWorldBeforeSetUsername() {
+        return allowJoinWorldBeforeSetUsername;
     }
 
     /**

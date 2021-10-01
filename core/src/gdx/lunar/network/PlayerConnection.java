@@ -7,6 +7,7 @@ import gdx.lunar.entity.network.NetworkEntity;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.entity.player.impl.LunarNetworkPlayer;
+import gdx.lunar.entity.player.prop.PlayerProperties;
 import gdx.lunar.protocol.packet.client.CPacketSetProperties;
 import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.world.LunarWorld;
@@ -19,14 +20,14 @@ import java.util.function.Consumer;
  */
 public class PlayerConnection extends AbstractConnection {
 
-    private final Lunar lunar;
-    private LunarEntityPlayer player;
+    protected final Lunar lunar;
+    protected LunarEntityPlayer player;
 
-    private Consumer<LunarNetworkEntityPlayer> joinWorldListener;
+    protected Consumer<LunarNetworkEntityPlayer> joinWorldListener;
 
     // default lobby world this player would want to join
-    private Runnable joinLobbyHandler;
-    private LunarWorld lobbyWorld;
+    protected Runnable joinLobbyHandler;
+    protected LunarWorld lobbyWorld;
 
     public PlayerConnection(Lunar lunar, Channel channel) {
         super(channel);
@@ -87,6 +88,11 @@ public class PlayerConnection extends AbstractConnection {
 
         // TODO: Maybe default global rotation.
         Lunar.log("PlayerConnection", "Spawning a new player with eid " + packet.getEntityId() + " and username " + packet.getUsername());
+        if (lunar.getPlayerProperties() == null) {
+            Lunar.log("PlayerConnection", "WARNING: PlayerProperties is null, setting default.");
+            lunar.setPlayerProperties(new PlayerProperties((1 / 16.0f), 16.0f, 16.0f));
+        }
+
         final LunarNetworkPlayer player = new LunarNetworkPlayer(
                 packet.getEntityId(),
                 lunar.getPlayerProperties().scale,

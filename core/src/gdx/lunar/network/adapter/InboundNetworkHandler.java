@@ -9,7 +9,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 /**
  * A basic adapter for handling exceptions and first connection.
  */
-public final class InboundNetworkHandler extends ChannelInboundHandlerAdapter {
+public class InboundNetworkHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * The connection of the current player.

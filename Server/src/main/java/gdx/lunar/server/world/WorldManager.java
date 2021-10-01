@@ -21,6 +21,16 @@ public abstract class WorldManager implements Disposable {
     }
 
     /**
+     * Add a world
+     *
+     * @param name  the name
+     * @param world the world
+     */
+    public void addWorld(String name, World world) {
+        this.worlds.put(name, world);
+    }
+
+    /**
      * Retrieve a world by its name
      *
      * @param name the name

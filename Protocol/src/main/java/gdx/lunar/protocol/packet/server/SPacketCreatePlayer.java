@@ -42,6 +42,9 @@ public class SPacketCreatePlayer extends Packet {
      */
     public SPacketCreatePlayer(ByteBufAllocator allocator, String username, int entityId, float x, float y) {
         super(allocator);
+        if (username == null) {
+            System.err.println("WARNING: username in SPacketCreatePlayer is NULL, this will cause decoding issues.");
+        }
         this.username = username;
         this.entityId = entityId;
         this.x = x;
