@@ -64,6 +64,7 @@ Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt
 # Known Issues
 - Random ghost player blinks next to networked player
 - Initial position seems to be de-synced some way
+- Worlds will need to be disposed when switching between them
 - probably other stuff I don't know about.
 
 # Using Lunar
