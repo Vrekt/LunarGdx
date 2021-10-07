@@ -42,6 +42,7 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
             System.err.println("New connection successfully authenticated.");
             send(new SPacketAuthentication(alloc(), true, null));
             this.player = new Player(-1, LunarServer.getServer(), this);
+            player.getServer().setPlayerJoined(player);
         }
     }
 
@@ -72,6 +73,12 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
 
     @Override
     public void handleJoinWorld(CPacketJoinWorld packet) {
+        // players are not allowed to join lobby worlds by default
+        if (packet.getWorldName().equalsIgnoreCase("Lobby")) {
+            send(new SPacketJoinWorld(alloc(), false, "Unknown world.", -1));
+            return;
+        }
+
         final World world = LunarServer.getServer().getWorldManager().getWorld(packet.getWorldName());
         if (world == null) {
             send(new SPacketJoinWorld(alloc(), false, "Unknown world.", -1));
@@ -150,6 +157,8 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
 
     @Override
     public void handleCreateLobby(CPacketCreateLobby packet) {
+        if (player == null) return;
+
         if (player.getServer().canCreateLobby()) {
             final World lobby = player.getServer().createNewLobby();
             player.setWorldIn(lobby);
@@ -162,6 +171,28 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
             send(new SPacketCreateLobby(alloc(), entityId, lobby.getWorldLobbyId()));
         } else {
             send(new SPacketCreateLobby(alloc(), "Too many lobbies within the server."));
+        }
+    }
+
+    @Override
+    public void handleJoinLobby(CPacketJoinLobby packet) {
+        if (player == null) return;
+
+        final World exist = packet.getLobbyName() != null
+                ? player.getServer().getLobbyByName(packet.getLobbyName())
+                : player.getServer().getLobbyById(packet.getLobbyId());
+
+        if (exist != null) {
+            player.setWorldIn(exist);
+
+            final int entityId = exist.assignEntityId();
+            player.setEntityId(entityId);
+            player.setLoaded(true);
+            player.getWorld().spawnPlayerInWorld(player);
+
+            send(new SPacketJoinLobby(alloc(), packet.getLobbyName(), packet.getLobbyId(), entityId));
+        } else {
+            send(new SPacketJoinLobbyDenied(alloc(), "Lobby not found."));
         }
     }
 

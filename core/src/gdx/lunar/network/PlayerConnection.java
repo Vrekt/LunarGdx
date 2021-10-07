@@ -103,7 +103,7 @@ public class PlayerConnection extends AbstractConnection {
         player.setName(packet.getUsername());
         Gdx.app.postRunnable(() -> {
             player.spawnEntityInWorld(this.player.getWorldIn(), packet.getX(), packet.getY());
-            this.joinWorldListener.accept(player);
+            if (this.joinWorldListener != null) this.joinWorldListener.accept(player);
         });
     }
 
@@ -192,6 +192,29 @@ public class PlayerConnection extends AbstractConnection {
             }
         } else {
             Lunar.log("PlayerConnection", "Cannot create a new lobby because: " + packet.getNotAllowedReason());
+        }
+    }
+
+    @Override
+    public void handleJoinLobbyDenied(SPacketJoinLobbyDenied packet) {
+        Lunar.log("PlayerConnection", "Cannot join lobby because: " + packet.getReason());
+    }
+
+    @Override
+    public void handleJoinLobby(SPacketJoinLobby packet) {
+        Lunar.log("PlayerConnection", "Joining lobby: " + packet.getLobbyName() + ":" + packet.getLobbyId());
+
+        if (this.lobbyWorld != null) {
+            lobbyWorld.setLobbyId(packet.getLobbyId());
+            this.player.setEntityId(packet.getEntityId());
+
+            // TODO: Were gonna need to decide where the player should be.
+            this.player.spawnEntityInWorld(lobbyWorld, 0.0f, 0.0f);
+        }
+
+        if (this.joinLobbyHandler != null) {
+            // post this sync.
+            Gdx.app.postRunnable(() -> joinLobbyHandler.run());
         }
     }
 

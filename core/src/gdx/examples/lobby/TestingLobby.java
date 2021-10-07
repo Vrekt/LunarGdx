@@ -77,30 +77,37 @@ public class TestingLobby extends Game {
         player.setConnection(connection);
         connection.setPlayer(player);
 
+        connection.sendSetUsername("SomeCoolPlayer" + ThreadLocalRandom.current().nextInt());
+
         // create a basic lobby world.
         lunarLobby = new GameLobbyWorldAdapter(player, world, scaling);
+        player.spawnEntityInWorld(lunarLobby, 0.0f, 0.0f);
 
         // create a new lobby.
         connection.setDefaultLobbyWorld(lunarLobby);
         connection.setJoinLobbyHandler(this::setup);
 
-        connection.sendCreateLobby();
-    }
-
-    private void setup() {
-        // Supply this player with our textures.
         atlas = new TextureAtlas("character.atlas");
         player.initializePlayerRendererAndLoad(atlas, true);
 
         // Supply all other players who join our world with those textures as-well.
         connection.setJoinWorldListener(networkPlayer -> networkPlayer.initializePlayerRendererAndLoad(atlas, true));
 
-        // set a random name for this player
-        // this MUST be set after sending the join world packet.
-        player.setName("Player" + ThreadLocalRandom.current().nextInt(111, 999));
+        final int lobbyId = 7468;
+        if (lobbyId != -1) {
+            connection.sendJoinLobby(lobbyId);
+        } else {
+            connection.sendCreateLobby();
+        }
+    }
+
+    private void setup() {
+        // Supply this player with our textures.
 
         batch = new SpriteBatch();
         this.ready = true;
+
+        System.err.println("setup");
     }
 
     @Override

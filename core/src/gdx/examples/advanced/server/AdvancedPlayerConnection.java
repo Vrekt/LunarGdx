@@ -114,4 +114,14 @@ public class AdvancedPlayerConnection extends AbstractConnection {
     public void handleSetEntityProperties(SPacketSetEntityProperties packet) {
 
     }
+
+    @Override
+    public void handleJoinLobbyDenied(SPacketJoinLobbyDenied packet) {
+
+    }
+
+    @Override
+    public void handleJoinLobby(SPacketJoinLobby packet) {
+
+    }
 }

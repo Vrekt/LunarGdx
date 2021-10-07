@@ -21,7 +21,7 @@ import gdx.lunar.protocol.packet.client.CPacketJoinWorld;
 import gdx.lunar.protocol.packet.client.CPacketWorldLoaded;
 import gdx.lunar.world.LunarWorldAdapter;
 
-public final class BasicExampleMain extends Game {
+public final class BasicExampleMain2 extends Game {
 
     private LunarClientServer server;
 
@@ -34,7 +34,7 @@ public final class BasicExampleMain extends Game {
     private ExtendViewport viewport;
     private SpriteBatch batch;
 
-    public BasicExampleMain() {
+    public BasicExampleMain2() {
     }
 
     @Override

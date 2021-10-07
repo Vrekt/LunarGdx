@@ -91,4 +91,18 @@ public interface ServerPacketHandler {
      */
     void handleCreateLobby(SPacketCreateLobby packet);
 
+    /**
+     * A request to join a lobby was denied
+     *
+     * @param packet the packet
+     */
+    void handleJoinLobbyDenied(SPacketJoinLobbyDenied packet);
+
+    /**
+     * Handle joining a lobby
+     *
+     * @param packet the packet
+     */
+    void handleJoinLobby(SPacketJoinLobby packet);
+
 }

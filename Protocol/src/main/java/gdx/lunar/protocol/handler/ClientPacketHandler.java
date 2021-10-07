@@ -77,4 +77,11 @@ public interface ClientPacketHandler {
      */
     void handleCreateLobby(CPacketCreateLobby packet);
 
+    /**
+     * Handle a request to join a lobby
+     *
+     * @param packet the packet
+     */
+    void handleJoinLobby(CPacketJoinLobby packet);
+
 }

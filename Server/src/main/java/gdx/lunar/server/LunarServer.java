@@ -17,6 +17,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Base implementation of the server.
+ *
+ * TODO: Tasks
+ * - Allow change username
+ * - Allow NULL usernames
+ * - Server example
  */
 public abstract class LunarServer {
 
@@ -159,6 +164,18 @@ public abstract class LunarServer {
 
         this.lobbies.put(id, lobby);
         return lobby;
+    }
+
+    public World getLobbyByName(String name) {
+        for (World value : this.lobbies.values()) {
+            if (value.getName().equalsIgnoreCase(name)) return value;
+        }
+        return null;
+    }
+
+
+    public World getLobbyById(int id) {
+        return this.lobbies.get(id);
     }
 
     /**
