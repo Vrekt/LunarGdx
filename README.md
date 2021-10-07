@@ -63,7 +63,6 @@ Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt
 - Better movement sync.
 - Better protocol security.
 - Networked entities and other map/world objects.
-- Lobbies
 - ...
 
 # Known Issues
