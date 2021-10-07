@@ -84,7 +84,7 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
             send(new SPacketJoinWorld(alloc(), false, "Unknown world.", -1));
         } else if (world.isFull()) {
             send(new SPacketJoinWorld(alloc(), false, "World is full.", -1));
-        } else if (!LunarServer.getServer().getAllowJoinWorldBeforeSetUsername() && player.getName() == null) {
+        } else if (!LunarServer.getServer().getConfiguration().allowJoinWorldBeforeSetUsername && player.getName() == null) {
             // player has no username.
             send(new SPacketJoinWorld(alloc(), false, "No username set.", -1));
         } else {

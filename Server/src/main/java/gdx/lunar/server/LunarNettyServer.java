@@ -121,4 +121,12 @@ public final class LunarNettyServer {
         return result;
     }
 
+    /**
+     * Shutdown the server
+     */
+    public void shutdown() {
+        child.shutdownGracefully();
+        parent.shutdownGracefully();
+    }
+
 }

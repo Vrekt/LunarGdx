@@ -1,6 +1,8 @@
 package gdx.lunar.server;
 
+import gdx.lunar.server.configuration.ServerConfiguration;
 import gdx.lunar.server.game.entity.player.Player;
+import gdx.lunar.server.game.utilities.Disposable;
 import gdx.lunar.server.world.World;
 import gdx.lunar.server.world.WorldManager;
 import gdx.lunar.server.world.impl.WorldManagerAdapter;
@@ -17,35 +19,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Base implementation of the server.
- *
+ * <p>
  * TODO: Tasks
  * - Allow change username
  * - Allow NULL usernames
  * - Server example
  */
-public abstract class LunarServer {
+public abstract class LunarServer implements Disposable {
 
     private static LunarServer instance;
-
-    /**
-     * Max amount of worlds allowed per thread.
-     * Max amount of players in general.
-     */
-    protected int maxWorldsPerThread, maxPlayers = 2000;
-
-    /**
-     * Max worlds allowed in general.
-     * Max lobbies allowed in general.
-     */
-    protected int maxWorlds = 100, maxLobbies = 100;
-
-    /**
-     * Default amount of time to sleep after each tick
-     * only if the server is not behind.
-     */
-    protected long tickSleepTime = 50;
-    // allow players to join worlds before setting their username.
-    protected boolean allowJoinWorldBeforeSetUsername = false;
 
     /**
      * All players connected to this server regardless of world or instance.
@@ -75,36 +57,19 @@ public abstract class LunarServer {
     }
 
     /**
+     * Retrieve the server configuration
+     *
+     * @return the configuration
+     */
+    public abstract ServerConfiguration getConfiguration();
+
+    /**
      * Set the world manager to use.
      *
      * @param worldManager world manager.
      */
     public void setWorldManager(WorldManager worldManager) {
         this.worldManager = worldManager;
-    }
-
-    public void setMaxWorldsPerThread(int maxWorldsPerThread) {
-        this.maxWorldsPerThread = maxWorldsPerThread;
-    }
-
-    public void setMaxPlayers(int maxPlayers) {
-        this.maxPlayers = maxPlayers;
-    }
-
-    public void setMaxWorlds(int maxWorlds) {
-        this.maxWorlds = maxWorlds;
-    }
-
-    public void setMaxLobbies(int maxLobbies) {
-        this.maxLobbies = maxLobbies;
-    }
-
-    public void setAllowJoinWorldBeforeSetUsername(boolean allowJoinWorldBeforeSetUsername) {
-        this.allowJoinWorldBeforeSetUsername = allowJoinWorldBeforeSetUsername;
-    }
-
-    public boolean getAllowJoinWorldBeforeSetUsername() {
-        return allowJoinWorldBeforeSetUsername;
     }
 
     /**
@@ -123,7 +88,7 @@ public abstract class LunarServer {
      * @return {@code true} if the player can join.
      */
     public boolean canPlayerJoin() {
-        return allPlayers.size() + 1 <= maxPlayers;
+        return allPlayers.size() + 1 <= getConfiguration().maxPlayers;
     }
 
     /**
@@ -139,7 +104,7 @@ public abstract class LunarServer {
      * @return {@code true} if the player can create a lobby.
      */
     public boolean canCreateLobby() {
-        return lobbies.size() + 1 <= maxLobbies;
+        return lobbies.size() + 1 <= getConfiguration().maxLobbies;
     }
 
     /**
@@ -166,6 +131,12 @@ public abstract class LunarServer {
         return lobby;
     }
 
+    /**
+     * Retrieve a lobby by its {@code name}
+     *
+     * @param name the name
+     * @return the world, or {@code null} if not found.
+     */
     public World getLobbyByName(String name) {
         for (World value : this.lobbies.values()) {
             if (value.getName().equalsIgnoreCase(name)) return value;
@@ -173,7 +144,12 @@ public abstract class LunarServer {
         return null;
     }
 
-
+    /**
+     * Retrieve a lobby by its {@code id}
+     *
+     * @param id id
+     * @return the world, or {@code null} if not found.
+     */
     public World getLobbyById(int id) {
         return this.lobbies.get(id);
     }
@@ -224,7 +200,7 @@ public abstract class LunarServer {
         running.compareAndSet(true, false);
 
         service.shutdownNow();
-        worldManager.dispose();
+        this.dispose();
     }
 
     /**
@@ -241,7 +217,7 @@ public abstract class LunarServer {
      * @throws InterruptedException e
      */
     private void waitUntilNextTick() throws InterruptedException {
-        Thread.sleep(tickSleepTime);
+        Thread.sleep(getConfiguration().tickSleepTime);
     }
 
     /**
@@ -256,5 +232,13 @@ public abstract class LunarServer {
 
     public static LunarServer getServer() {
         return instance;
+    }
+
+    @Override
+    public void dispose() {
+        worldManager.dispose();
+        allPlayers.clear();
+        lobbies.clear();
+        running.set(false);
     }
 }
