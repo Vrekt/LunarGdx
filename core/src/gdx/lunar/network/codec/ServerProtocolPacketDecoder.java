@@ -16,15 +16,25 @@ public class ServerProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
      * The handler
      */
     private final ServerPacketHandler handler;
+    private LunarProtocol protocol;
 
     /**
      * Initialize this local decoder
      *
      * @param handler the handler
      */
-    public ServerProtocolPacketDecoder(ServerPacketHandler handler) {
+    public ServerProtocolPacketDecoder(ServerPacketHandler handler, LunarProtocol protocol) {
         super(Integer.MAX_VALUE, 0, 4);
         this.handler = handler;
+        this.protocol = protocol;
+    }
+
+    public LunarProtocol getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(LunarProtocol protocol) {
+        this.protocol = protocol;
     }
 
     @Override
@@ -35,7 +45,7 @@ public class ServerProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
             buf.readInt();
             // retrieve packet from PID
             final int pid = buf.readByte() & 0xFF;
-            LunarProtocol.handleServerPacket(pid, buf, handler, ctx);
+            protocol.handleServerPacket(pid, buf, handler, ctx);
 
             buf.release();
         } else {

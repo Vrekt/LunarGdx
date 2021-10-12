@@ -23,15 +23,15 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
     private long lastEntityRequestReset = System.currentTimeMillis();
     private int totalEntityRequests;
 
-    public PlayerConnection(Channel channel) {
-        super(channel);
+    public PlayerConnection(Channel channel, LunarProtocol protocol) {
+        super(channel, protocol);
     }
 
     @Override
     public void handleAuthentication(CPacketAuthentication packet) {
         System.err.println("Attempting to authenticate new client.");
 
-        if (packet.getProtocolVersion() != LunarProtocol.protocolVersion) {
+        if (packet.getProtocolVersion() != protocol.getProtocolVersion()) {
             // invalid protocol version, not allowed.
             send(new SPacketAuthentication(alloc(), false, "Outdated protocol version!"));
             disconnect();

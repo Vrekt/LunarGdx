@@ -9,6 +9,7 @@ import gdx.lunar.network.provider.ConnectionProvider;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.channel.ClientChannels;
 import gdx.lunar.protocol.codec.ProtocolPacketEncoder;
+import gdx.lunar.protocol.packet.Packet;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -16,6 +17,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -40,8 +42,11 @@ public final class LunarClientServer implements Disposable {
     private final SslContext ssl;
     private final Lunar lunar;
 
+    private final LunarProtocol protocol;
+
     private ChannelInboundHandlerAdapter adapter;
     private LengthFieldBasedFrameDecoder decoder;
+    private MessageToByteEncoder<Packet> encoder;
     private ConnectionProvider provider;
 
     private AbstractConnection connection;
@@ -50,12 +55,14 @@ public final class LunarClientServer implements Disposable {
      * Initialize a new instance with a pre-built bootstrap.
      *
      * @param lunar     lunar instance
+     * @param protocol  the protocol to use
      * @param bootstrap boostrap.
      * @param ip        the server IP address
      * @param port      the server port
      */
-    public LunarClientServer(Lunar lunar, Bootstrap bootstrap, String ip, int port) {
+    public LunarClientServer(Lunar lunar, LunarProtocol protocol, Bootstrap bootstrap, String ip, int port) {
         this.lunar = lunar;
+        this.protocol = protocol;
         this.bootstrap = bootstrap;
         this.group = bootstrap.config().group();
         this.ip = ip;
@@ -72,12 +79,14 @@ public final class LunarClientServer implements Disposable {
     /**
      * Initialize the bootstrap
      *
-     * @param lunar lunar instance
-     * @param ip    the server IP address
-     * @param port  the server port
+     * @param lunar    lunar instance
+     * @param protocol the protocol to use
+     * @param ip       the server IP address
+     * @param port     the server port
      */
-    public LunarClientServer(Lunar lunar, String ip, int port) {
+    public LunarClientServer(Lunar lunar, LunarProtocol protocol, String ip, int port) {
         this.lunar = lunar;
+        this.protocol = protocol;
         this.ip = ip;
         this.port = port;
 
@@ -103,8 +112,6 @@ public final class LunarClientServer implements Disposable {
         } catch (SSLException exception) {
             throw new RuntimeException(exception);
         }
-
-        LunarProtocol.initialize();
     }
 
     public void setInboundNetworkHandler(ChannelInboundHandlerAdapter adapter) {
@@ -115,8 +122,24 @@ public final class LunarClientServer implements Disposable {
         this.decoder = decoder;
     }
 
+    /**
+     * Set the connection provider.
+     * This provides incoming multiplayer connections a way to retrieve custom implementations of {@link AbstractConnection}
+     *
+     * @param provider the provider
+     */
     public void setProvider(ConnectionProvider provider) {
         this.provider = provider;
+    }
+
+    /**
+     * Use a custom protocol encoder.
+     * 10-12-2021: Custom encoders
+     *
+     * @param encoder encoder
+     */
+    public void setProtocolEncoder(MessageToByteEncoder<Packet> encoder) {
+        this.encoder = encoder;
     }
 
     /**
@@ -126,19 +149,24 @@ public final class LunarClientServer implements Disposable {
      */
     private void handleSocketConnection(SocketChannel channel) {
         connection = this.provider == null
-                ? new PlayerConnection(lunar, channel)
+                ? new PlayerConnection(lunar, protocol, channel)
                 : this.provider.createConnection(channel);
         if (this.adapter == null) adapter = new InboundNetworkHandler(connection);
-        if (this.decoder == null) decoder = new ServerProtocolPacketDecoder(connection);
+        if (this.decoder == null) decoder = new ServerProtocolPacketDecoder(connection, protocol);
+        if (this.encoder == null) encoder = new ProtocolPacketEncoder();
 
         channel.pipeline().addLast(ssl.newHandler(channel.alloc(), ip, port));
         channel.pipeline().addLast(decoder);
-        channel.pipeline().addLast(new ProtocolPacketEncoder());
+        channel.pipeline().addLast(encoder);
         channel.pipeline().addLast(adapter);
     }
 
     public AbstractConnection getConnection() {
         return connection;
+    }
+
+    public LunarProtocol getProtocol() {
+        return protocol;
     }
 
     /**

@@ -13,31 +13,44 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * The protocol.
+ * The base protocol
+ * 10-12-2021: Allow multiple instances of the base protocol
  */
-public final class LunarProtocol {
+public class LunarProtocol {
 
     /**
      * Protocol version
      */
-    public static int protocolVersion = 1;
+    private int protocolVersion = 1;
 
     /**
      * A map register of all server packets
      */
-    private static final Map<Integer, BiConsumer<ByteBuf, ServerPacketHandler>> SERVER_PACKETS = new HashMap<>();
+    private final Map<Integer, BiConsumer<ByteBuf, ServerPacketHandler>> server = new HashMap<>();
 
     /**
      * A map register of all client packets
      */
-    private static final Map<Integer, BiConsumer<ByteBuf, ClientPacketHandler>> CLIENT_PACKETS = new HashMap<>();
+    private final Map<Integer, BiConsumer<ByteBuf, ClientPacketHandler>> client = new HashMap<>();
 
     /**
      * Map register of custom packets
      */
-    private static final Map<Integer, Consumer<ByteBuf>> CUSTOM_PACKETS = new HashMap<>();
+    private final Map<Integer, Consumer<ByteBuf>> custom = new HashMap<>();
 
-    public static void initialize() {
+    /**
+     * Creates a new instance.
+     *
+     * @param initialize if {@code true} server and client (default) packets will be automatically added
+     */
+    public LunarProtocol(boolean initialize) {
+        if (initialize) {
+            initializeServer();
+            initializeClient();
+        }
+    }
+
+    public void initialize() {
         initializeServer();
         initializeClient();
     }
@@ -50,8 +63,8 @@ public final class LunarProtocol {
      * @param pid     pid
      * @param handler handler
      */
-    public static void changeDefaultClientPacketHandlerFor(int pid, BiConsumer<ByteBuf, ClientPacketHandler> handler) {
-        CLIENT_PACKETS.put(pid, handler);
+    public void changeDefaultClientPacketHandlerFor(int pid, BiConsumer<ByteBuf, ClientPacketHandler> handler) {
+        client.put(pid, handler);
     }
 
     /**
@@ -62,8 +75,8 @@ public final class LunarProtocol {
      * @param pid     pid
      * @param handler handler
      */
-    public static void changeDefaultServerPacketHandlerFor(int pid, BiConsumer<ByteBuf, ServerPacketHandler> handler) {
-        SERVER_PACKETS.put(pid, handler);
+    public void changeDefaultServerPacketHandlerFor(int pid, BiConsumer<ByteBuf, ServerPacketHandler> handler) {
+        server.put(pid, handler);
     }
 
     /**
@@ -72,8 +85,8 @@ public final class LunarProtocol {
      * @param pid     the pid
      * @param handler the handler.
      */
-    public static void addClientPacket(int pid, BiConsumer<ByteBuf, ClientPacketHandler> handler) {
-        CLIENT_PACKETS.put(pid, handler);
+    public void addClientPacket(int pid, BiConsumer<ByteBuf, ClientPacketHandler> handler) {
+        client.put(pid, handler);
     }
 
     /**
@@ -82,8 +95,8 @@ public final class LunarProtocol {
      * @param pid     the pid
      * @param handler the handler.
      */
-    public static void addServerPacket(int pid, BiConsumer<ByteBuf, ServerPacketHandler> handler) {
-        SERVER_PACKETS.put(pid, handler);
+    public void addServerPacket(int pid, BiConsumer<ByteBuf, ServerPacketHandler> handler) {
+        server.put(pid, handler);
     }
 
     /**
@@ -92,45 +105,45 @@ public final class LunarProtocol {
      * @param pid      pid
      * @param consumer consumer
      */
-    public static void registerCustomPacket(int pid, Consumer<ByteBuf> consumer) {
-        CUSTOM_PACKETS.put(pid, consumer);
+    public void registerCustomPacket(int pid, Consumer<ByteBuf> consumer) {
+        custom.put(pid, consumer);
     }
 
     /**
      * Initialize server side
      */
-    private static void initializeServer() {
-        SERVER_PACKETS.put(SPacketDisconnect.PID, (buf, handler) -> SPacketDisconnect.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketAuthentication.PID, (buf, handler) -> SPacketAuthentication.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketCreatePlayer.PID, (buf, handler) -> SPacketCreatePlayer.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketRemovePlayer.PID, (buf, handler) -> SPacketRemovePlayer.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketPlayerPosition.PID, (buf, handler) -> SPacketPlayerPosition.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketPlayerVelocity.PID, (buf, handler) -> SPacketPlayerVelocity.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketJoinWorld.PID, (buf, handler) -> SPacketJoinWorld.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketBodyForce.PID, (buf, handler) -> SPacketBodyForce.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketSpawnEntity.PID, (buf, handler) -> SPacketSpawnEntity.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketSpawnEntityDenied.PID, (buf, handler) -> SPacketSpawnEntityDenied.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketSetEntityProperties.PID, (buf, handler) -> SPacketSetEntityProperties.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketCreateLobby.PID, (buf, handler) -> SPacketCreateLobby.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketJoinLobbyDenied.PID, (buf, handler) -> SPacketJoinLobbyDenied.handle(handler, buf));
-        SERVER_PACKETS.put(SPacketJoinLobby.PID, (buf, handler) -> SPacketJoinLobby.handle(handler, buf));
+    private void initializeServer() {
+        server.put(SPacketDisconnect.PID, (buf, handler) -> SPacketDisconnect.handle(handler, buf));
+        server.put(SPacketAuthentication.PID, (buf, handler) -> SPacketAuthentication.handle(handler, buf));
+        server.put(SPacketCreatePlayer.PID, (buf, handler) -> SPacketCreatePlayer.handle(handler, buf));
+        server.put(SPacketRemovePlayer.PID, (buf, handler) -> SPacketRemovePlayer.handle(handler, buf));
+        server.put(SPacketPlayerPosition.PID, (buf, handler) -> SPacketPlayerPosition.handle(handler, buf));
+        server.put(SPacketPlayerVelocity.PID, (buf, handler) -> SPacketPlayerVelocity.handle(handler, buf));
+        server.put(SPacketJoinWorld.PID, (buf, handler) -> SPacketJoinWorld.handle(handler, buf));
+        server.put(SPacketBodyForce.PID, (buf, handler) -> SPacketBodyForce.handle(handler, buf));
+        server.put(SPacketSpawnEntity.PID, (buf, handler) -> SPacketSpawnEntity.handle(handler, buf));
+        server.put(SPacketSpawnEntityDenied.PID, (buf, handler) -> SPacketSpawnEntityDenied.handle(handler, buf));
+        server.put(SPacketSetEntityProperties.PID, (buf, handler) -> SPacketSetEntityProperties.handle(handler, buf));
+        server.put(SPacketCreateLobby.PID, (buf, handler) -> SPacketCreateLobby.handle(handler, buf));
+        server.put(SPacketJoinLobbyDenied.PID, (buf, handler) -> SPacketJoinLobbyDenied.handle(handler, buf));
+        server.put(SPacketJoinLobby.PID, (buf, handler) -> SPacketJoinLobby.handle(handler, buf));
     }
 
     /**
      * Initialize client side
      */
-    private static void initializeClient() {
-        CLIENT_PACKETS.put(CPacketAuthentication.PID, (buf, handler) -> CPacketAuthentication.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketDisconnect.PID, (buf, handler) -> CPacketDisconnect.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketPosition.PID, (buf, handler) -> CPacketPosition.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketVelocity.PID, (buf, handler) -> CPacketVelocity.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketJoinWorld.PID, (buf, handler) -> CPacketJoinWorld.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketWorldLoaded.PID, (buf, handler) -> CPacketWorldLoaded.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketBodyForce.PID, (buf, handler) -> CPacketBodyForce.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketRequestSpawnEntity.PID, (buf, handler) -> CPacketRequestSpawnEntity.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketSetProperties.PID, (buf, handler) -> CPacketSetProperties.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketCreateLobby.PID, (buf, handler) -> CPacketCreateLobby.handle(handler, buf));
-        CLIENT_PACKETS.put(CPacketJoinLobby.PID, (buf, handler) -> CPacketJoinLobby.handle(handler, buf));
+    private void initializeClient() {
+        client.put(CPacketAuthentication.PID, (buf, handler) -> CPacketAuthentication.handle(handler, buf));
+        client.put(CPacketDisconnect.PID, (buf, handler) -> CPacketDisconnect.handle(handler, buf));
+        client.put(CPacketPosition.PID, (buf, handler) -> CPacketPosition.handle(handler, buf));
+        client.put(CPacketVelocity.PID, (buf, handler) -> CPacketVelocity.handle(handler, buf));
+        client.put(CPacketJoinWorld.PID, (buf, handler) -> CPacketJoinWorld.handle(handler, buf));
+        client.put(CPacketWorldLoaded.PID, (buf, handler) -> CPacketWorldLoaded.handle(handler, buf));
+        client.put(CPacketBodyForce.PID, (buf, handler) -> CPacketBodyForce.handle(handler, buf));
+        client.put(CPacketRequestSpawnEntity.PID, (buf, handler) -> CPacketRequestSpawnEntity.handle(handler, buf));
+        client.put(CPacketSetProperties.PID, (buf, handler) -> CPacketSetProperties.handle(handler, buf));
+        client.put(CPacketCreateLobby.PID, (buf, handler) -> CPacketCreateLobby.handle(handler, buf));
+        client.put(CPacketJoinLobby.PID, (buf, handler) -> CPacketJoinLobby.handle(handler, buf));
     }
 
     /**
@@ -139,8 +152,8 @@ public final class LunarProtocol {
      * @param pid the packet ID
      * @return {@code true} if so
      */
-    public static boolean isClientPacket(int pid) {
-        return CLIENT_PACKETS.containsKey(pid);
+    public boolean isClientPacket(int pid) {
+        return client.containsKey(pid);
     }
 
     /**
@@ -149,8 +162,8 @@ public final class LunarProtocol {
      * @param pid the pid
      * @return {@code true} if so
      */
-    public static boolean isServerPacket(int pid) {
-        return SERVER_PACKETS.containsKey(pid);
+    public boolean isServerPacket(int pid) {
+        return server.containsKey(pid);
     }
 
     /**
@@ -159,8 +172,8 @@ public final class LunarProtocol {
      * @param pid pid
      * @return {@code true} if so
      */
-    public static boolean isCustomPacket(int pid) {
-        return CUSTOM_PACKETS.containsKey(pid);
+    public boolean isCustomPacket(int pid) {
+        return custom.containsKey(pid);
     }
 
     /**
@@ -172,12 +185,12 @@ public final class LunarProtocol {
      * @param handler the handler
      * @param context local context
      */
-    public static void handleServerPacket(int pid, ByteBuf in, ServerPacketHandler handler, ChannelHandlerContext context) {
+    public void handleServerPacket(int pid, ByteBuf in, ServerPacketHandler handler, ChannelHandlerContext context) {
         try {
             if (isCustomPacket(pid)) {
-                CUSTOM_PACKETS.get(pid).accept(in);
+                custom.get(pid).accept(in);
             } else if (isServerPacket(pid)) {
-                SERVER_PACKETS.get(pid).accept(in, handler);
+                server.get(pid).accept(in, handler);
             }
         } catch (Exception exception) {
             context.fireExceptionCaught(exception);
@@ -193,16 +206,30 @@ public final class LunarProtocol {
      * @param handler the handler
      * @param context local context
      */
-    public static void handleClientPacket(int pid, ByteBuf in, ClientPacketHandler handler, ChannelHandlerContext context) {
+    public void handleClientPacket(int pid, ByteBuf in, ClientPacketHandler handler, ChannelHandlerContext context) {
         try {
             if (isCustomPacket(pid)) {
-                CUSTOM_PACKETS.get(pid).accept(in);
+                custom.get(pid).accept(in);
             } else if (isClientPacket(pid)) {
-                CLIENT_PACKETS.get(pid).accept(in, handler);
+                client.get(pid).accept(in, handler);
             }
         } catch (Exception exception) {
             context.fireExceptionCaught(exception);
         }
+    }
+
+    public int getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(int protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
+    public void dispose() {
+        server.clear();
+        client.clear();
+        custom.clear();
     }
 
 }

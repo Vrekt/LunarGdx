@@ -7,6 +7,7 @@ import gdx.examples.advanced.entity.Player;
 import gdx.examples.advanced.packet.MyCustomPositionPacketServer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
 
@@ -15,8 +16,8 @@ public class AdvancedPlayerConnection extends AbstractConnection {
     private final Player player;
     private final AdvancedExampleMain main;
 
-    public AdvancedPlayerConnection(Channel channel, Player player, AdvancedExampleMain main) {
-        super(channel);
+    public AdvancedPlayerConnection(Channel channel, Player player, AdvancedExampleMain main, LunarProtocol protocol) {
+        super(channel, protocol);
 
         this.player = player;
         this.main = main;

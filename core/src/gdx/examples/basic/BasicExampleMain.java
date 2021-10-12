@@ -17,6 +17,7 @@ import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.impl.LunarPlayer;
 import gdx.lunar.entity.player.prop.PlayerProperties;
 import gdx.lunar.network.PlayerConnection;
+import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.client.CPacketJoinWorld;
 import gdx.lunar.protocol.packet.client.CPacketWorldLoaded;
 import gdx.lunar.world.LunarWorldAdapter;
@@ -43,8 +44,11 @@ public final class BasicExampleMain extends Game {
         final Lunar lunar = new Lunar();
         lunar.setGdxInitialized(true);
 
+        // Initialize our default protocol
+        final LunarProtocol protocol = new LunarProtocol(true);
+
         // connect to remote server.
-        server = new LunarClientServer(lunar, "localhost", 6969);
+        server = new LunarClientServer(lunar, protocol, "localhost", 6969);
         server.connect().join();
 
         // get our connection
@@ -65,8 +69,7 @@ public final class BasicExampleMain extends Game {
         player = new LunarPlayer(scaling, basic.width, basic.height, Rotation.FACING_UP);
         player.setConnection(connection);
         connection.setPlayer(player);
-
-        connection.sendSetUsername("SomeCoolPlayer");
+        player.setName("SomeCoolPlayer");
         // tell the server we want to join a world.
         connection.send(new CPacketJoinWorld(connection.alloc(), "LunarWorld"));
 
@@ -83,8 +86,6 @@ public final class BasicExampleMain extends Game {
         // Spawn our player in the world.
         player.spawnEntityInWorld(lunarWorld, 2.0f, 2.0f);
         // set a random name for this player
-        // this MUST be set after sending the join world packet.
-        player.setName("SomeCoolPlayer");
         // Initialize our graphics for drawing.
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth() / (scaling / 2.0f), Gdx.graphics.getHeight() / (scaling / 2.0f));
@@ -116,7 +117,7 @@ public final class BasicExampleMain extends Game {
         lunarWorld.update(delta);
 
         // begin batch
-        batch.setProjectionMatrix(camera.projection);
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
         // render our world.

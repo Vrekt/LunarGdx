@@ -124,3 +124,5 @@ Thumbs.db
 /ios/xcode/native/
 /ios/IOSLauncher.app
 /ios/IOSLauncher.app.dSYM
+/Server/src/main/java/gdx/lunar/matchmaking/
+/Server/src/main/java/gdx/lunar/redis/

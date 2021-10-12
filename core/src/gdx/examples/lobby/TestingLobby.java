@@ -16,6 +16,7 @@ import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.impl.LunarPlayer;
 import gdx.lunar.entity.player.prop.PlayerProperties;
 import gdx.lunar.network.PlayerConnection;
+import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.world.lobby.GameLobbyWorldAdapter;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -57,8 +58,11 @@ public class TestingLobby extends Game {
         camera.position.set(2.0f, 2.0f, 0.0f);
         camera.update();
 
+        // Initialize our default protocol
+        final LunarProtocol protocol = new LunarProtocol(true);
+
         // connect to remote server.
-        server = new LunarClientServer(lunar, "localhost", 6969);
+        server = new LunarClientServer(lunar, protocol, "localhost", 6969);
         server.connect().join();
 
         // get our connection
@@ -126,7 +130,7 @@ public class TestingLobby extends Game {
             lunarLobby.update(delta);
 
             // begin batch
-            batch.setProjectionMatrix(camera.projection);
+            batch.setProjectionMatrix(camera.combined);
             batch.begin();
 
             // render our world.

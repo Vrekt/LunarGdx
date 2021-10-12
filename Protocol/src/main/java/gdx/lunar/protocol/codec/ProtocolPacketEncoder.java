@@ -8,9 +8,11 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
  * Encodes incoming packets then appends the length + packet.
+ * <p>
+ * 10-12-2021: Allow this to be extended.
  */
 @ChannelHandler.Sharable
-public final class ProtocolPacketEncoder extends MessageToByteEncoder<Packet> {
+public class ProtocolPacketEncoder extends MessageToByteEncoder<Packet> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) {

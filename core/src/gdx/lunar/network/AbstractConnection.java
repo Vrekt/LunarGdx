@@ -20,10 +20,22 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      * The current channel of this connection.
      */
     protected final Channel channel;
+    protected LunarProtocol protocol;
     protected boolean isConnected;
 
-    public AbstractConnection(Channel channel) {
+    public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
+        this.protocol = protocol;
+    }
+
+    /**
+     * Set the protocol to use
+     * 10-12-2021: Allow use of diff protocols
+     *
+     * @param protocol protocol
+     */
+    public void setProtocol(LunarProtocol protocol) {
+        this.protocol = protocol;
     }
 
     /**
@@ -33,7 +45,7 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      * @param handler the handler
      */
     public <T> void registerPacket(int pid, PacketFactory<T> factory, Consumer<T> handler) {
-        LunarProtocol.registerCustomPacket(pid, in -> handler.accept(factory.create(in)));
+        protocol.registerCustomPacket(pid, in -> handler.accept(factory.create(in)));
     }
 
     /**

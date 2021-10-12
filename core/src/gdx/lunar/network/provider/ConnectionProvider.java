@@ -11,7 +11,7 @@ public interface ConnectionProvider {
     /**
      * Create a new connection from the given channel
      *
-     * @param channel the channel
+     * @param channel  the channel
      * @return the new connection.
      */
     AbstractConnection createConnection(Channel channel);

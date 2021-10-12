@@ -15,10 +15,20 @@ public final class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDeco
      * The local session packet handler
      */
     private final AbstractConnection handler;
+    private LunarProtocol protocol;
 
-    public ClientProtocolPacketDecoder(AbstractConnection handler) {
+    public ClientProtocolPacketDecoder(AbstractConnection handler, LunarProtocol protocol) {
         super(Integer.MAX_VALUE, 0, 4);
         this.handler = handler;
+        this.protocol = protocol;
+    }
+
+    public LunarProtocol getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(LunarProtocol protocol) {
+        this.protocol = protocol;
     }
 
     @Override
@@ -31,9 +41,9 @@ public final class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDeco
                 buf.readInt();
                 // retrieve packet from PID
                 final int pid = buf.readByte() & 0xFF;
-                if (LunarProtocol.isClientPacket(pid)) {
+                if (protocol.isClientPacket(pid)) {
                     handler.setLastPacketReceived(System.currentTimeMillis());
-                    LunarProtocol.handleClientPacket(pid, buf, handler, ctx);
+                    protocol.handleClientPacket(pid, buf, handler, ctx);
                 }
             }
         } catch (Exception any) {

@@ -20,7 +20,6 @@ public abstract class ServerConfiguration {
     public boolean allowJoinWorldBeforeSetUsername = false;
     public boolean allowChangeUsername = false;
 
-
     public void setTickSleepTime(long tickSleepTime) {
         this.tickSleepTime = tickSleepTime;
     }

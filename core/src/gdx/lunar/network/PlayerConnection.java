@@ -8,6 +8,7 @@ import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.entity.player.impl.LunarNetworkPlayer;
 import gdx.lunar.entity.player.prop.PlayerProperties;
+import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.client.CPacketSetProperties;
 import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.world.LunarWorld;
@@ -29,8 +30,8 @@ public class PlayerConnection extends AbstractConnection {
     protected Runnable joinLobbyHandler;
     protected LunarWorld lobbyWorld;
 
-    public PlayerConnection(Lunar lunar, Channel channel) {
-        super(channel);
+    public PlayerConnection(Lunar lunar, LunarProtocol protocol, Channel channel) {
+        super(channel, protocol);
 
         this.lunar = lunar;
     }

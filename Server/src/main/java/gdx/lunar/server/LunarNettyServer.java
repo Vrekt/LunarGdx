@@ -37,15 +37,18 @@ public final class LunarNettyServer {
     private Supplier<LengthFieldBasedFrameDecoder> decoderSupplier;
     private final SslContext sslContext;
 
+    private final LunarProtocol protocol;
+
     /**
      * Initialize the bootstrap and server.
      *
      * @param ip   the server IP address
      * @param port the server port
      */
-    public LunarNettyServer(String ip, int port) {
+    public LunarNettyServer(String ip, int port, LunarProtocol protocol) {
         this.ip = ip;
         this.port = port;
+        this.protocol = protocol;
 
         try {
             final SelfSignedCertificate ssc = new SelfSignedCertificate();
@@ -75,7 +78,6 @@ public final class LunarNettyServer {
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
 
         encoder = new ProtocolPacketEncoder();
-        LunarProtocol.initialize();
     }
 
     public void setDecoderSupplier(Supplier<LengthFieldBasedFrameDecoder> decoderSupplier) {
@@ -92,8 +94,8 @@ public final class LunarNettyServer {
      * @param channel the channel
      */
     private void handleSocketConnection(SocketChannel channel) {
-        final AbstractConnection connection = connectionSupplier == null ? new PlayerConnection(channel) : connectionSupplier.get();
-        final LengthFieldBasedFrameDecoder decoder = this.decoderSupplier == null ? new ClientProtocolPacketDecoder(connection)
+        final AbstractConnection connection = connectionSupplier == null ? new PlayerConnection(channel, protocol) : connectionSupplier.get();
+        final LengthFieldBasedFrameDecoder decoder = this.decoderSupplier == null ? new ClientProtocolPacketDecoder(connection, protocol)
                 : decoderSupplier.get();
 
         channel.pipeline().addLast(sslContext.newHandler(channel.alloc()));

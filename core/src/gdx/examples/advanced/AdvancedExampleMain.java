@@ -51,10 +51,13 @@ public final class AdvancedExampleMain extends Game {
         final Lunar lunar = new Lunar();
         lunar.setGdxInitialized(true);
 
+        // Initialize our default protocol
+        final LunarProtocol protocol = new LunarProtocol(true);
+
         // Set up the local client server.
-        final LunarClientServer server = new LunarClientServer(lunar, "localhost", 6969);
+        final LunarClientServer server = new LunarClientServer(lunar, protocol, "localhost", 6969);
         // tell the server to use our custom player connection class.
-        server.setProvider(channel -> new AdvancedPlayerConnection(channel, player, this));
+        server.setProvider(channel -> new AdvancedPlayerConnection(channel, player, this, protocol));
         // tell the server to use our custom adapter.
         server.setInboundNetworkHandler(new AdvancedNetworkHandler(this));
         // connect
@@ -65,7 +68,7 @@ public final class AdvancedExampleMain extends Game {
         player.setConnection(this.connection);
 
         // register custom packets
-        LunarProtocol.changeDefaultServerPacketHandlerFor(SPacketPlayerPosition.PID, (in, handler)
+        server.getProtocol().changeDefaultServerPacketHandlerFor(SPacketPlayerPosition.PID, (in, handler)
                 -> this.connection.handleCustomPacket(new MyCustomPositionPacketServer(in)));
 
         // register a unique custom packet.
