@@ -77,5 +77,5 @@ You can find releases in the releases section. Both client and server rely on th
 You must also add a dependency for netty-all.
 ##### Gradle 6.7.2
 ```java
-compile group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
+implementation group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
 ```
