@@ -68,10 +68,9 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
             doPositionInterpolation = true;
             interpolateToX = x;
             interpolateToY = y;
+        } else {
+            setPosition(x, y);
         }
-
-        this.position.x = x;
-        this.position.y = y;
     }
 
     @Override
@@ -84,7 +83,8 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
             final float diffX = position.x - interpolateToX;
             final float diffY = position.y - interpolateToY;
             body.setLinearVelocity(diffX * worldStepTime, diffY * worldStepTime);
-            setPosition(interpolateToX, interpolateToY);
+            setPosition(body.getPosition().x, body.getPosition().y);
+
             doPositionInterpolation = false;
             return;
         }

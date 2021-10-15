@@ -22,8 +22,8 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public abstract class LunarWorld implements Disposable {
 
-    protected final ConcurrentMap<Integer, LunarNetworkEntityPlayer> players = new ConcurrentHashMap<>();
-    protected final ConcurrentMap<Integer, LunarEntity> entities = new ConcurrentHashMap<>();
+    protected ConcurrentMap<Integer, LunarNetworkEntityPlayer> players = new ConcurrentHashMap<>();
+    protected ConcurrentMap<Integer, LunarEntity> entities = new ConcurrentHashMap<>();
 
     protected final LunarEntityPlayer player;
     protected final World world;
@@ -108,6 +108,32 @@ public abstract class LunarWorld implements Disposable {
 
     public void setUpdateNetworkPlayers(boolean updateNetworkPlayers) {
         this.updateNetworkPlayers = updateNetworkPlayers;
+    }
+
+    public void setUpdateEntities(boolean updateEntities) {
+        this.updateEntities = updateEntities;
+    }
+
+    /**
+     * Allows you to use internal collections in your project.
+     * Should override {@code setPlayerInWorld}
+     *
+     * @param players c
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends LunarNetworkEntityPlayer> void setPlayersCollection(ConcurrentMap<Integer, T> players) {
+        this.players = (ConcurrentMap<Integer, LunarNetworkEntityPlayer>) players;
+    }
+
+    /**
+     * Allows you to use internal collections in your project.
+     * Should override {@code setPlayerInWorld}
+     *
+     * @param entities c
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends LunarEntity> void setEntitiesCollection(ConcurrentMap<Integer, T> entities) {
+        this.entities = (ConcurrentMap<Integer, LunarEntity>) entities;
     }
 
     public void setLobbyId(int lobbyId) {
@@ -370,16 +396,18 @@ public abstract class LunarWorld implements Disposable {
      * @param d delta time.
      */
     public void update(float d) {
-        if (updateNetworkPlayers) {
-            for (LunarNetworkEntityPlayer value : players.values()) value.preUpdate();
-        }
-
         final float delta = Math.min(d, maxFrameTime);
 
         if (handlePhysics) {
             accumulator += delta;
 
             while (accumulator >= stepTime) {
+                if (updateNetworkPlayers) {
+                    for (LunarNetworkEntityPlayer value : players.values()) {
+                        value.preUpdate();
+                    }
+                }
+
                 player.preUpdate();
 
                 world.step(stepTime, velocityIterations, positionIterations);
@@ -393,9 +421,11 @@ public abstract class LunarWorld implements Disposable {
             player.interpolate(0.5f);
         }
 
-        for (LunarNetworkEntityPlayer value : players.values()) {
-            value.update(delta);
-            value.interpolate(0.5f);
+        if (updateNetworkPlayers) {
+            for (LunarNetworkEntityPlayer value : players.values()) {
+                value.update(delta);
+                value.interpolate(0.5f);
+            }
         }
     }
 

@@ -14,8 +14,6 @@ import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.world.LunarWorld;
 import io.netty.channel.Channel;
 
-import java.util.function.Consumer;
-
 /**
  * Represents a player connection to the server.
  */
@@ -23,8 +21,6 @@ public class PlayerConnection extends AbstractConnection {
 
     protected final Lunar lunar;
     protected LunarEntityPlayer player;
-
-    protected Consumer<LunarNetworkEntityPlayer> joinWorldListener;
 
     // default lobby world this player would want to join
     protected Runnable joinLobbyHandler;
@@ -38,15 +34,6 @@ public class PlayerConnection extends AbstractConnection {
 
     public void setPlayer(LunarEntityPlayer player) {
         this.player = player;
-    }
-
-    /**
-     * Set the join world listener. This is invoked once other network players join the players world.
-     *
-     * @param joinWorldListener the consumer
-     */
-    public void setJoinWorldListener(Consumer<LunarNetworkEntityPlayer> joinWorldListener) {
-        this.joinWorldListener = joinWorldListener;
     }
 
     /**
@@ -86,6 +73,12 @@ public class PlayerConnection extends AbstractConnection {
     @Override
     public void handleCreatePlayer(SPacketCreatePlayer packet) {
         if (packet.getEntityId() == player.getEntityId()) return;
+
+        // handle custom
+        if (createPlayerHandler != null) {
+            Gdx.app.postRunnable(() -> createPlayerHandler.accept(packet));
+            return;
+        }
 
         // TODO: Maybe default global rotation.
         Lunar.log("PlayerConnection", "Spawning a new player with eid " + packet.getEntityId() + " and username " + packet.getUsername());

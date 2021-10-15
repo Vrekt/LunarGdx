@@ -49,7 +49,7 @@ public final class AdvancedExampleMain extends Game {
     public void create() {
         // create a new lunar instance.
         final Lunar lunar = new Lunar();
-        lunar.setGdxInitialized(true);
+        lunar.setUseGdxLogging(true);
 
         // Initialize our default protocol
         final LunarProtocol protocol = new LunarProtocol(true);

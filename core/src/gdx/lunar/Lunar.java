@@ -22,7 +22,7 @@ public final class Lunar {
         return playerProperties;
     }
 
-    public void setGdxInitialized(boolean gdx) {
+    public void setUseGdxLogging(boolean gdx) {
         gdxInitialized = gdx;
     }
 

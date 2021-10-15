@@ -3,6 +3,7 @@ package me.vrekt.testiong;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.server.LunarGameServer;
 import gdx.lunar.server.LunarNettyServer;
+import gdx.lunar.server.world.impl.LunarWorldAdapter;
 
 public class Main {
 
@@ -13,6 +14,7 @@ public class Main {
         server.bind();
 
         final LunarGameServer gameServer = new LunarGameServer();
+        gameServer.getWorldManager().addWorld("Athena", new LunarWorldAdapter());
         gameServer.start();
 
     }

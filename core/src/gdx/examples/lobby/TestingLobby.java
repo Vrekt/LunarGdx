@@ -44,7 +44,7 @@ public class TestingLobby extends Game {
     public void create() {
         // create a new lunar instance.
         final Lunar lunar = new Lunar();
-        lunar.setGdxInitialized(true);
+        lunar.setUseGdxLogging(true);
 
         // default world and camera scaling.
         final float scaling = 1 / 16.0f;

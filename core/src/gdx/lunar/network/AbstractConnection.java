@@ -1,11 +1,13 @@
 package gdx.lunar.network;
 
 import gdx.lunar.entity.drawing.Rotation;
+import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.PacketFactory;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.client.*;
+import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 
@@ -23,6 +25,13 @@ public abstract class AbstractConnection implements ServerPacketHandler {
     protected LunarProtocol protocol;
     protected boolean isConnected;
 
+    protected Consumer<LunarNetworkEntityPlayer> joinWorldListener;
+
+    // create player handler, for basic stuff if you dont want to create
+    // custom instances of {@code this}
+    // NOTE: You will have to spawn the player yourself if using this.
+    protected Consumer<SPacketCreatePlayer> createPlayerHandler;
+
     public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
         this.protocol = protocol;
@@ -36,6 +45,26 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      */
     public void setProtocol(LunarProtocol protocol) {
         this.protocol = protocol;
+    }
+
+    /**
+     * Set the creation player handler. This is invoked once receiving {@link SPacketCreatePlayer}
+     * Note: if you have set the {@code setJoinWorldListener} it will not be invoked.
+     *
+     * @param createPlayerHandler handler
+     */
+    public void setCreatePlayerHandler(Consumer<SPacketCreatePlayer> createPlayerHandler) {
+        this.createPlayerHandler = createPlayerHandler;
+    }
+
+    /**
+     * Set the join world listener. This is invoked once other network players join the players world.
+     * Note: if you have set the {@code setCreatePlayerHandler} it will not be invoked.
+     *
+     * @param joinWorldListener the consumer
+     */
+    public void setJoinWorldListener(Consumer<LunarNetworkEntityPlayer> joinWorldListener) {
+        this.joinWorldListener = joinWorldListener;
     }
 
     /**
