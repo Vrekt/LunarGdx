@@ -12,6 +12,7 @@ import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.client.CPacketBodyForce;
 import gdx.lunar.protocol.packet.client.CPacketRequestSpawnEntity;
+import gdx.lunar.world.map.LunarNetworkedTile;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -156,6 +157,22 @@ public abstract class LunarWorld implements Disposable {
      */
     public ConcurrentMap<Integer, LunarNetworkEntityPlayer> getPlayers() {
         return players;
+    }
+
+    /**
+     * Send the tiled map over the network.
+     */
+    public void syncTiledMapOverNetwork() {
+
+    }
+
+    /**
+     * Tell other players about a networked tile
+     *
+     * @param tile the tile
+     */
+    public void sendNetworkedTile(AbstractConnection connection, LunarNetworkedTile tile) {
+
     }
 
     /**

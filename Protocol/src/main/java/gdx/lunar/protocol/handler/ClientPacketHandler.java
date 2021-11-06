@@ -84,4 +84,11 @@ public interface ClientPacketHandler {
      */
     void handleJoinLobby(CPacketJoinLobby packet);
 
+    /**
+     * Handle a request to create a networked tile
+     *
+     * @param packet the packet
+     */
+    void handleNetworkTile(CPacketNetworkedTile packet);
+
 }

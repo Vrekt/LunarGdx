@@ -1,5 +1,6 @@
 package gdx.lunar.network;
 
+import com.badlogic.gdx.Gdx;
 import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.protocol.LunarProtocol;
@@ -26,6 +27,7 @@ public abstract class AbstractConnection implements ServerPacketHandler {
     protected boolean isConnected;
 
     protected Consumer<LunarNetworkEntityPlayer> joinWorldListener;
+    protected Runnable disconnectionHandler;
 
     // create player handler, for basic stuff if you dont want to create
     // custom instances of {@code this}
@@ -35,6 +37,13 @@ public abstract class AbstractConnection implements ServerPacketHandler {
     public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
         this.protocol = protocol;
+    }
+
+    /**
+     * Run an action sync.
+     */
+    protected void run(Runnable runnable) {
+        Gdx.app.postRunnable(runnable);
     }
 
     /**
@@ -65,6 +74,15 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      */
     public void setJoinWorldListener(Consumer<LunarNetworkEntityPlayer> joinWorldListener) {
         this.joinWorldListener = joinWorldListener;
+    }
+
+    /**
+     * Set a handler for disconnects
+     *
+     * @param disconnectionHandler the handler
+     */
+    public void setDisconnectionHandler(Runnable disconnectionHandler) {
+        this.disconnectionHandler = disconnectionHandler;
     }
 
     /**

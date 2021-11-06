@@ -57,15 +57,14 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleDisconnect(SPacketDisconnect packet) {
+        run(disconnectionHandler);
         this.close();
     }
 
     @Override
     public void handleAuthentication(SPacketAuthentication packet) {
-        if (packet.isAllowed()) {
-            Lunar.log("PlayerConnection", "Successfully authenticated with remote server.");
-        } else {
-            Lunar.log("PlayerConnection", "Failed to authenticate with server: " + packet.getNotAllowedReason());
+        if (!packet.isAllowed()) {
+            run(disconnectionHandler);
             this.close();
         }
     }
@@ -81,11 +80,8 @@ public class PlayerConnection extends AbstractConnection {
         }
 
         // TODO: Maybe default global rotation.
-        Lunar.log("PlayerConnection", "Spawning a new player with eid " + packet.getEntityId() + " and username " + packet.getUsername());
-        if (lunar.getPlayerProperties() == null) {
-            Lunar.log("PlayerConnection", "WARNING: PlayerProperties is null, setting default.");
+        if (lunar.getPlayerProperties() == null)
             lunar.setPlayerProperties(new PlayerProperties((1 / 16.0f), 16.0f, 16.0f));
-        }
 
         final LunarNetworkPlayer player = new LunarNetworkPlayer(
                 packet.getEntityId(),
@@ -107,7 +103,6 @@ public class PlayerConnection extends AbstractConnection {
                 || packet.getEntityId() == this.player.getEntityId()) return;
 
         Gdx.app.postRunnable(() -> player.getWorldIn().removePlayerFromWorld(packet.getEntityId()));
-        Lunar.log("PlayerConnection", "Removed player: " + packet.getEntityId());
     }
 
     @Override
@@ -131,9 +126,6 @@ public class PlayerConnection extends AbstractConnection {
             if (this.player.getName() != null) {
                 send(new CPacketSetProperties(alloc(), player.getName()));
             }
-            Lunar.log("PlayerConnection", "Allowed to join requested world.");
-        } else {
-            Lunar.log("PlayerConnection", "Failed to join the requested world because: " + packet.getNotAllowedReason());
         }
     }
 
@@ -141,7 +133,9 @@ public class PlayerConnection extends AbstractConnection {
     public void handleBodyForce(SPacketBodyForce packet) {
         final LunarNetworkEntityPlayer other = this.player.getWorldIn().getPlayer(packet.getEntityId());
         if (other != null) {
-            other.getBody().applyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY(), true);
+
+            // apply a force to the other body sync.
+            run(() -> other.getBody().applyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY(), true));
         }
     }
 
@@ -159,7 +153,6 @@ public class PlayerConnection extends AbstractConnection {
     @Override
     public void handleSpawnEntityDenied(SPacketSpawnEntityDenied packet) {
         player.getWorldIn().removeTemporaryEntity(packet.getTemporaryEntityId());
-        Lunar.log("PlayerConnection", "Request to spawn an entity was denied because: " + packet.getReason());
     }
 
     @Override
@@ -171,39 +164,34 @@ public class PlayerConnection extends AbstractConnection {
     @Override
     public void handleCreateLobby(SPacketCreateLobby packet) {
         if (packet.isAllowed()) {
-            Lunar.log("PlayerConnection", "Creating a new lobby with the ID " + packet.getLobbyId());
             if (this.lobbyWorld != null) {
                 lobbyWorld.setLobbyId(packet.getLobbyId());
                 this.player.setEntityId(packet.getEntityId());
 
                 // TODO: Were gonna need to decide where the player should be.
-                this.player.spawnEntityInWorld(lobbyWorld, 0.0f, 0.0f);
+                run(() -> this.player.spawnEntityInWorld(lobbyWorld, 0.0f, 0.0f));
             }
 
             if (this.joinLobbyHandler != null) {
                 // post this sync.
                 Gdx.app.postRunnable(() -> joinLobbyHandler.run());
             }
-        } else {
-            Lunar.log("PlayerConnection", "Cannot create a new lobby because: " + packet.getNotAllowedReason());
         }
     }
 
     @Override
     public void handleJoinLobbyDenied(SPacketJoinLobbyDenied packet) {
-        Lunar.log("PlayerConnection", "Cannot join lobby because: " + packet.getReason());
+
     }
 
     @Override
     public void handleJoinLobby(SPacketJoinLobby packet) {
-        Lunar.log("PlayerConnection", "Joining lobby: " + packet.getLobbyName() + ":" + packet.getLobbyId());
-
         if (this.lobbyWorld != null) {
             lobbyWorld.setLobbyId(packet.getLobbyId());
             this.player.setEntityId(packet.getEntityId());
 
             // TODO: Were gonna need to decide where the player should be.
-            this.player.spawnEntityInWorld(lobbyWorld, 0.0f, 0.0f);
+            run(() -> this.player.spawnEntityInWorld(lobbyWorld, 0.0f, 0.0f));
         }
 
         if (this.joinLobbyHandler != null) {
