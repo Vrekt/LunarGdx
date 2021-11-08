@@ -125,4 +125,14 @@ public class AdvancedPlayerConnection extends AbstractConnection {
     public void handleJoinLobby(SPacketJoinLobby packet) {
 
     }
+
+    @Override
+    public void handleEnterInstance(SPacketEnterInstance packet) {
+
+    }
+
+    @Override
+    public void handlePlayerEnterInstance(SPacketPlayerEnterInstance packet) {
+
+    }
 }

@@ -127,6 +127,8 @@ public class LunarProtocol {
         server.put(SPacketCreateLobby.PID, (buf, handler) -> SPacketCreateLobby.handle(handler, buf));
         server.put(SPacketJoinLobbyDenied.PID, (buf, handler) -> SPacketJoinLobbyDenied.handle(handler, buf));
         server.put(SPacketJoinLobby.PID, (buf, handler) -> SPacketJoinLobby.handle(handler, buf));
+        server.put(SPacketEnterInstance.PID, (buf, handler) -> SPacketEnterInstance.handle(handler, buf));
+        server.put(SPacketPlayerEnterInstance.PID, (buf, handler) -> SPacketPlayerEnterInstance.handle(handler, buf));
     }
 
     /**
@@ -144,6 +146,7 @@ public class LunarProtocol {
         client.put(CPacketSetProperties.PID, (buf, handler) -> CPacketSetProperties.handle(handler, buf));
         client.put(CPacketCreateLobby.PID, (buf, handler) -> CPacketCreateLobby.handle(handler, buf));
         client.put(CPacketJoinLobby.PID, (buf, handler) -> CPacketJoinLobby.handle(handler, buf));
+        client.put(CPacketEnterInstance.PID, (buf, handler) -> CPacketEnterInstance.handle(handler, buf));
     }
 
     /**

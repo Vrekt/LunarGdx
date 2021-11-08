@@ -8,6 +8,7 @@ import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import gdx.lunar.server.game.entity.Entity;
 import gdx.lunar.server.game.entity.player.Player;
 import gdx.lunar.server.game.utilities.Disposable;
+import gdx.lunar.server.game.utilities.Location;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +33,8 @@ public abstract class World implements Disposable {
     protected long playerTimeoutMs = 3000;
     // if players can spawn entities here.
     protected boolean allowedToSpawnEntities = true;
+    // world spawn location
+    protected Location spawnLocation = new Location();
 
     /**
      * Queued packet updates
@@ -86,6 +89,15 @@ public abstract class World implements Disposable {
         this.worldLobbyId = worldLobbyId;
     }
 
+    public void setSpawnLocation(Location spawnLocation) {
+        this.spawnLocation = spawnLocation;
+    }
+
+    public void setSpawnLocation(float x, float y) {
+        this.spawnLocation.x = x;
+        this.spawnLocation.y = y;
+    }
+
     public ConcurrentMap<Integer, Entity> getEntities() {
         return entities;
     }
@@ -137,6 +149,27 @@ public abstract class World implements Disposable {
      * Spawn a player in this world
      *
      * @param player the player
+     * @param x      X
+     * @param y      Y
+     */
+    public void spawnPlayerInWorld(Player player, float x, float y) {
+        player.setWorldIn(this);
+
+        // send all current players in this world to the connecting player.
+        for (Player value : players.values()) value.sendTo(player);
+
+        // broadcast the joining of this player to others.
+        broadcastPacketInWorld(new SPacketCreatePlayer(player.getConnection().alloc(), player.getName(), player.getEntityId(), x, y));
+
+        // add this new player to the map.
+        players.put(player.getEntityId(), player);
+    }
+
+
+    /**
+     * Spawn a player in this world
+     *
+     * @param player the player
      */
     public void spawnPlayerInWorld(Player player) {
         player.setWorldIn(this);
@@ -144,8 +177,9 @@ public abstract class World implements Disposable {
         // send all current players in this world to the connecting player.
         for (Player value : players.values()) value.sendTo(player);
 
+        player.setLocation(spawnLocation.x, spawnLocation.y);
         // broadcast the joining of this player to others.
-        broadcastPacketInWorld(new SPacketCreatePlayer(player.getConnection().alloc(), player.getName(), player.getEntityId(), 0.0f, 0.0f));
+        broadcastPacketInWorld(new SPacketCreatePlayer(player.getConnection().alloc(), player.getName(), player.getEntityId(), this.spawnLocation.x, this.spawnLocation.y));
 
         // add this new player to the map.
         players.put(player.getEntityId(), player);

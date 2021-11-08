@@ -6,10 +6,12 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
 import gdx.lunar.entity.drawing.LunarDrawableEntity;
 import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.drawing.render.DefaultPlayerRenderer;
 import gdx.lunar.entity.drawing.render.LunarPlayerRenderer;
+import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.world.LunarWorld;
 
 /**
@@ -22,7 +24,7 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
      * Player width * scale
      * Player height * scale
      */
-    private final float scale, width, height;
+    protected final float scale, width, height;
 
     /**
      * renderer this player is using.
@@ -150,6 +152,41 @@ public abstract class LunarEntityPlayer extends LunarDrawableEntity {
         fixtureDef.shape = shape;
 
         body.createFixture(fixtureDef).setUserData(this);
+        shape.dispose();
+    }
+
+    @Override
+    public void spawnEntityInInstance(LunarInstance instance, float x, float y, boolean destroyOtherBodies) {
+        if (destroyOtherBodies) {
+            for (World world : boxWorldsIn) {
+                world.destroyBody(body);
+            }
+        }
+
+        this.instanceIn = instance;
+
+        // set initial positions
+        prevX = x;
+        prevY = y;
+        position.set(x, y);
+        interpolated.set(x, y);
+
+        // default body def for all player types (network + local)
+        final BodyDef definition = new BodyDef();
+        definition.type = BodyDef.BodyType.DynamicBody;
+        definition.fixedRotation = true;
+        definition.position.set(x, y);
+
+        // create body and set the basic poly shape
+        body = instance.getWorld().createBody(definition);
+        final PolygonShape shape = new PolygonShape();
+        shape.setAsBox(width / 2f, height / 2f);
+
+        final FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.density = 1.0f;
+        fixtureDef.shape = shape;
+
+        body.createFixture(fixtureDef).setUserData(LunarEntityPlayer.this);
         shape.dispose();
     }
 

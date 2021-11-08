@@ -16,6 +16,9 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
     protected boolean doPositionInterpolation;
     protected float interpolateToX, interpolateToY;
 
+    // snap player to the correct position if distance >= interpolateDesyncDistance
+    protected boolean snapToPositionIfDesync;
+
     /**
      * Default distance that player will interpolate to if they are too far away from server position.
      */
@@ -31,6 +34,10 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
 
     public void setInterpolateDesyncDistance(float interpolateDesyncDistance) {
         this.interpolateDesyncDistance = interpolateDesyncDistance;
+    }
+
+    public void setSnapToPositionIfDesync(boolean snapToPositionIfDesync) {
+        this.snapToPositionIfDesync = snapToPositionIfDesync;
     }
 
     @Override
@@ -65,9 +72,14 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
 
         // interpolate to position if too far away (de sync)
         if (dst >= interpolateDesyncDistance) {
-            doPositionInterpolation = true;
-            interpolateToX = x;
-            interpolateToY = y;
+            if (snapToPositionIfDesync) {
+                body.setTransform(x, y, 0.0f);
+                setPosition(x, y);
+            } else {
+                doPositionInterpolation = true;
+                interpolateToX = x;
+                interpolateToY = y;
+            }
         } else {
             setPosition(x, y);
         }

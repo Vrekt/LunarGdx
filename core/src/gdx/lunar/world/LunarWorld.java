@@ -40,6 +40,8 @@ public abstract class LunarWorld implements Disposable {
     // if this world is being used as a lobby.
     protected int lobbyId;
 
+    protected final Vector2 worldSpawn = new Vector2(0, 0);
+
     /**
      * Initialize a new game world.
      *
@@ -157,6 +159,18 @@ public abstract class LunarWorld implements Disposable {
      */
     public ConcurrentMap<Integer, LunarNetworkEntityPlayer> getPlayers() {
         return players;
+    }
+
+    public Vector2 getWorldSpawn() {
+        return worldSpawn;
+    }
+
+    public void setWorldSpawn(Vector2 where) {
+        this.worldSpawn.set(where);
+    }
+
+    public void setWorldSpawn(float x, float y) {
+        this.worldSpawn.set(x, y);
     }
 
     /**
@@ -443,6 +457,28 @@ public abstract class LunarWorld implements Disposable {
                 value.update(delta);
                 value.interpolate(0.5f);
             }
+        }
+    }
+
+    /**
+     * Step the internal physics world
+     *
+     * @param delta delta time
+     */
+    public void stepPhysicsWorld(float delta) {
+        accumulator += delta;
+
+        while (accumulator >= stepTime) {
+            if (updateNetworkPlayers) {
+                for (LunarNetworkEntityPlayer value : players.values()) {
+                    value.preUpdate();
+                }
+            }
+
+            player.preUpdate();
+
+            world.step(stepTime, velocityIterations, positionIterations);
+            accumulator -= stepTime;
         }
     }
 

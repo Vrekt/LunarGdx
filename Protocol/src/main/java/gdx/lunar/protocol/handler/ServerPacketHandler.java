@@ -105,4 +105,18 @@ public interface ServerPacketHandler {
      */
     void handleJoinLobby(SPacketJoinLobby packet);
 
+    /**
+     * Handle entering an instance
+     *
+     * @param packet the packet
+     */
+    void handleEnterInstance(SPacketEnterInstance packet);
+
+    /**
+     * Handle a player entering an instance
+     *
+     * @param packet the packet
+     */
+    void handlePlayerEnterInstance(SPacketPlayerEnterInstance packet);
+
 }

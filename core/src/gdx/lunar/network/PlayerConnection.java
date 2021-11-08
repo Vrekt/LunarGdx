@@ -108,12 +108,15 @@ public class PlayerConnection extends AbstractConnection {
     @Override
     public void handlePlayerPosition(SPacketPlayerPosition packet) {
         if (player.getWorldIn() == null) return;
+        System.err.println("pos from " + packet.getEntityId());
+
         player.getWorldIn().updatePlayerPosition(packet.getEntityId(), packet.getX(), packet.getY(), packet.getRotation());
     }
 
     @Override
     public void handlePlayerVelocity(SPacketPlayerVelocity packet) {
         if (player.getWorldIn() == null) return;
+        System.err.println("vel from " + packet.getEntityId());
         player.getWorldIn().updatePlayerVelocity(packet.getEntityId(), packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
     }
 
@@ -169,7 +172,7 @@ public class PlayerConnection extends AbstractConnection {
                 this.player.setEntityId(packet.getEntityId());
 
                 // TODO: Were gonna need to decide where the player should be.
-                run(() -> this.player.spawnEntityInWorld(lobbyWorld, 0.0f, 0.0f));
+                run(() -> this.player.spawnEntityInWorld(lobbyWorld, lobbyWorld.getWorldSpawn().x, lobbyWorld.getWorldSpawn().y));
             }
 
             if (this.joinLobbyHandler != null) {
@@ -191,13 +194,23 @@ public class PlayerConnection extends AbstractConnection {
             this.player.setEntityId(packet.getEntityId());
 
             // TODO: Were gonna need to decide where the player should be.
-            run(() -> this.player.spawnEntityInWorld(lobbyWorld, 0.0f, 0.0f));
+            run(() -> this.player.spawnEntityInWorld(lobbyWorld, lobbyWorld.getWorldSpawn().x, lobbyWorld.getWorldSpawn().y));
         }
 
         if (this.joinLobbyHandler != null) {
             // post this sync.
             Gdx.app.postRunnable(() -> joinLobbyHandler.run());
         }
+    }
+
+    @Override
+    public void handleEnterInstance(SPacketEnterInstance packet) {
+
+    }
+
+    @Override
+    public void handlePlayerEnterInstance(SPacketPlayerEnterInstance packet) {
+        player.getWorldIn().getPlayer(packet.getEntityId()).spawnEntityInInstance(player.getInstanceIn(), player.getX(), player.getY(), true);
     }
 
     @Override

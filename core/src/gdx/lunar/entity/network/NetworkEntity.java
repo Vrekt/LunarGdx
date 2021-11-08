@@ -1,11 +1,12 @@
 package gdx.lunar.entity.network;
 
 import gdx.lunar.entity.LunarEntity;
+import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.world.LunarWorld;
 
 /**
  * A basic networked {@link gdx.lunar.entity.LunarEntity}
- * Possibly TODO.
+ * TODO
  */
 public class NetworkEntity extends LunarEntity {
 
@@ -21,6 +22,11 @@ public class NetworkEntity extends LunarEntity {
 
     @Override
     public void spawnEntityInWorld(LunarWorld world, float x, float y) {
+
+    }
+
+    @Override
+    public void spawnEntityInInstance(LunarInstance instance, float x, float y, boolean destroyOtherBodies) {
 
     }
 

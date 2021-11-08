@@ -11,6 +11,10 @@ public class LunarWorldAdapter extends World {
     private int statistics;
     private int total;
 
+    public LunarWorldAdapter(String worldName, int maxPacketsPerTick, int capacity, int maxEntities, int maxEntityRequests) {
+        super(worldName, maxPacketsPerTick, capacity, maxEntities, maxEntityRequests);
+    }
+
     public LunarWorldAdapter() {
         super("LunarWorld", 100, 200, 100, 1);
 

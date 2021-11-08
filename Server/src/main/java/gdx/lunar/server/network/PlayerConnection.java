@@ -88,6 +88,8 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
             // player has no username.
             send(new SPacketJoinWorld(alloc(), false, "No username set.", -1));
         } else {
+            System.err.println("Player is joining world: " + world.getName());
+
             player.setEntityId(world.assignEntityId());
             player.setWorldIn(world);
 
@@ -193,6 +195,34 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
             send(new SPacketJoinLobby(alloc(), packet.getLobbyName(), packet.getLobbyId(), entityId));
         } else {
             send(new SPacketJoinLobbyDenied(alloc(), "Lobby not found."));
+        }
+    }
+
+    @Override
+    public void handleNetworkTile(CPacketNetworkedTile packet) {
+
+    }
+
+    @Override
+    public void handleEnterInstance(CPacketEnterInstance packet) {
+        final World world = LunarServer.getServer().getWorldManager().getWorld(packet.getInstanceName());
+        if (world == null) {
+            send(new SPacketEnterInstance(alloc(), false, "Unknown world."));
+        } else if (world.isFull()) {
+            send(new SPacketEnterInstance(alloc(), false, "Instance is full."));
+        } else if (!LunarServer.getServer().getConfiguration().allowJoinWorldBeforeSetUsername && player.getName() == null) {
+            // player has no username.
+            send(new SPacketEnterInstance(alloc(), false, "No username set."));
+        } else {
+            System.err.println("Player is joining instance: " + world.getName());
+
+            player.setEntityId(world.assignEntityId());
+            player.setWorldIn(world);
+
+            player.getWorld().broadcast(player.getEntityId(), new SPacketPlayerEnterInstance(alloc(), player.getEntityId()));
+
+            // player will be set into world once they are actually loaded.
+            send(new SPacketEnterInstance(alloc(), true, null));
         }
     }
 

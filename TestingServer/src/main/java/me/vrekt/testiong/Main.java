@@ -14,7 +14,10 @@ public class Main {
         server.bind();
 
         final LunarGameServer gameServer = new LunarGameServer();
-        gameServer.getWorldManager().addWorld("Athena", new LunarWorldAdapter());
+        gameServer.getWorldManager().addWorld("Athena", new LunarWorldAdapter("Athena", 1000, 1000, 1000, 100));
+        gameServer.getWorldManager().getWorld("Athena").setSpawnLocation(64.25f, 8.887496f);
+        gameServer.getWorldManager().addWorld("I", new LunarWorldAdapter("I", 1000, 1000, 1000, 100));
+        gameServer.getWorldManager().getWorld("I").setSpawnLocation(8, 2.3f);
         gameServer.start();
 
     }

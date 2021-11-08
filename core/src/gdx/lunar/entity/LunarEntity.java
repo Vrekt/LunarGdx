@@ -1,7 +1,10 @@
 package gdx.lunar.entity;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.world.LunarWorld;
 
 /**
@@ -28,6 +31,10 @@ public abstract class LunarEntity implements Disposable {
      * The world this entity is in.
      */
     protected LunarWorld worldIn;
+    // the instance this player is in
+    protected LunarInstance instanceIn;
+    // an array of Box2d worlds we are in.
+    protected Array<World> boxWorldsIn = new Array<>();
     protected String name;
 
     public LunarEntity(int entityId) {
@@ -56,6 +63,16 @@ public abstract class LunarEntity implements Disposable {
      * @param y     Y
      */
     public abstract void spawnEntityInWorld(LunarWorld world, float x, float y);
+
+    /**
+     * Spawn this entity in an instance
+     *
+     * @param instance           the instance
+     * @param x                  X
+     * @param y                  Y
+     * @param destroyOtherBodies if {@code true} other world bodies will be destroyed.
+     */
+    public abstract void spawnEntityInInstance(LunarInstance instance, float x, float y, boolean destroyOtherBodies);
 
     public String getName() {
         return name;
@@ -117,6 +134,7 @@ public abstract class LunarEntity implements Disposable {
         setY(y);
     }
 
+
     /**
      * @return the entities interpolated position for better drawing.
      */
@@ -143,6 +161,14 @@ public abstract class LunarEntity implements Disposable {
      */
     public LunarWorld getWorldIn() {
         return worldIn;
+    }
+
+    public Array<World> getBoxWorldsIn() {
+        return boxWorldsIn;
+    }
+
+    public LunarInstance getInstanceIn() {
+        return instanceIn;
     }
 
     public void setWorldIn(LunarWorld worldIn) {
