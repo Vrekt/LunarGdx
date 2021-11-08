@@ -10,9 +10,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import gdx.lunar.entity.components.drawing.EntityAnimation;
 import gdx.lunar.entity.components.drawing.EntityAnimationComponent;
-import gdx.lunar.entity.drawing.render.LunarPlayerRenderer;
 import gdx.lunar.entity.drawing.v2.LunarAnimatedEntity;
-import gdx.lunar.world.LunarWorld;
+import gdx.lunar.entity.playerv2.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.world.v2.LunarWorld;
 
 /**
  * Represents a local or network player.
@@ -22,8 +22,6 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     // animation comp system
     protected ComponentMapper<EntityAnimationComponent> animationComponent = ComponentMapper.getFor(EntityAnimationComponent.class);
 
-    // renderer for this entity.
-    protected LunarPlayerRenderer renderer;
     // if other player collisions should be turned off.
     protected boolean ignorePlayerCollision;
 
@@ -126,7 +124,9 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     }
 
     @Override
-    public void spawnEntityInWorld(LunarWorld world, float x, float y) {
+    public <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
         getPosition().set(x, y);
         getPrevious().set(x, y);
         getInterpolated().set(x, y);
@@ -135,7 +135,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
         if (!hasSetFixedRotation) definition.fixedRotation = true;
         definition.position.set(x, y);
 
-        body = world.getPhysicsWorld().createBody(definition);
+        body = world.getWorld().createBody(definition);
         if (fixture.shape == null) {
             final PolygonShape shape = new PolygonShape();
             shape.setAsBox(getWidth() / 2f, getHeight() / 2f);
@@ -145,5 +145,11 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
         }
 
         body.createFixture(fixture).setUserData(this);
+        world.spawnEntityInWorld(this, x, y);
+    }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world) {
+        spawnEntityInWorld(world, world.getSpawn().x, world.getSpawn().y);
     }
 }

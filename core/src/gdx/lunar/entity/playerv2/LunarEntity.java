@@ -1,6 +1,7 @@
 package gdx.lunar.entity.playerv2;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import gdx.lunar.entity.components.config.EntityConfigurationComponent;
@@ -9,7 +10,8 @@ import gdx.lunar.entity.components.position.EntityPositionComponent;
 import gdx.lunar.entity.components.position.EntityVelocityComponent;
 import gdx.lunar.entity.components.prop.EntityPropertiesComponent;
 import gdx.lunar.entity.mapping.GlobalEntityMapper;
-import gdx.lunar.world.LunarWorld;
+import gdx.lunar.entity.playerv2.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.world.v2.LunarWorld;
 
 /**
  * A basic entity within the Lunar framework.
@@ -134,6 +136,18 @@ public abstract class LunarEntity {
         return GlobalEntityMapper.position.get(entity).interpolated;
     }
 
+    /**
+     * Set the position
+     *
+     * @param x         X
+     * @param y         Y
+     * @param transform if body transform should be used
+     */
+    public void setPosition(float x, float y, boolean transform) {
+        getPosition().set(x, y);
+        if (transform) body.setTransform(x, y, body.getTransform().getRotation());
+    }
+
     public Body getBody() {
         return body;
     }
@@ -158,12 +172,53 @@ public abstract class LunarEntity {
     }
 
     /**
+     * Interpolate the players position.
+     *
+     * @param alpha linear alpha
+     */
+    public void interpolatePosition(float alpha) {
+        interpolatePosition(Interpolation.linear, alpha);
+    }
+
+    /**
+     * Interpolate the players position.
+     *
+     * @param interpolation the interpolation to use
+     * @param alpha         linear alpha
+     */
+    public void interpolatePosition(Interpolation interpolation, float alpha) {
+        if (getPrevious() != getPosition()) {
+            final Vector2 previous = getPrevious();
+            final Vector2 current = getPosition();
+            getInterpolated().set(interpolation.apply(previous.x, current.x, alpha), interpolation.apply(previous.y, current.y, alpha));
+        }
+    }
+
+    /**
+     * Update this entity
+     *
+     * @param delta the delta time
+     */
+    public abstract void update(float delta);
+
+    /**
      * Spawn this entity in the given world.
      *
      * @param world the world
      * @param x     the X location
      * @param y     the Y location
      */
-    public abstract void spawnEntityInWorld(LunarWorld world, float x, float y);
+    public abstract <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y);
+
+    /**
+     * Spawn this entity in the given world at the worlds spawn location
+     *
+     * @param world the world
+     */
+    public abstract <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world);
 
 }

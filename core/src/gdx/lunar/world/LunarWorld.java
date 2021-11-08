@@ -20,13 +20,17 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Represents a networked game world.
+ * <p>
+ * P = any local entity player instance type you wish.
+ * N = any local network entity instance type you wish
+ * E = any local entity instance type you wish
  */
-public abstract class LunarWorld implements Disposable {
+public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> implements Disposable {
 
-    protected ConcurrentMap<Integer, LunarNetworkEntityPlayer> players = new ConcurrentHashMap<>();
-    protected ConcurrentMap<Integer, LunarEntity> entities = new ConcurrentHashMap<>();
+    protected ConcurrentMap<Integer, N> players = new ConcurrentHashMap<>();
+    protected ConcurrentMap<Integer, E> entities = new ConcurrentHashMap<>();
 
-    protected final LunarEntityPlayer player;
+    protected final P player;
     protected final World world;
     protected float worldScale;
     protected boolean handlePhysics, updatePlayer, updateNetworkPlayers;
