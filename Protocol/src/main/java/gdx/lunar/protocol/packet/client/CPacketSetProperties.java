@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Set player properties like their username or anything else.
@@ -18,8 +17,7 @@ public class CPacketSetProperties extends Packet {
         handler.handleSetProperties(new CPacketSetProperties(buf));
     }
 
-    public CPacketSetProperties(ByteBufAllocator allocator, String username) {
-        super(allocator);
+    public CPacketSetProperties(String username) {
         this.username = username;
     }
 

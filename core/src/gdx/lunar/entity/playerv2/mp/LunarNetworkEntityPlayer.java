@@ -66,10 +66,11 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
     /**
      * Update this players position from the server.
      *
-     * @param x X
-     * @param y Y
+     * @param x     X
+     * @param y     Y
+     * @param angle angle
      */
-    public void updateServerPosition(float x, float y) {
+    public void updateServerPosition(float x, float y, float angle) {
         final float dst = getPosition().dst2(x, y);
 
         // interpolate to position if too far away (de sync)
@@ -84,6 +85,24 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
         } else {
             setPosition(x, y, false);
         }
+
+        this.rotation = angle;
+    }
+
+    /**
+     * Update velocity
+     *
+     * @param x     x
+     * @param y     y
+     * @param angle angle
+     */
+    public void updateServerVelocity(float x, float y, float angle) {
+        getVelocity().set(x, y);
+        this.rotation = angle;
+    }
+
+    public void updateForces(float fx, float fy, float px, float py) {
+
     }
 
     @Override

@@ -1,49 +1,41 @@
 package gdx.lunar.network;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.entity.drawing.Rotation;
-import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.PacketFactory;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.client.*;
-import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 /**
  * Represents a basic connection.
  */
-public abstract class AbstractConnection implements ServerPacketHandler {
+public abstract class AbstractConnection implements ServerPacketHandler, Disposable {
 
-    /**
-     * The current channel of this connection.
-     */
     protected final Channel channel;
     protected LunarProtocol protocol;
     protected boolean isConnected;
 
-    protected Consumer<LunarNetworkEntityPlayer> joinWorldListener;
-    protected Runnable disconnectionHandler;
+    // packet flush interval.
+    // default is 50 ms
+    protected float updateInterval = .05f;
+    protected long lastUpdate = System.currentTimeMillis();
 
-    // create player handler, for basic stuff if you dont want to create
-    // custom instances of {@code this}
-    // NOTE: You will have to spawn the player yourself if using this.
-    protected Consumer<SPacketCreatePlayer> createPlayerHandler;
+    // queue of packets
+    protected final ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<>();
+    protected final ExecutorService single = Executors.newCachedThreadPool();
 
     public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
         this.protocol = protocol;
-    }
-
-    /**
-     * Run an action sync.
-     */
-    protected void run(Runnable runnable) {
-        Gdx.app.postRunnable(runnable);
     }
 
     /**
@@ -56,34 +48,43 @@ public abstract class AbstractConnection implements ServerPacketHandler {
         this.protocol = protocol;
     }
 
-    /**
-     * Set the creation player handler. This is invoked once receiving {@link SPacketCreatePlayer}
-     * Note: if you have set the {@code setJoinWorldListener} it will not be invoked.
-     *
-     * @param createPlayerHandler handler
-     */
-    public void setCreatePlayerHandler(Consumer<SPacketCreatePlayer> createPlayerHandler) {
-        this.createPlayerHandler = createPlayerHandler;
+    public void setUpdateInterval(float updateInterval) {
+        this.updateInterval = updateInterval;
     }
 
     /**
-     * Set the join world listener. This is invoked once other network players join the players world.
-     * Note: if you have set the {@code setCreatePlayerHandler} it will not be invoked.
+     * Handle server authentication failed
      *
-     * @param joinWorldListener the consumer
+     * @param reason the reason
      */
-    public void setJoinWorldListener(Consumer<LunarNetworkEntityPlayer> joinWorldListener) {
-        this.joinWorldListener = joinWorldListener;
-    }
+    public abstract void handleAuthenticationFailed(String reason);
 
     /**
-     * Set a handler for disconnects
-     *
-     * @param disconnectionHandler the handler
+     * Handle entities joining the local world.
      */
-    public void setDisconnectionHandler(Runnable disconnectionHandler) {
-        this.disconnectionHandler = disconnectionHandler;
-    }
+    public abstract void handleEntityJoinedWorld();
+
+    /**
+     * Handle general disconnection from server.
+     */
+    public abstract void handleDisconnection();
+
+    /**
+     * Handle creating a new player.
+     * <p>
+     * This could be used for custom handlers.
+     *
+     * @return {@code true} if this method was handled.
+     */
+    public abstract boolean handleCreatePlayer(String username, int entityId, float x, float y);
+
+    /**
+     * Handle removing a player
+     *
+     * @param entityId EID
+     * @return {@code true} if the method was handled.
+     */
+    public abstract boolean handleRemovePlayer(int entityId);
 
     /**
      * Register a custom packet handler.
@@ -102,8 +103,8 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      * @param x        X
      * @param y        Y
      */
-    public void sendPlayerPosition(Rotation rotation, float x, float y) {
-        this.send(new CPacketPosition(channel.alloc(), rotation.ordinal(), x, y));
+    public void updatePosition(Rotation rotation, float x, float y) {
+        this.send(new CPacketPosition(rotation.ordinal(), x, y));
     }
 
     /**
@@ -113,21 +114,21 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      * @param velX     X
      * @param velY     Y
      */
-    public void sendPlayerVelocity(Rotation rotation, float velX, float velY) {
-        this.send(new CPacketVelocity(channel.alloc(), velX, velY, rotation.ordinal()));
+    public void updateVelocity(Rotation rotation, float velX, float velY) {
+        this.send(new CPacketVelocity(rotation.ordinal(), velX, velY));
     }
 
     /**
      * Send disconnect packet
      */
-    public void sendDisconnect() {
-        this.send(new CPacketDisconnect(channel.alloc()));
+    public void disconnect() {
+        this.sendImmediately(new CPacketDisconnect());
     }
 
     /**
      * Send world loaded
      */
-    public void sendWorldLoaded() {
+    public void updateWorldLoaded() {
         this.send(new CPacketWorldLoaded(channel.alloc()));
     }
 
@@ -136,8 +137,8 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      *
      * @param world the world name
      */
-    public void sendJoinWorld(String world) {
-        this.send(new CPacketJoinWorld(channel.alloc(), world));
+    public void joinWorld(String world) {
+        this.send(new CPacketJoinWorld(world));
     }
 
     /**
@@ -145,15 +146,12 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      *
      * @param username the username
      */
-    public void sendSetUsername(String username) {
-        this.send(new CPacketSetProperties(channel.alloc(), username));
+    public void setUsername(String username) {
+        this.send(new CPacketSetProperties(username));
     }
 
-    /**
-     * Send a request to create a lobby.
-     */
-    public void sendCreateLobby() {
-        this.send(new CPacketCreateLobby(channel.alloc()));
+    public void createLobby() {
+        this.send(new CPacketCreateLobby());
     }
 
     /**
@@ -162,7 +160,7 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      * @param lobbyName the name
      */
     public void sendJoinLobby(String lobbyName) {
-        this.send(new CPacketJoinLobby(alloc(), lobbyName));
+        //  this.send(new CPacketJoinLobby(alloc(), lobbyName));
     }
 
     /**
@@ -171,7 +169,7 @@ public abstract class AbstractConnection implements ServerPacketHandler {
      * @param lobbyId lobby id.
      */
     public void sendJoinLobby(int lobbyId) {
-        this.send(new CPacketJoinLobby(alloc(), lobbyId));
+        //   this.send(new CPacketJoinLobby(alloc(), lobbyId));
     }
 
     /**
@@ -181,23 +179,56 @@ public abstract class AbstractConnection implements ServerPacketHandler {
         return isConnected;
     }
 
-    /**
-     * Disconnect via packets.
-     */
-    public void disconnect() {
-        channel.writeAndFlush(new CPacketDisconnect(channel.alloc()));
-    }
-
     public ByteBufAllocator alloc() {
         return channel.alloc();
     }
 
+    /**
+     * Queue's the provided packet.
+     *
+     * @param packet the packet
+     */
     public void send(Packet packet) {
+        packet.alloc(alloc());
+        queue.add(packet);
+    }
+
+    /**
+     * Send a packet now
+     *
+     * @param packet the packet
+     */
+    public void sendImmediately(Packet packet) {
+        packet.alloc(alloc());
         channel.writeAndFlush(packet);
+    }
+
+    /**
+     * Update this connection
+     */
+    public void update() {
+        if (System.currentTimeMillis() - lastUpdate >= updateInterval * 1000) {
+            single.execute(this::flush);
+            lastUpdate = System.currentTimeMillis();
+        }
+    }
+
+    protected void flush() {
+        for (Packet packet = queue.poll(); packet != null; packet = queue.poll()) {
+            channel.write(packet);
+        }
+
+        channel.flush();
     }
 
     public void close() {
         channel.close();
     }
 
+    @Override
+    public void dispose() {
+        single.shutdownNow();
+        flush();
+        close();
+    }
 }

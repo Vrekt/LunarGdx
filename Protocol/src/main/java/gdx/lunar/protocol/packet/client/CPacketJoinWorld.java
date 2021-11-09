@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * A packet sent to request to join a world.
@@ -21,8 +20,7 @@ public class CPacketJoinWorld extends Packet {
         handler.handleJoinWorld(new CPacketJoinWorld(buf));
     }
 
-    public CPacketJoinWorld(ByteBufAllocator allocator, String worldName) {
-        super(allocator);
+    public CPacketJoinWorld(String worldName) {
         this.worldName = worldName;
     }
 

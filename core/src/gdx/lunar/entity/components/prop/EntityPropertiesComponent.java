@@ -18,6 +18,11 @@ public class EntityPropertiesComponent implements Component, Pool.Poolable {
     // if the entity is moving.
     public boolean isMoving;
 
+    public void initialize(int entityId, String entityName) {
+        this.entityId = entityId;
+        this.entityName = entityName;
+    }
+
     @Override
     public void reset() {
         entityId = 0;

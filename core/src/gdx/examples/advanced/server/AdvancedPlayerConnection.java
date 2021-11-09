@@ -85,7 +85,7 @@ public class AdvancedPlayerConnection extends AbstractConnection {
     }
 
     @Override
-    public void handleBodyForce(SPacketBodyForce packet) {
+    public void handleBodyForce(SPacketApplyEntityBodyForce packet) {
         final LunarNetworkEntityPlayer other = this.player.getWorldIn().getPlayer(packet.getEntityId());
         if (other != null) {
             other.getBody().applyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY(), true);

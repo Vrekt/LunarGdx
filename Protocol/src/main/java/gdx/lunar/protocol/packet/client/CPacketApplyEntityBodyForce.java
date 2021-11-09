@@ -3,12 +3,11 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * A client packet for when the players body was given a force to it.
  */
-public class CPacketBodyForce extends Packet {
+public class CPacketApplyEntityBodyForce extends Packet {
 
     public static final int PID = 14;
 
@@ -16,11 +15,10 @@ public class CPacketBodyForce extends Packet {
     private float forceX, forceY, pointX, pointY;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
-        handler.handleBodyForce(new CPacketBodyForce(buf));
+        handler.handleBodyForce(new CPacketApplyEntityBodyForce(buf));
     }
 
-    public CPacketBodyForce(ByteBufAllocator allocator, int entityId, float forceX, float forceY, float pointX, float pointY) {
-        super(allocator);
+    public CPacketApplyEntityBodyForce(int entityId, float forceX, float forceY, float pointX, float pointY) {
         this.entityId = entityId;
         this.forceX = forceX;
         this.forceY = forceY;
@@ -28,7 +26,7 @@ public class CPacketBodyForce extends Packet {
         this.pointY = pointY;
     }
 
-    public CPacketBodyForce(ByteBuf buffer) {
+    public CPacketApplyEntityBodyForce(ByteBuf buffer) {
         super(buffer);
     }
 

@@ -2,14 +2,14 @@ package gdx.lunar.protocol.packet.server;
 
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
-import gdx.lunar.protocol.packet.client.CPacketBodyForce;
+import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
 /**
- * A broadcasted packet built from {@link gdx.lunar.protocol.packet.client.CPacketBodyForce}
+ * A broadcasted packet built from {@link CPacketApplyEntityBodyForce}
  */
-public class SPacketBodyForce extends Packet {
+public class SPacketApplyEntityBodyForce extends Packet {
 
     public static final int PID = 15;
 
@@ -17,10 +17,10 @@ public class SPacketBodyForce extends Packet {
     private float forceX, forceY, pointX, pointY;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
-        handler.handleBodyForce(new SPacketBodyForce(buf));
+        handler.handleBodyForce(new SPacketApplyEntityBodyForce(buf));
     }
 
-    public SPacketBodyForce(ByteBufAllocator allocator, CPacketBodyForce other) {
+    public SPacketApplyEntityBodyForce(ByteBufAllocator allocator, CPacketApplyEntityBodyForce other) {
         super(allocator);
         this.entityId = other.getEntityId();
         this.forceX = other.getForceX();
@@ -29,7 +29,7 @@ public class SPacketBodyForce extends Packet {
         this.pointY = other.getPointY();
     }
 
-    public SPacketBodyForce(ByteBufAllocator allocator, int entityId, float forceX, float forceY, float pointX, float pointY) {
+    public SPacketApplyEntityBodyForce(ByteBufAllocator allocator, int entityId, float forceX, float forceY, float pointX, float pointY) {
         super(allocator);
         this.entityId = entityId;
         this.forceX = forceX;
@@ -38,7 +38,7 @@ public class SPacketBodyForce extends Packet {
         this.pointY = pointY;
     }
 
-    public SPacketBodyForce(ByteBuf buffer) {
+    public SPacketApplyEntityBodyForce(ByteBuf buffer) {
         super(buffer);
     }
 

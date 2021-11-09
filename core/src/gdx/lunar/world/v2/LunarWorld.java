@@ -9,6 +9,7 @@ import gdx.lunar.entity.playerv2.LunarEntityPlayer;
 import gdx.lunar.entity.playerv2.mp.LunarNetworkEntityPlayer;
 import gdx.lunar.entity.system.animation.EntityAnimationSystem;
 import gdx.lunar.entity.system.moving.EntityMovementSystem;
+import gdx.lunar.network.AbstractConnection;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -97,6 +98,10 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         this(player, world, new WorldConfiguration(), new PooledEngine());
     }
 
+    public AbstractConnection getLocalConnection() {
+        return player.getConnection();
+    }
+
     public void setEngine(PooledEngine engine) {
         this.engine = engine;
     }
@@ -155,9 +160,18 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         this.spawn.set(x, y);
     }
 
+    /**
+     * Spawn the entity in this world
+     *
+     * @param entity the entity
+     * @param x      location X
+     * @param y      location Y
+     */
     public void spawnEntityInWorld(LunarEntity entity, float x, float y) {
         engine.addEntity(entity.getEntity());
         selectType(entity);
+
+        entity.getInstance().worldIn = this;
     }
 
     /**
@@ -168,6 +182,8 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
     public void spawnEntityInWorld(LunarEntity entity) {
         engine.addEntity(entity.getEntity());
         selectType(entity);
+
+        entity.getInstance().worldIn = this;
     }
 
     /**
@@ -181,6 +197,44 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         } else {
             this.entities.put(entity.getProperties().entityId, (E) entity);
         }
+    }
+
+    /**
+     * Remove the entity from this world
+     *
+     * @param entity the entity
+     */
+    public void removeEntityInWorld(LunarEntity entity) {
+        engine.removeEntity(entity.getEntity());
+        if (entity instanceof LunarNetworkEntityPlayer) {
+            this.players.remove(entity.getProperties().entityId);
+        } else {
+            this.entities.remove(entity.getProperties().entityId);
+        }
+    }
+
+    /**
+     * Remove the entity from this world
+     *
+     * @param entity   the entity
+     * @param isPlayer if the entity is a player
+     */
+    public void removeEntityInWorld(int entity, boolean isPlayer) {
+        if (isPlayer && this.players.containsKey(entity)) {
+            final N player = this.players.get(entity);
+            player.removeEntityInWorld(this);
+        } else if (this.entities.containsKey(entity)) {
+            final E e = this.entities.get(entity);
+            e.removeEntityInWorld(this);
+        }
+    }
+
+    public boolean hasNetworkPlayer(int id) {
+        return this.players.containsKey(id);
+    }
+
+    public N getNetworkPlayer(int id) {
+        return this.players.get(id);
     }
 
     /**

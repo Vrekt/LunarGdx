@@ -107,9 +107,9 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
     }
 
     @Override
-    public void handleBodyForce(CPacketBodyForce packet) {
+    public void handleBodyForce(CPacketApplyEntityBodyForce packet) {
         if (player != null && player.getWorld() != null) {
-            player.getWorld().broadcastPacketInWorld(new SPacketBodyForce(alloc(), packet));
+            player.getWorld().broadcastPacketInWorld(new SPacketApplyEntityBodyForce(alloc(), packet));
         }
     }
 

@@ -54,7 +54,7 @@ public interface ClientPacketHandler {
      *
      * @param packet the placket
      */
-    void handleBodyForce(CPacketBodyForce packet);
+    void handleBodyForce(CPacketApplyEntityBodyForce packet);
 
     /**
      * Handle a request to spawn an entity in the world

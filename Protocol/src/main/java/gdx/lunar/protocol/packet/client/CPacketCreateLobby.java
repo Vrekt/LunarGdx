@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * A request to create a lobby.
@@ -15,8 +14,7 @@ public class CPacketCreateLobby extends Packet {
         handler.handleCreateLobby(new CPacketCreateLobby(buf));
     }
 
-    public CPacketCreateLobby(ByteBufAllocator allocator) {
-        super(allocator);
+    public CPacketCreateLobby() {
     }
 
     public CPacketCreateLobby(ByteBuf buffer) {

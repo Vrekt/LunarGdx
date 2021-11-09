@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Clients request to join a lobby.
@@ -19,19 +18,16 @@ public class CPacketJoinLobby extends Packet {
         handler.handleJoinLobby(new CPacketJoinLobby(buf));
     }
 
-    public CPacketJoinLobby(ByteBufAllocator allocator, String lobbyName, int lobbyId) {
-        super(allocator);
+    public CPacketJoinLobby(String lobbyName, int lobbyId) {
         this.lobbyName = lobbyName;
         this.lobbyId = lobbyId;
     }
 
-    public CPacketJoinLobby(ByteBufAllocator allocator, String lobbyName) {
-        super(allocator);
+    public CPacketJoinLobby(String lobbyName) {
         this.lobbyName = lobbyName;
     }
 
-    public CPacketJoinLobby(ByteBufAllocator allocator, int lobbyId) {
-        super(allocator);
+    public CPacketJoinLobby(int lobbyId) {
         this.lobbyId = lobbyId;
     }
 

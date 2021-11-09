@@ -11,6 +11,7 @@ import gdx.lunar.entity.components.position.EntityVelocityComponent;
 import gdx.lunar.entity.components.prop.EntityPropertiesComponent;
 import gdx.lunar.entity.mapping.GlobalEntityMapper;
 import gdx.lunar.entity.playerv2.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
 import gdx.lunar.world.v2.LunarWorld;
 
 /**
@@ -23,6 +24,8 @@ public abstract class LunarEntity {
 
     // box2d body of this entity
     protected Body body;
+    protected boolean inWorld;
+    protected float rotation;
 
     public LunarEntity(Entity entity, boolean initializeComponents) {
         this.entity = entity;
@@ -194,6 +197,14 @@ public abstract class LunarEntity {
         }
     }
 
+    public EntityInstanceComponent getInstance() {
+        return GlobalEntityMapper.instance.get(entity);
+    }
+
+    public boolean isInWorld() {
+        return inWorld;
+    }
+
     /**
      * Update this entity
      *
@@ -220,5 +231,28 @@ public abstract class LunarEntity {
     public abstract <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
             E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world);
+
+    /**
+     * Remove this entity from the world
+     *
+     * @param world world
+     */
+    public abstract <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world);
+
+    /**
+     * Apply force to this player
+     *
+     * @param fx   force x
+     * @param fy   force y
+     * @param px   point x
+     * @param py   point y
+     * @param wake wake
+     */
+    public void applyForce(float fx, float fy, float px, float py, boolean wake) {
+        getBody().applyForce(fx, fy, px, py, wake);
+        getInstance().worldIn.getLocalConnection().send(new CPacketApplyEntityBodyForce(getProperties().entityId, fx, fy, px, py));
+    }
 
 }

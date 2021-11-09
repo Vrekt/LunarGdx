@@ -4,10 +4,10 @@ import com.badlogic.gdx.Gdx;
 import gdx.lunar.Lunar;
 import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.network.NetworkEntity;
-import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.entity.player.impl.LunarNetworkPlayer;
 import gdx.lunar.entity.player.prop.PlayerProperties;
+import gdx.lunar.entity.playerv2.LunarEntityPlayer;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.client.CPacketSetProperties;
 import gdx.lunar.protocol.packet.server.*;
@@ -133,7 +133,7 @@ public class PlayerConnection extends AbstractConnection {
     }
 
     @Override
-    public void handleBodyForce(SPacketBodyForce packet) {
+    public void handleEntityBodyForce(SPacketApplyEntityBodyForce packet) {
         final LunarNetworkEntityPlayer other = this.player.getWorldIn().getPlayer(packet.getEntityId());
         if (other != null) {
 

@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * A packet wrapper around a networked tile
@@ -20,8 +19,7 @@ public class CPacketNetworkedTile extends Packet {
         handler.handleNetworkTile(new CPacketNetworkedTile(buf));
     }
 
-    public CPacketNetworkedTile(ByteBufAllocator allocator, float x, float y, boolean isNetworked, String tileTexture) {
-        super(allocator);
+    public CPacketNetworkedTile(float x, float y, boolean isNetworked, String tileTexture) {
         this.x = x;
         this.y = y;
         this.isNetworked = isNetworked;

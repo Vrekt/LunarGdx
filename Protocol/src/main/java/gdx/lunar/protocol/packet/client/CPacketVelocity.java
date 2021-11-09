@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Sent by clients to update their velocity
@@ -12,25 +11,16 @@ public class CPacketVelocity extends Packet {
 
     public static final int PID = 10;
 
-    /**
-     * Velocity
-     */
-    private float velocityX, velocityY;
-
-    /**
-     * Rotation
-     */
-    private int rotation;
+    private float velocityX, velocityY, rotation;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handlePlayerVelocity(new CPacketVelocity(buf));
     }
 
-    public CPacketVelocity(ByteBufAllocator allocator, float velocityX, float velocityY, int rotation) {
-        super(allocator);
+    public CPacketVelocity(float rotation, float velocityX, float velocityY) {
+        this.rotation = rotation;
         this.velocityX = velocityX;
         this.velocityY = velocityY;
-        this.rotation = rotation;
     }
 
     private CPacketVelocity(ByteBuf buffer) {
@@ -54,7 +44,7 @@ public class CPacketVelocity extends Packet {
     /**
      * @return the rotation value
      */
-    public int getRotation() {
+    public float getRotation() {
         return rotation;
     }
 
@@ -66,15 +56,15 @@ public class CPacketVelocity extends Packet {
     @Override
     public void encode() {
         writeId();
+        buffer.writeFloat(rotation);
         buffer.writeFloat(velocityX);
         buffer.writeFloat(velocityY);
-        buffer.writeInt(rotation);
     }
 
     @Override
     public void decode() {
+        rotation = buffer.readFloat();
         velocityX = buffer.readFloat();
         velocityY = buffer.readFloat();
-        rotation = buffer.readInt();
     }
 }

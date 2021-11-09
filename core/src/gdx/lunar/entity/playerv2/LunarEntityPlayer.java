@@ -12,6 +12,8 @@ import gdx.lunar.entity.components.drawing.EntityAnimation;
 import gdx.lunar.entity.components.drawing.EntityAnimationComponent;
 import gdx.lunar.entity.drawing.v2.LunarAnimatedEntity;
 import gdx.lunar.entity.playerv2.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
 import gdx.lunar.world.v2.LunarWorld;
 
 /**
@@ -31,12 +33,23 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     // if user specified custom rotation or density
     protected boolean hasSetFixedRotation, hasSetDensity;
 
+    // connection for this player
+    protected AbstractConnection connection;
+
     public LunarEntityPlayer(Entity entity, boolean initializeComponents) {
         super(entity, initializeComponents);
     }
 
     public LunarEntityPlayer(boolean initializeComponents) {
         super(initializeComponents);
+    }
+
+    public void setConnection(AbstractConnection connection) {
+        this.connection = connection;
+    }
+
+    public AbstractConnection getConnection() {
+        return connection;
     }
 
     /**
@@ -146,10 +159,32 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
 
         body.createFixture(fixture).setUserData(this);
         world.spawnEntityInWorld(this, x, y);
+        this.inWorld = true;
     }
 
     @Override
     public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world) {
         spawnEntityInWorld(world, world.getSpawn().x, world.getSpawn().y);
     }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
+        world.removeEntityInWorld(this);
+        world.getWorld().destroyBody(body);
+    }
+
+    /**
+     * Apply force to this player
+     *
+     * @param fx   force x
+     * @param fy   force y
+     * @param px   point x
+     * @param py   point y
+     * @param wake wake
+     */
+    public void applyForce(float fx, float fy, float px, float py, boolean wake) {
+        getBody().applyForce(fx, fy, px, py, wake);
+        connection.send(new CPacketApplyEntityBodyForce(getProperties().entityId, fx, fy, px, py));
+    }
+
 }

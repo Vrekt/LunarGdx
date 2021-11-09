@@ -1,5 +1,6 @@
 package gdx.lunar.protocol.handler;
 
+import gdx.lunar.protocol.packet.permission.PermissionAttachment;
 import gdx.lunar.protocol.packet.server.*;
 
 /**
@@ -8,18 +9,18 @@ import gdx.lunar.protocol.packet.server.*;
 public interface ServerPacketHandler {
 
     /**
+     * Handle permission attachment
+     *
+     * @param permission permission
+     */
+    void handlePermissionAttachment(PermissionAttachment permission);
+
+    /**
      * Handle server disconnection
      *
      * @param packet the packet
      */
     void handleDisconnect(SPacketDisconnect packet);
-
-    /**
-     * Handle authentication response.
-     *
-     * @param packet the packet
-     */
-    void handleAuthentication(SPacketAuthentication packet);
 
     /**
      * Handle spawning a new player
@@ -61,7 +62,7 @@ public interface ServerPacketHandler {
      *
      * @param packet packet
      */
-    void handleBodyForce(SPacketBodyForce packet);
+    void handleEntityBodyForce(SPacketApplyEntityBodyForce packet);
 
     /**
      * Spawn an entity

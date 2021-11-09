@@ -15,8 +15,8 @@ public abstract class Packet {
      */
     protected ByteBuf buffer;
 
-    public Packet(ByteBufAllocator allocator) {
-        this.buffer = allocator.ioBuffer();
+    public Packet() {
+
     }
 
     protected Packet(ByteBuf buffer) {
@@ -24,8 +24,8 @@ public abstract class Packet {
         decode();
     }
 
-    protected Packet() {
-
+    public void alloc(ByteBufAllocator alloc) {
+        this.buffer = alloc.ioBuffer();
     }
 
     /**

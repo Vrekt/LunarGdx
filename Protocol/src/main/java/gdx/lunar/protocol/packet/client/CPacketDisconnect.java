@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * A packet that indicates the client disconnected.
@@ -14,10 +13,6 @@ public class CPacketDisconnect extends Packet {
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleDisconnect(new CPacketDisconnect());
-    }
-
-    public CPacketDisconnect(ByteBufAllocator allocator) {
-        super(allocator);
     }
 
     public CPacketDisconnect() {

@@ -10,7 +10,7 @@ import gdx.lunar.entity.network.NetworkEntity;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
 import gdx.lunar.network.AbstractConnection;
-import gdx.lunar.protocol.packet.client.CPacketBodyForce;
+import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
 import gdx.lunar.protocol.packet.client.CPacketRequestSpawnEntity;
 import gdx.lunar.world.map.LunarNetworkedTile;
 
@@ -325,7 +325,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      * @param wake       wake
      */
     public void applyForceToPlayerNetwork(AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
-        connection.send(new CPacketBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
+        connection.send(new CPacketApplyEntityBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
         this.player.getBody().applyForce(fx, fy, px, py, wake);
     }
 
@@ -358,7 +358,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
     public void applyForceToOtherPlayerNetwork(LunarNetworkEntityPlayer player, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
         if (player == null) return;
 
-        connection.send(new CPacketBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
+        connection.send(new CPacketApplyEntityBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
         player.getBody().applyForce(fx, fy, px, py, wake);
     }
 
@@ -391,7 +391,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
     public void applyForceToEntityNetwork(LunarEntity entity, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
         if (entity == null) return;
 
-        connection.send(new CPacketBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
+        connection.send(new CPacketApplyEntityBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
         player.getBody().applyForce(fx, fy, px, py, wake);
     }
 

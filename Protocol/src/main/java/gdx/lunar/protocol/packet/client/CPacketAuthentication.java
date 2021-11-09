@@ -2,24 +2,18 @@ package gdx.lunar.protocol.packet.client;
 
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
+import gdx.lunar.protocol.packet.permission.Permissible;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * A basic authentication packet.
  */
-public class CPacketAuthentication extends Packet {
+public class CPacketAuthentication extends Packet implements Permissible {
 
     public static final int PID = 1;
 
-    /**
-     * Versioning
-     */
+    private boolean permission;
     private String gameVersion;
-
-    /**
-     * Versioning
-     */
     private int protocolVersion;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
@@ -29,12 +23,10 @@ public class CPacketAuthentication extends Packet {
     /**
      * Initialize
      *
-     * @param allocator       alloc
      * @param gameVersion     the game version
      * @param protocolVersion the protocol version
      */
-    public CPacketAuthentication(ByteBufAllocator allocator, String gameVersion, int protocolVersion) {
-        super(allocator);
+    public CPacketAuthentication(String gameVersion, int protocolVersion) {
         this.gameVersion = gameVersion;
         this.protocolVersion = protocolVersion;
     }
@@ -73,5 +65,20 @@ public class CPacketAuthentication extends Packet {
     public void decode() {
         gameVersion = readString();
         protocolVersion = buffer.readInt();
+    }
+
+    @Override
+    public Packet requester() {
+        return this;
+    }
+
+    @Override
+    public boolean hasPermission() {
+        return permission;
+    }
+
+    @Override
+    public void setPermission(boolean permission) {
+        this.permission = permission;
     }
 }

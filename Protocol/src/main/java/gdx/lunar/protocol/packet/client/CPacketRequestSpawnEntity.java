@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.client;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Request to spawn an entity in the world
@@ -20,8 +19,7 @@ public class CPacketRequestSpawnEntity extends Packet {
         handler.handleRequestSpawnEntity(new CPacketRequestSpawnEntity(buf));
     }
 
-    public CPacketRequestSpawnEntity(ByteBufAllocator allocator, String entityName, float x, float y, int temporaryEntityId) {
-        super(allocator);
+    public CPacketRequestSpawnEntity(String entityName, float x, float y, int temporaryEntityId) {
         this.entityName = entityName;
         this.x = x;
         this.y = y;

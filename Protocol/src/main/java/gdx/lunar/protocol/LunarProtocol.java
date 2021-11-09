@@ -3,6 +3,7 @@ package gdx.lunar.protocol;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.client.*;
+import gdx.lunar.protocol.packet.permission.PermissionAttachment;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -113,6 +114,7 @@ public class LunarProtocol {
      * Initialize server side
      */
     private void initializeServer() {
+        server.put(0, (buf, handler) -> PermissionAttachment.handle(handler, buf));
         server.put(SPacketDisconnect.PID, (buf, handler) -> SPacketDisconnect.handle(handler, buf));
         server.put(SPacketAuthentication.PID, (buf, handler) -> SPacketAuthentication.handle(handler, buf));
         server.put(SPacketCreatePlayer.PID, (buf, handler) -> SPacketCreatePlayer.handle(handler, buf));
@@ -120,7 +122,7 @@ public class LunarProtocol {
         server.put(SPacketPlayerPosition.PID, (buf, handler) -> SPacketPlayerPosition.handle(handler, buf));
         server.put(SPacketPlayerVelocity.PID, (buf, handler) -> SPacketPlayerVelocity.handle(handler, buf));
         server.put(SPacketJoinWorld.PID, (buf, handler) -> SPacketJoinWorld.handle(handler, buf));
-        server.put(SPacketBodyForce.PID, (buf, handler) -> SPacketBodyForce.handle(handler, buf));
+        server.put(SPacketApplyEntityBodyForce.PID, (buf, handler) -> SPacketApplyEntityBodyForce.handle(handler, buf));
         server.put(SPacketSpawnEntity.PID, (buf, handler) -> SPacketSpawnEntity.handle(handler, buf));
         server.put(SPacketSpawnEntityDenied.PID, (buf, handler) -> SPacketSpawnEntityDenied.handle(handler, buf));
         server.put(SPacketSetEntityProperties.PID, (buf, handler) -> SPacketSetEntityProperties.handle(handler, buf));
@@ -141,12 +143,11 @@ public class LunarProtocol {
         client.put(CPacketVelocity.PID, (buf, handler) -> CPacketVelocity.handle(handler, buf));
         client.put(CPacketJoinWorld.PID, (buf, handler) -> CPacketJoinWorld.handle(handler, buf));
         client.put(CPacketWorldLoaded.PID, (buf, handler) -> CPacketWorldLoaded.handle(handler, buf));
-        client.put(CPacketBodyForce.PID, (buf, handler) -> CPacketBodyForce.handle(handler, buf));
+        client.put(CPacketApplyEntityBodyForce.PID, (buf, handler) -> CPacketApplyEntityBodyForce.handle(handler, buf));
         client.put(CPacketRequestSpawnEntity.PID, (buf, handler) -> CPacketRequestSpawnEntity.handle(handler, buf));
         client.put(CPacketSetProperties.PID, (buf, handler) -> CPacketSetProperties.handle(handler, buf));
         client.put(CPacketCreateLobby.PID, (buf, handler) -> CPacketCreateLobby.handle(handler, buf));
         client.put(CPacketJoinLobby.PID, (buf, handler) -> CPacketJoinLobby.handle(handler, buf));
-        client.put(CPacketEnterInstance.PID, (buf, handler) -> CPacketEnterInstance.handle(handler, buf));
     }
 
     /**
