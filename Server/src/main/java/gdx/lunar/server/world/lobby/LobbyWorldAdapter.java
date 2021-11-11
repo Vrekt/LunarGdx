@@ -1,6 +1,6 @@
 package gdx.lunar.server.world.lobby;
 
-import gdx.lunar.server.game.entity.player.Player;
+import gdx.lunar.server.game.entity.player.LunarPlayer;
 import gdx.lunar.server.world.World;
 
 /**
@@ -20,7 +20,7 @@ public class LobbyWorldAdapter extends World {
         int packets = 0;
 
         // flush previous tick packets.
-        for (Player player : players.values()) {
+        for (LunarPlayer player : players.values()) {
             player.getConnection().flush();
 
             // update timed out players.

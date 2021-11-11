@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector3;
 import gdx.lunar.entity.components.drawing.EntityAnimation;
 import gdx.lunar.entity.components.drawing.EntityAnimationComponent;
 import gdx.lunar.entity.components.position.EntityPositionComponent;
-import gdx.lunar.entity.playerv2.LunarEntity;
+import gdx.lunar.entity.player.LunarEntity;
 
 /**
  * Basic animation system for entities.

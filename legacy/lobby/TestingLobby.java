@@ -15,7 +15,6 @@ import gdx.lunar.entity.contact.PlayerCollisionListener;
 import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.impl.LunarPlayer;
 import gdx.lunar.entity.player.prop.PlayerProperties;
-import gdx.lunar.network.PlayerConnection;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.world.lobby.GameLobbyWorldAdapter;
 

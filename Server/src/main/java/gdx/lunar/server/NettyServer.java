@@ -24,11 +24,11 @@ import java.util.function.Supplier;
 /**
  * The netty server.
  */
-public final class LunarNettyServer {
+public class NettyServer {
 
     private final ServerBootstrap bootstrap;
     private final EventLoopGroup parent, child;
-    private final ProtocolPacketEncoder encoder;
+    private ProtocolPacketEncoder encoder;
 
     private final String ip;
     private final int port;
@@ -38,6 +38,29 @@ public final class LunarNettyServer {
     private final SslContext sslContext;
 
     private final LunarProtocol protocol;
+    private LunarServer server;
+
+    /**
+     * Initialize the bootstrap and server.
+     *
+     * @param ip        the server IP address
+     * @param port      the server port
+     * @param protocol  protocol
+     * @param bootstrap bootstrap
+     * @param context   ssl
+     */
+    public NettyServer(String ip, int port, LunarProtocol protocol, ServerBootstrap bootstrap, SslContext context, LunarServer server) {
+        this.ip = ip;
+        this.port = port;
+        this.protocol = protocol;
+        this.bootstrap = bootstrap;
+        this.sslContext = context;
+        this.server = server;
+
+        this.parent = bootstrap.config().group();
+        this.child = bootstrap.config().childGroup();
+        this.encoder = new ProtocolPacketEncoder();
+    }
 
     /**
      * Initialize the bootstrap and server.
@@ -45,10 +68,11 @@ public final class LunarNettyServer {
      * @param ip   the server IP address
      * @param port the server port
      */
-    public LunarNettyServer(String ip, int port, LunarProtocol protocol) {
+    public NettyServer(String ip, int port, LunarProtocol protocol, LunarServer server) {
         this.ip = ip;
         this.port = port;
         this.protocol = protocol;
+        this.server = server;
 
         try {
             final SelfSignedCertificate ssc = new SelfSignedCertificate();
@@ -88,13 +112,17 @@ public final class LunarNettyServer {
         this.connectionSupplier = connectionSupplier;
     }
 
+    public void setEncoder(ProtocolPacketEncoder encoder) {
+        this.encoder = encoder;
+    }
+
     /**
      * Handle a new socket channel
      *
      * @param channel the channel
      */
     private void handleSocketConnection(SocketChannel channel) {
-        final AbstractConnection connection = connectionSupplier == null ? new PlayerConnection(channel, protocol) : connectionSupplier.get();
+        final AbstractConnection connection = connectionSupplier == null ? new PlayerConnection(channel, server) : connectionSupplier.get();
         final LengthFieldBasedFrameDecoder decoder = this.decoderSupplier == null ? new ClientProtocolPacketDecoder(connection, protocol)
                 : decoderSupplier.get();
 

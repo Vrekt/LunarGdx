@@ -1,50 +1,49 @@
 package gdx.lunar.world;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
-import gdx.lunar.entity.LunarEntity;
-import gdx.lunar.entity.drawing.Rotation;
-import gdx.lunar.entity.network.NetworkEntity;
+import gdx.lunar.entity.player.LunarEntity;
 import gdx.lunar.entity.player.LunarEntityPlayer;
-import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
+import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.entity.system.animation.EntityAnimationSystem;
+import gdx.lunar.entity.system.moving.EntityMovementSystem;
 import gdx.lunar.network.AbstractConnection;
-import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
-import gdx.lunar.protocol.packet.client.CPacketRequestSpawnEntity;
-import gdx.lunar.world.map.LunarNetworkedTile;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Represents a networked game world.
- * <p>
- * P = any local entity player instance type you wish.
- * N = any local network entity instance type you wish
- * E = any local entity instance type you wish
+ * Represents a networked world players and entities exist in.
+ *
+ * @param <P> any local entity player instance type you wish.
+ * @param <N> any local network entity instance type you wish
+ * @param <E> any local entity instance type you wish
  */
 public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> implements Disposable {
 
+    // engine for this world.
+    protected PooledEngine engine;
+
+    // system
+    protected EntityMovementSystem movementSystem;
+    protected EntityAnimationSystem animationSystem;
+
+    // network players and entities
     protected ConcurrentMap<Integer, N> players = new ConcurrentHashMap<>();
     protected ConcurrentMap<Integer, E> entities = new ConcurrentHashMap<>();
 
+    // starting/spawn point of this world.
+    protected final Vector2 spawn = new Vector2();
+
+    // local player
     protected final P player;
     protected final World world;
-    protected float worldScale;
-    protected boolean handlePhysics, updatePlayer, updateNetworkPlayers;
-    protected boolean updateEntities;
 
-    protected float stepTime = 1.0f / 60.0f;
-    protected float maxFrameTime = 0.25f;
+    // config
+    protected WorldConfiguration configuration;
     protected float accumulator;
-
-    protected int velocityIterations = 8, positionIterations = 3;
-    // if this world is being used as a lobby.
-    protected int lobbyId;
-
-    protected final Vector2 worldSpawn = new Vector2(0, 0);
 
     /**
      * Initialize a new game world.
@@ -57,16 +56,21 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      * @param updateNetworkPlayers if network players should be updated.
      * @param updateEntities       if entities should be updated.
      */
-    public LunarWorld(LunarEntityPlayer player, World world, float worldScale,
+    public LunarWorld(P player, World world, float worldScale,
                       boolean handlePhysics, boolean updatePlayer, boolean updateNetworkPlayers,
-                      boolean updateEntities) {
+                      boolean updateEntities, PooledEngine engine) {
         this.player = player;
         this.world = world;
-        this.worldScale = worldScale;
-        this.handlePhysics = handlePhysics;
-        this.updatePlayer = updatePlayer;
-        this.updateNetworkPlayers = updateNetworkPlayers;
-        this.updateEntities = updateEntities;
+        this.engine = engine;
+
+        this.configuration = new WorldConfiguration();
+        configuration.worldScale = worldScale;
+        configuration.handlePhysics = handlePhysics;
+        configuration.updatePlayer = updatePlayer;
+        configuration.updateNetworkPlayers = updateNetworkPlayers;
+        configuration.updateEntities = updateEntities;
+
+        addWorldSystems();
     }
 
     /**
@@ -75,354 +79,162 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      * @param player the player
      * @param world  the world
      */
-    public LunarWorld(LunarEntityPlayer player, World world) {
+    public LunarWorld(P player, World world, WorldConfiguration configuration, PooledEngine engine) {
         this.player = player;
         this.world = world;
+        this.configuration = configuration;
+        this.engine = engine;
 
-        this.handlePhysics = true;
-        this.updatePlayer = true;
-        this.updateNetworkPlayers = true;
-        this.updateEntities = true;
-    }
-
-    public void setStepTime(float stepTime) {
-        this.stepTime = stepTime;
-    }
-
-    public float getStepTime() {
-        return stepTime;
-    }
-
-    public void setMaxFrameTime(float maxFrameTime) {
-        this.maxFrameTime = maxFrameTime;
-    }
-
-    public void setVelocityIterations(int velocityIterations) {
-        this.velocityIterations = velocityIterations;
-    }
-
-    public void setPositionIterations(int positionIterations) {
-        this.positionIterations = positionIterations;
-    }
-
-    public void setHandlePhysics(boolean handlePhysics) {
-        this.handlePhysics = handlePhysics;
-    }
-
-    public void setUpdatePlayer(boolean updatePlayer) {
-        this.updatePlayer = updatePlayer;
-    }
-
-    public void setUpdateNetworkPlayers(boolean updateNetworkPlayers) {
-        this.updateNetworkPlayers = updateNetworkPlayers;
-    }
-
-    public void setUpdateEntities(boolean updateEntities) {
-        this.updateEntities = updateEntities;
+        addWorldSystems();
     }
 
     /**
-     * Allows you to use internal collections in your project.
-     * Should override {@code setPlayerInWorld}
+     * An empty default constructor. You should use the setters to define configuration next.
      *
-     * @param players c
+     * @param player the player
+     * @param world  the world
      */
-    @SuppressWarnings("unchecked")
-    public <T extends LunarNetworkEntityPlayer> void setPlayersCollection(ConcurrentMap<Integer, T> players) {
-        this.players = (ConcurrentMap<Integer, LunarNetworkEntityPlayer>) players;
+    public LunarWorld(P player, World world) {
+        this(player, world, new WorldConfiguration(), new PooledEngine());
+    }
+
+    public AbstractConnection getLocalConnection() {
+        return player.getConnection();
+    }
+
+    public void setEngine(PooledEngine engine) {
+        this.engine = engine;
+    }
+
+    public PooledEngine getEngine() {
+        return engine;
     }
 
     /**
-     * Allows you to use internal collections in your project.
-     * Should override {@code setPlayerInWorld}
-     *
-     * @param entities c
+     * Add world systems to the engine.
      */
-    @SuppressWarnings("unchecked")
-    public <T extends LunarEntity> void setEntitiesCollection(ConcurrentMap<Integer, T> entities) {
-        this.entities = (ConcurrentMap<Integer, LunarEntity>) entities;
-    }
-
-    public void setLobbyId(int lobbyId) {
-        this.lobbyId = lobbyId;
-    }
-
-    public int getLobbyId() {
-        return lobbyId;
+    public void addWorldSystems() {
+        movementSystem = new EntityMovementSystem();
+        animationSystem = new EntityAnimationSystem();
+        engine.addSystem(movementSystem);
+        engine.addSystem(animationSystem);
     }
 
     /**
-     * @return the Box2d world.
+     * @return configuration for this world
      */
-    public World getPhysicsWorld() {
+    public WorldConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * @return Box2d world
+     */
+    public World getWorld() {
         return world;
     }
 
     /**
-     * @return players in this world.
+     * @return network players in this world
      */
-    public ConcurrentMap<Integer, LunarNetworkEntityPlayer> getPlayers() {
+    public ConcurrentMap<Integer, N> getPlayers() {
         return players;
     }
 
-    public Vector2 getWorldSpawn() {
-        return worldSpawn;
-    }
-
-    public void setWorldSpawn(Vector2 where) {
-        this.worldSpawn.set(where);
-    }
-
-    public void setWorldSpawn(float x, float y) {
-        this.worldSpawn.set(x, y);
-    }
-
     /**
-     * Send the tiled map over the network.
+     * @return entities in this world
      */
-    public void syncTiledMapOverNetwork() {
+    public ConcurrentMap<Integer, E> getEntities() {
+        return entities;
+    }
 
+    public Vector2 getSpawn() {
+        return spawn;
+    }
+
+    public void setSpawn(Vector2 where) {
+        this.spawn.set(where);
+    }
+
+    public void setSpawn(float x, float y) {
+        this.spawn.set(x, y);
     }
 
     /**
-     * Tell other players about a networked tile
+     * Spawn the entity in this world
      *
-     * @param tile the tile
+     * @param entity the entity
+     * @param x      location X
+     * @param y      location Y
      */
-    public void sendNetworkedTile(AbstractConnection connection, LunarNetworkedTile tile) {
+    public void spawnEntityInWorld(LunarEntity entity, float x, float y) {
+        engine.addEntity(entity.getEntity());
+        selectType(entity);
 
+        entity.getInstance().worldIn = this;
     }
 
     /**
-     * Set player in this world
-     *
-     * @param player the player
-     */
-    public void setPlayerInWorld(LunarNetworkEntityPlayer player) {
-        this.players.put(player.getEntityId(), player);
-    }
-
-    /**
-     * Set an entity in this world
+     * This method will spawn the entity in this world at the spawn location
      *
      * @param entity the entity
      */
-    public void setEntityInWorld(LunarEntity entity) {
-        this.entities.put(entity.getEntityId(), entity);
+    public void spawnEntityInWorld(LunarEntity entity) {
+        engine.addEntity(entity.getEntity());
+        selectType(entity);
+
+        entity.getInstance().worldIn = this;
     }
 
     /**
-     * Set an entity in this world and broadcast to others.
+     * Add the entity to the internal lists
      *
-     * @param entity the entity
+     * @param entity entity
      */
-    public void setEntityInWorldNetwork(AbstractConnection connection, LunarEntity entity) {
-        // ensure we have a temporary entity ID before continuing.
-        if (entity.getEntityId() == 0) {
-            entity.setEntityId(ThreadLocalRandom.current().nextInt());
-        }
-        setEntityInWorld(entity);
-        connection.send(new CPacketRequestSpawnEntity(connection.alloc(), entity.getName(), entity.getX(), entity.getY(), entity.getEntityId()));
-    }
-
-    /**
-     * Check if a temporary entity exists by ID
-     *
-     * @param temporaryEntityId the temporary ID
-     * @param entityId          the new entity ID
-     * @return {@code true} if so
-     */
-    public boolean resetTemporaryEntityIfExists(int temporaryEntityId, int entityId) {
-        if (this.entities.containsKey(temporaryEntityId)) {
-            this.entities.get(temporaryEntityId).setEntityId(entityId);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * The request was denied from the server, so remove it.
-     *
-     * @param temporaryEntityId the entity ID.
-     */
-    public void removeTemporaryEntity(int temporaryEntityId) {
-        this.entities.remove(temporaryEntityId);
-    }
-
-    /**
-     * Set a networked entity in this world.
-     *
-     * @param entity the entity
-     */
-    public void setEntityInWorld(NetworkEntity entity) {
-        this.entities.put(entity.getEntityId(), entity);
-    }
-
-    /**
-     * Remove a player from this world
-     *
-     * @param player the player
-     */
-    public void removePlayerFromWorld(LunarNetworkEntityPlayer player) {
-        this.players.remove(player.getEntityId(), player);
-    }
-
-    /**
-     * Remove a player from this world
-     *
-     * @param player the player ID.
-     */
-    public void removePlayerFromWorld(int player) {
-        this.players.remove(player);
-    }
-
-    /**
-     * Remove an entity from this world
-     *
-     * @param entity the entity
-     */
-    public void removeEntityFromWorld(LunarEntity entity) {
-        this.entities.remove(entity.getEntityId(), entity);
-    }
-
-    /**
-     * Remove an entity from this world
-     *
-     * @param entity the entity ID
-     */
-    public void removeEntityFromWorld(int entity) {
-        this.entities.remove(entity);
-    }
-
-    /**
-     * Get the position of a player
-     *
-     * @param player entity ID
-     * @return the position or {@code null} if no player matching the ID was found.
-     */
-    public Vector2 getPositionOfPlayer(int player) {
-        final LunarNetworkEntityPlayer p = this.players.get(player);
-        if (p == null) return null;
-        return p.getPosition();
-    }
-
-    /**
-     * @param player the player
-     * @return the player or {@code null} if no player matching the ID was found.
-     */
-    public LunarNetworkEntityPlayer getPlayer(int player) {
-        return this.players.get(player);
-    }
-
-    /**
-     * Apply force to the local players body and send over the network.
-     *
-     * @param connection the connection
-     * @param fx         force X
-     * @param fy         force Y
-     * @param px         point X
-     * @param py         point Y
-     * @param wake       wake
-     */
-    public void applyForceToPlayerNetwork(AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
-        connection.send(new CPacketApplyEntityBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
-        this.player.getBody().applyForce(fx, fy, px, py, wake);
-    }
-
-    /**
-     * Apply a force to another players body and send that over the network to others.
-     *
-     * @param player     the player
-     * @param connection the connection
-     * @param fx         force X
-     * @param fy         force Y
-     * @param px         point X
-     * @param py         point Y
-     * @param wake       wake
-     */
-    public void applyForceToOtherPlayerNetwork(int player, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
-        applyForceToOtherPlayerNetwork(this.players.get(player), connection, fx, fy, px, py, wake);
-    }
-
-    /**
-     * Apply a force to another players body and send that over the network to others.
-     *
-     * @param player     the player
-     * @param connection the connection to use
-     * @param fx         force X
-     * @param fy         force Y
-     * @param px         point X
-     * @param py         point Y
-     * @param wake       wake
-     */
-    public void applyForceToOtherPlayerNetwork(LunarNetworkEntityPlayer player, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
-        if (player == null) return;
-
-        connection.send(new CPacketApplyEntityBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
-        player.getBody().applyForce(fx, fy, px, py, wake);
-    }
-
-    /**
-     * Apply a force to another entities body and send that over the network to others.
-     *
-     * @param entityId   the entities ID
-     * @param connection the connection to use
-     * @param fx         force X
-     * @param fy         force Y
-     * @param px         point X
-     * @param py         point Y
-     * @param wake       wake
-     */
-    public void applyForceToEntityNetwork(int entityId, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
-        applyForceToEntityNetwork(this.entities.get(entityId), connection, fx, fy, px, py, wake);
-    }
-
-    /**
-     * Apply a force to another entities body and send that over the network to others.
-     *
-     * @param entity     the entity
-     * @param connection the connection to use
-     * @param fx         force X
-     * @param fy         force Y
-     * @param px         point X
-     * @param py         point Y
-     * @param wake       wake
-     */
-    public void applyForceToEntityNetwork(LunarEntity entity, AbstractConnection connection, float fx, float fy, float px, float py, boolean wake) {
-        if (entity == null) return;
-
-        connection.send(new CPacketApplyEntityBodyForce(connection.alloc(), player.getEntityId(), fx, fy, px, py));
-        player.getBody().applyForce(fx, fy, px, py, wake);
-    }
-
-    /**
-     * Update a players position
-     *
-     * @param entityId the entity ID
-     * @param x        x
-     * @param y        y
-     * @param rotation rotation
-     */
-    public void updatePlayerPosition(int entityId, float x, float y, int rotation) {
-        final LunarNetworkEntityPlayer player = players.get(entityId);
-        if (player != null) {
-            player.updatePositionFromNetwork(x, y, Rotation.values()[rotation]);
+    private void selectType(LunarEntity entity) {
+        if (entity instanceof LunarNetworkEntityPlayer) {
+            this.players.put(entity.getProperties().entityId, (N) entity);
+        } else {
+            this.entities.put(entity.getProperties().entityId, (E) entity);
         }
     }
 
     /**
-     * Update a players velocity
+     * Remove the entity from this world
      *
-     * @param entityId  entity ID
-     * @param velocityX velocity X
-     * @param velocityY velocity Y
-     * @param rotation  the rotation
+     * @param entity the entity
      */
-    public void updatePlayerVelocity(int entityId, float velocityX, float velocityY, int rotation) {
-        final LunarNetworkEntityPlayer player = players.get(entityId);
-        if (player != null) {
-            player.updateVelocityFromNetwork(velocityX, velocityY, Rotation.values()[rotation]);
+    public void removeEntityInWorld(LunarEntity entity) {
+        engine.removeEntity(entity.getEntity());
+        if (entity instanceof LunarNetworkEntityPlayer) {
+            this.players.remove(entity.getProperties().entityId);
+        } else {
+            this.entities.remove(entity.getProperties().entityId);
         }
+    }
+
+    /**
+     * Remove the entity from this world
+     *
+     * @param entity   the entity
+     * @param isPlayer if the entity is a player
+     */
+    public void removeEntityInWorld(int entity, boolean isPlayer) {
+        if (isPlayer && this.players.containsKey(entity)) {
+            final N player = this.players.get(entity);
+            player.removeEntityInWorld(this);
+        } else if (this.entities.containsKey(entity)) {
+            final E e = this.entities.get(entity);
+            e.removeEntityInWorld(this);
+        }
+    }
+
+    public boolean hasNetworkPlayer(int id) {
+        return this.players.containsKey(id);
+    }
+
+    public N getNetworkPlayer(int id) {
+        return this.players.get(id);
     }
 
     /**
@@ -431,72 +243,62 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      * @param d delta time.
      */
     public void update(float d) {
-        final float delta = Math.min(d, maxFrameTime);
+        final float delta = Math.min(d, configuration.maxFrameTime);
 
-        if (handlePhysics) {
-            accumulator += delta;
-
-            while (accumulator >= stepTime) {
-                if (updateNetworkPlayers) {
-                    for (LunarNetworkEntityPlayer value : players.values()) {
-                        value.preUpdate();
-                    }
-                }
-
-                player.preUpdate();
-
-                world.step(stepTime, velocityIterations, positionIterations);
-                accumulator -= stepTime;
-            }
+        // step world
+        if (configuration.handlePhysics) {
+            stepPhysicsSimulation(delta);
         }
-        if (updateEntities) for (LunarEntity value : entities.values()) value.update(delta);
 
-        if (updatePlayer) {
+        // update all types of entities
+        if (configuration.updateEntities)
+            for (E value : entities.values()) value.update(delta);
+
+        // update local
+        if (configuration.updatePlayer) {
+            player.interpolatePosition(0.5f);
             player.update(delta);
-            player.interpolate(0.5f);
         }
 
-        if (updateNetworkPlayers) {
-            for (LunarNetworkEntityPlayer value : players.values()) {
-                value.update(delta);
-                value.interpolate(0.5f);
+        // update network
+        if (configuration.updateNetworkPlayers) {
+            for (LunarNetworkEntityPlayer player : players.values()) {
+                player.interpolatePosition(0.5f);
+                player.update(delta);
             }
+        }
+
+        if (configuration.updateEngine) {
+            engine.update(delta);
         }
     }
 
     /**
-     * Step the internal physics world
+     * Step physics simulation using the {@code configuration}
      *
      * @param delta delta time
      */
-    public void stepPhysicsWorld(float delta) {
+    public void stepPhysicsSimulation(float delta) {
         accumulator += delta;
 
-        while (accumulator >= stepTime) {
-            if (updateNetworkPlayers) {
-                for (LunarNetworkEntityPlayer value : players.values()) {
-                    value.preUpdate();
+        while (accumulator >= configuration.stepTime) {
+            if (configuration.updateNetworkPlayers) {
+                for (N player : players.values()) {
+                    player.getPrevious().set(player.getBody().getPosition());
                 }
             }
 
-            player.preUpdate();
+            player.getPrevious().set(player.getBody().getPosition());
 
-            world.step(stepTime, velocityIterations, positionIterations);
-            accumulator -= stepTime;
+            world.step(configuration.stepTime, configuration.velocityIterations, configuration.positionIterations);
+            accumulator -= configuration.stepTime;
         }
     }
 
-    /**
-     * Render this world
-     *
-     * @param batch the batch
-     * @param delta the delta
-     */
-    public abstract void renderWorld(SpriteBatch batch, float delta);
-
     @Override
     public void dispose() {
-        this.players.clear();
-        this.world.dispose();
+        players.clear();
+        entities.clear();
+        engine.clearPools();
     }
 }

@@ -1,4 +1,4 @@
-package gdx.lunar.entity.playerv2;
+package gdx.lunar.entity.player;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Interpolation;
@@ -10,9 +10,9 @@ import gdx.lunar.entity.components.position.EntityPositionComponent;
 import gdx.lunar.entity.components.position.EntityVelocityComponent;
 import gdx.lunar.entity.components.prop.EntityPropertiesComponent;
 import gdx.lunar.entity.mapping.GlobalEntityMapper;
-import gdx.lunar.entity.playerv2.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
 import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
-import gdx.lunar.world.v2.LunarWorld;
+import gdx.lunar.world.LunarWorld;
 
 /**
  * A basic entity within the Lunar framework.

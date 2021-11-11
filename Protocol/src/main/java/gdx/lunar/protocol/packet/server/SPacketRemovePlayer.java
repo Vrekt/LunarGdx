@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Sent by the server to remove a player client side
@@ -26,8 +25,7 @@ public class SPacketRemovePlayer extends Packet {
      *
      * @param entityId ID to remove
      */
-    public SPacketRemovePlayer(ByteBufAllocator allocator, int entityId) {
-        super(allocator);
+    public SPacketRemovePlayer(int entityId) {
         this.entityId = entityId;
     }
 

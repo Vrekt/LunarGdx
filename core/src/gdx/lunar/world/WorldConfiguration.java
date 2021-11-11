@@ -1,4 +1,4 @@
-package gdx.lunar.world.v2;
+package gdx.lunar.world;
 
 /**
  * A basic configuration for {@link LunarWorld}

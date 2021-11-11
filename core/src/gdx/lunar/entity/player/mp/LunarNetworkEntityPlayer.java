@@ -1,9 +1,9 @@
-package gdx.lunar.entity.playerv2.mp;
+package gdx.lunar.entity.player.mp;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import gdx.lunar.entity.playerv2.LunarEntityPlayer;
+import gdx.lunar.entity.player.LunarEntityPlayer;
 
 /**
  * Represents a player that is playing over the network.

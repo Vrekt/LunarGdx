@@ -2,6 +2,7 @@ package gdx.lunar.network;
 
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.entity.drawing.Rotation;
+import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.PacketFactory;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
@@ -20,6 +21,8 @@ import java.util.function.Consumer;
  */
 public abstract class AbstractConnection implements ServerPacketHandler, Disposable {
 
+    protected LunarEntityPlayer local;
+
     protected final Channel channel;
     protected LunarProtocol protocol;
     protected boolean isConnected;
@@ -36,6 +39,10 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
     public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
         this.protocol = protocol;
+    }
+
+    public void setLocalPlayer(LunarEntityPlayer local) {
+        this.local = local;
     }
 
     /**
@@ -85,6 +92,19 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * @return {@code true} if the method was handled.
      */
     public abstract boolean handleRemovePlayer(int entityId);
+
+    /**
+     * Handle when a join world request is denied
+     */
+    public abstract void handleJoinWorldDenied(String reason);
+
+    /**
+     * Handle joining the requested world.
+     *
+     * @param entityId the new entity ID
+     * @return {@code true} if handled.
+     */
+    public abstract boolean handleJoinWorld(int entityId);
 
     /**
      * Register a custom packet handler.

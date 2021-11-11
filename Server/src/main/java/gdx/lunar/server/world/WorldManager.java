@@ -47,6 +47,13 @@ public abstract class WorldManager implements Disposable {
         return worlds.values();
     }
 
+    /**
+     * Update all worlds.
+     */
+    public void update(float delta) {
+
+    }
+
     @Override
     public void dispose() {
         getWorlds().forEach(World::dispose);

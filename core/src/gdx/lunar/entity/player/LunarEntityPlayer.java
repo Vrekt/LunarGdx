@@ -1,199 +1,191 @@
 package gdx.lunar.entity.player;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.ashley.core.ComponentMapper;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.World;
-import gdx.lunar.entity.drawing.LunarDrawableEntity;
-import gdx.lunar.entity.drawing.Rotation;
-import gdx.lunar.entity.drawing.render.DefaultPlayerRenderer;
-import gdx.lunar.entity.drawing.render.LunarPlayerRenderer;
-import gdx.lunar.instance.LunarInstance;
+import com.badlogic.gdx.physics.box2d.Shape;
+import gdx.lunar.entity.components.drawing.EntityAnimation;
+import gdx.lunar.entity.components.drawing.EntityAnimationComponent;
+import gdx.lunar.entity.drawing.v2.LunarAnimatedEntity;
+import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
 import gdx.lunar.world.LunarWorld;
 
 /**
- * Could be a local player entity.
+ * Represents a local or network player.
  */
-public abstract class LunarEntityPlayer extends LunarDrawableEntity {
+public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
 
-    /**
-     * Player scaling.
-     * Player width * scale
-     * Player height * scale
-     */
-    protected final float scale, width, height;
+    // animation comp system
+    protected ComponentMapper<EntityAnimationComponent> animationComponent = ComponentMapper.getFor(EntityAnimationComponent.class);
 
-    /**
-     * renderer this player is using.
-     */
-    protected LunarPlayerRenderer renderer;
+    // if other player collisions should be turned off.
     protected boolean ignorePlayerCollision;
 
-    /**
-     * Initialize a new player entity.
-     *
-     * @param entityId     the unique ID
-     * @param playerScale  the scale of the player, usually relates to the world scale.
-     * @param playerWidth  the width of the player or players texture.
-     * @param playerHeight the height of the players or players texture.
-     * @param rotation     the default rotation
-     */
-    public LunarEntityPlayer(int entityId, float playerScale, float playerWidth, float playerHeight, Rotation rotation) {
-        super(entityId);
+    // definition for this player.
+    protected BodyDef definition = new BodyDef();
+    protected FixtureDef fixture = new FixtureDef();
+    // if user specified custom rotation or density
+    protected boolean hasSetFixedRotation, hasSetDensity;
 
-        this.scale = playerScale;
-        this.width = playerWidth * scale;
-        this.height = playerHeight * scale;
-        this.rotation = rotation;
+    // connection for this player
+    protected AbstractConnection connection;
+
+    public LunarEntityPlayer(Entity entity, boolean initializeComponents) {
+        super(entity, initializeComponents);
+    }
+
+    public LunarEntityPlayer(boolean initializeComponents) {
+        super(initializeComponents);
+    }
+
+    public void setConnection(AbstractConnection connection) {
+        this.connection = connection;
+        connection.setLocalPlayer(this);
+    }
+
+    public AbstractConnection getConnection() {
+        return connection;
     }
 
     /**
-     * Initialize a new player entity.
+     * If this player should ignore collisions with other players.
      *
-     * @param playerScale  the scale of the player, usually relates to the world scale.
-     * @param playerWidth  the width of the player or players texture.
-     * @param playerHeight the height of the players or players texture.
-     * @param rotation     the default rotation
+     * @param ignorePlayerCollision the state
      */
-    public LunarEntityPlayer(float playerScale, float playerWidth, float playerHeight, Rotation rotation) {
-        this(0, playerScale, playerWidth, playerHeight, rotation);
-    }
-
-    public void setIgnoreOtherPlayerCollision(boolean ignorePlayerCollision) {
+    public void setIgnorePlayerCollision(boolean ignorePlayerCollision) {
         this.ignorePlayerCollision = ignorePlayerCollision;
     }
 
-    public boolean ignorePlayerCollision() {
+    /**
+     * @return if this player ignores collision with other players.
+     */
+    public boolean isIgnorePlayerCollision() {
         return ignorePlayerCollision;
     }
 
     /**
-     * Initialize the renderer this player is going to use.
-     *
-     * @param atlas       the atlas of textures.
-     * @param offsetBox2d if player position should be offset to correct collision.
+     * @return definition for this entity player.
      */
-    public void initializePlayerRendererAndLoad(TextureAtlas atlas, boolean offsetBox2d) {
-        this.renderer = new DefaultPlayerRenderer(atlas, rotation, width, height, offsetBox2d);
-        renderer.load();
+    public BodyDef getDefinition() {
+        return definition;
     }
 
     /**
-     * Initialize the renderer this player is going to use.
-     * NOTE: This will **NOT** load the renderer.
-     *
-     * @param renderer the custom renderer.
+     * @return fixture
      */
-    public void initializePlayerRendererWith(LunarPlayerRenderer renderer) {
-        this.renderer = renderer;
+    public FixtureDef getFixture() {
+        return fixture;
+    }
+
+    /**
+     * Set the body definition type
+     *
+     * @param type type
+     */
+    public void setBodyType(BodyDef.BodyType type) {
+        this.definition.type = type;
+    }
+
+    /**
+     * Set if fixed rotation
+     *
+     * @param fixedRotation state
+     */
+    public void setFixedRotation(boolean fixedRotation) {
+        this.definition.fixedRotation = fixedRotation;
+        hasSetFixedRotation = true;
+    }
+
+    /**
+     * Set density of the players fixture
+     *
+     * @param density density
+     */
+    public void setDensity(float density) {
+        this.fixture.density = density;
+        hasSetDensity = true;
+    }
+
+    /**
+     * Set the shape of this player
+     *
+     * @param shape the shape
+     */
+    public void setPlayerShape(Shape shape) {
+        this.fixture.shape = shape;
+    }
+
+    public void setAnimationComponent(ComponentMapper<EntityAnimationComponent> animationComponent) {
+        this.animationComponent = animationComponent;
+    }
+
+    public EntityAnimationComponent getAnimationComponent() {
+        return animationComponent.get(entity);
+    }
+
+    public void registerAnimation(int id, EntityAnimation animation) {
+        getAnimationComponent().animations.put(id, animation);
+    }
+
+    public void registerAnimation(int id, Animation<TextureRegion> animation) {
+        getAnimationComponent().animations.put(id, new EntityAnimation(animation));
     }
 
     @Override
-    public void render(SpriteBatch batch, float delta) {
-        if (renderer != null)
-            renderer.render(delta, interpolated.x, interpolated.y, batch);
-    }
+    public <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
+        getPosition().set(x, y);
+        getPrevious().set(x, y);
+        getInterpolated().set(x, y);
 
-    /**
-     * Pre update this player to capture their current position.
-     */
-    public void preUpdate() {
-        prevX = body.getPosition().x;
-        prevY = body.getPosition().y;
-    }
-
-    /**
-     * Interpolate the position.
-     *
-     * @param alpha alpha
-     */
-    public void interpolate(float alpha) {
-        interpolated.x = Interpolation.linear.apply(prevX, position.x, alpha);
-        interpolated.y = Interpolation.linear.apply(prevY, position.y, alpha);
-    }
-
-    /**
-     * Interpolate the position.
-     *
-     * @param i     method
-     * @param alpha alpha
-     */
-    public void interpolate(Interpolation i, float alpha) {
-        interpolated.x = i.apply(prevX, position.x, alpha);
-        interpolated.y = i.apply(prevY, position.y, alpha);
-    }
-
-    @Override
-    public void spawnEntityInWorld(LunarWorld world, float x, float y) {
-        this.worldIn = world;
-
-        // set initial positions
-        prevX = x;
-        prevY = y;
-        position.set(x, y);
-        interpolated.set(x, y);
-
-        // default body def for all player types (network + local)
-        final BodyDef definition = new BodyDef();
-        definition.type = BodyDef.BodyType.DynamicBody;
-        definition.fixedRotation = true;
+        if (definition.type == null) definition.type = BodyDef.BodyType.DynamicBody;
+        if (!hasSetFixedRotation) definition.fixedRotation = true;
         definition.position.set(x, y);
 
-        // create body and set the basic poly shape
-        body = world.getPhysicsWorld().createBody(definition);
-        final PolygonShape shape = new PolygonShape();
-        shape.setAsBox(width / 2f, height / 2f);
-
-        final FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.density = 1.0f;
-        fixtureDef.shape = shape;
-
-        body.createFixture(fixtureDef).setUserData(this);
-        shape.dispose();
-    }
-
-    @Override
-    public void spawnEntityInInstance(LunarInstance instance, float x, float y, boolean destroyOtherBodies) {
-        if (destroyOtherBodies) {
-            for (World world : boxWorldsIn) {
-                world.destroyBody(body);
-            }
+        body = world.getWorld().createBody(definition);
+        if (fixture.shape == null) {
+            final PolygonShape shape = new PolygonShape();
+            shape.setAsBox(getWidth() / 2f, getHeight() / 2f);
+            fixture.shape = shape;
+            if (!hasSetDensity) fixture.density = 1.0f;
+            shape.dispose();
         }
 
-        this.instanceIn = instance;
-
-        // set initial positions
-        prevX = x;
-        prevY = y;
-        position.set(x, y);
-        interpolated.set(x, y);
-
-        // default body def for all player types (network + local)
-        final BodyDef definition = new BodyDef();
-        definition.type = BodyDef.BodyType.DynamicBody;
-        definition.fixedRotation = true;
-        definition.position.set(x, y);
-
-        // create body and set the basic poly shape
-        body = instance.getWorld().createBody(definition);
-        final PolygonShape shape = new PolygonShape();
-        shape.setAsBox(width / 2f, height / 2f);
-
-        final FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.density = 1.0f;
-        fixtureDef.shape = shape;
-
-        body.createFixture(fixtureDef).setUserData(LunarEntityPlayer.this);
-        shape.dispose();
+        body.createFixture(fixture).setUserData(this);
+        world.spawnEntityInWorld(this, x, y);
+        this.inWorld = true;
     }
 
     @Override
-    public void dispose() {
-        if (this.renderer != null) renderer.dispose();
-        renderer = null;
-        worldIn = null;
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world) {
+        spawnEntityInWorld(world, world.getSpawn().x, world.getSpawn().y);
     }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
+        world.removeEntityInWorld(this);
+        world.getWorld().destroyBody(body);
+    }
+
+    /**
+     * Apply force to this player
+     *
+     * @param fx   force x
+     * @param fy   force y
+     * @param px   point x
+     * @param py   point y
+     * @param wake wake
+     */
+    public void applyForce(float fx, float fy, float px, float py, boolean wake) {
+        getBody().applyForce(fx, fy, px, py, wake);
+        connection.send(new CPacketApplyEntityBodyForce(getProperties().entityId, fx, fy, px, py));
+    }
+
 }

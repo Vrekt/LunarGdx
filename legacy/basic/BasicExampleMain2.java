@@ -16,13 +16,12 @@ import gdx.lunar.entity.contact.PlayerCollisionListener;
 import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.impl.LunarPlayer;
 import gdx.lunar.entity.player.prop.PlayerProperties;
-import gdx.lunar.network.PlayerConnection;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.client.CPacketJoinWorld;
 import gdx.lunar.protocol.packet.client.CPacketWorldLoaded;
 import gdx.lunar.world.LunarWorldAdapter;
 
-public final class BasicExampleMain extends Game {
+public final class BasicExampleMain2 extends Game {
 
     private LunarClientServer server;
 
@@ -35,7 +34,7 @@ public final class BasicExampleMain extends Game {
     private ExtendViewport viewport;
     private SpriteBatch batch;
 
-    public BasicExampleMain() {
+    public BasicExampleMain2() {
     }
 
     @Override
@@ -69,7 +68,8 @@ public final class BasicExampleMain extends Game {
         player = new LunarPlayer(scaling, basic.width, basic.height, Rotation.FACING_UP);
         player.setConnection(connection);
         connection.setPlayer(player);
-        player.setName("SomeCoolPlayer");
+
+        connection.sendSetUsername("SomeCoolPlayer");
         // tell the server we want to join a world.
         connection.send(new CPacketJoinWorld(connection.alloc(), "LunarWorld"));
 
@@ -86,6 +86,8 @@ public final class BasicExampleMain extends Game {
         // Spawn our player in the world.
         player.spawnEntityInWorld(lunarWorld, 2.0f, 2.0f);
         // set a random name for this player
+        // this MUST be set after sending the join world packet.
+        player.setName("SomeCoolPlayer");
         // Initialize our graphics for drawing.
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth() / (scaling / 2.0f), Gdx.graphics.getHeight() / (scaling / 2.0f));

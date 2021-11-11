@@ -1,8 +1,8 @@
 package gdx.lunar.server.network;
 
-import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
+import gdx.lunar.server.LunarServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
@@ -25,11 +25,11 @@ public abstract class AbstractConnection extends ChannelInboundHandlerAdapter im
     protected boolean isConnected;
     private long lastPacketReceived;
 
-    protected LunarProtocol protocol;
+    protected LunarServer server;
 
-    public AbstractConnection(Channel channel, LunarProtocol protocol) {
+    public AbstractConnection(Channel channel, LunarServer server) {
         this.channel = channel;
-        this.protocol = protocol;
+        this.server = server;
     }
 
     public long getLastPacketReceived() {
@@ -44,13 +44,6 @@ public abstract class AbstractConnection extends ChannelInboundHandlerAdapter im
         return channel.alloc();
     }
 
-    public void setProtocol(LunarProtocol protocol) {
-        this.protocol = protocol;
-    }
-
-    public LunarProtocol getProtocol() {
-        return protocol;
-    }
 
     /**
      * Disconnect
@@ -74,7 +67,7 @@ public abstract class AbstractConnection extends ChannelInboundHandlerAdapter im
      *
      * @param packet the packet
      */
-    public void send(Packet packet) {
+    public void sendImmediately(Packet packet) {
         channel.writeAndFlush(packet);
     }
 

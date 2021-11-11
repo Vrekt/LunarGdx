@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import gdx.lunar.instance.LunarInstance;
-import gdx.lunar.world.v2.LunarWorld;
+import gdx.lunar.world.LunarWorld;
 
 /**
  * Manages data about what world or instance an entity is in.

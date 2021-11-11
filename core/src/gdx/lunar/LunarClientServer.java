@@ -2,7 +2,6 @@ package gdx.lunar;
 
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.network.AbstractConnection;
-import gdx.lunar.network.PlayerConnection;
 import gdx.lunar.network.adapter.InboundNetworkHandler;
 import gdx.lunar.network.codec.ServerProtocolPacketDecoder;
 import gdx.lunar.network.provider.ConnectionProvider;

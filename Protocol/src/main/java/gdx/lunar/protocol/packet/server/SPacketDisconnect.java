@@ -3,7 +3,6 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Sent by the server to disconnect a player.
@@ -24,8 +23,7 @@ public class SPacketDisconnect extends Packet {
         handler.handleDisconnect(new SPacketDisconnect(buf));
     }
 
-    public SPacketDisconnect(ByteBufAllocator allocator, String reason) {
-        super(allocator);
+    public SPacketDisconnect(String reason) {
         this.reason = reason;
     }
 

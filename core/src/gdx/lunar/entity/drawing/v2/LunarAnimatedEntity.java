@@ -2,7 +2,7 @@ package gdx.lunar.entity.drawing.v2;
 
 import com.badlogic.ashley.core.Entity;
 import gdx.lunar.entity.components.drawing.EntityAnimationComponent;
-import gdx.lunar.entity.playerv2.LunarEntity;
+import gdx.lunar.entity.player.LunarEntity;
 
 /**
  * Represents an entity that could be animated.

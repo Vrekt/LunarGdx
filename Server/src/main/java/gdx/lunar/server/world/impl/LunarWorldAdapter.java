@@ -1,6 +1,6 @@
 package gdx.lunar.server.world.impl;
 
-import gdx.lunar.server.game.entity.player.Player;
+import gdx.lunar.server.game.entity.player.LunarPlayer;
 import gdx.lunar.server.world.World;
 
 /**
@@ -28,7 +28,7 @@ public class LunarWorldAdapter extends World {
 
         // flush previous tick packets.
         final long now = System.currentTimeMillis();
-        for (Player value : players.values()) {
+        for (LunarPlayer value : players.values()) {
             value.getConnection().flush();
 
             // update timed out players.

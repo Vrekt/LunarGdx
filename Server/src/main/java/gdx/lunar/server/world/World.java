@@ -1,14 +1,13 @@
 package gdx.lunar.server.world;
 
 import gdx.lunar.protocol.packet.Packet;
-import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
 import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
-import gdx.lunar.server.game.entity.Entity;
-import gdx.lunar.server.game.entity.player.Player;
+import gdx.lunar.server.game.entity.LunarEntity;
+import gdx.lunar.server.game.entity.player.LunarPlayer;
 import gdx.lunar.server.game.utilities.Disposable;
-import gdx.lunar.server.game.utilities.Location;
+import gdx.lunar.server.world.config.WorldConfiguration;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,20 +20,11 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public abstract class World implements Disposable {
 
-    protected final ConcurrentMap<Integer, Player> players = new ConcurrentHashMap<>();
-    protected final ConcurrentMap<Integer, Entity> entities = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<Integer, LunarPlayer> players = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<Integer, LunarEntity> entities = new ConcurrentHashMap<>();
 
+    protected final WorldConfiguration configuration;
     protected final String worldName;
-    protected final int maxPacketsPerTick, capacity;
-
-    protected int maxEntities, maxEntityRequests;
-    protected int worldLobbyId;
-
-    protected long playerTimeoutMs = 3000;
-    // if players can spawn entities here.
-    protected boolean allowedToSpawnEntities = true;
-    // world spawn location
-    protected Location spawnLocation = new Location();
 
     /**
      * Queued packet updates
@@ -44,18 +34,12 @@ public abstract class World implements Disposable {
     /**
      * Initialize a new world.
      *
-     * @param worldName         the name of this world.
-     * @param maxPacketsPerTick the max packets to process per tick.
-     * @param capacity          max capacity.
-     * @param maxEntities       the max amount of entities allowed in this world
-     * @param maxEntityRequests the max amount of  requests allowed per second.
+     * @param worldName     the name of this world.
+     * @param configuration the configuration to use
      */
-    public World(String worldName, int maxPacketsPerTick, int capacity, int maxEntities, int maxEntityRequests) {
+    public World(String worldName, WorldConfiguration configuration) {
         this.worldName = worldName;
-        this.maxPacketsPerTick = maxPacketsPerTick;
-        this.capacity = capacity;
-        this.maxEntities = maxEntities;
-        this.maxEntityRequests = maxEntityRequests;
+        this.configuration = configuration;
     }
 
     /**
@@ -65,53 +49,28 @@ public abstract class World implements Disposable {
         return worldName;
     }
 
-    public void setAllowedToSpawnEntities(boolean allowedToSpawnEntities) {
-        this.allowedToSpawnEntities = allowedToSpawnEntities;
-    }
-
-    public void setPlayerTimeoutMs(long playerTimeoutMs) {
-        this.playerTimeoutMs = playerTimeoutMs;
-    }
-
-    public int getMaxEntities() {
-        return maxEntities;
-    }
-
-    public int getMaxEntityRequests() {
-        return maxEntityRequests;
-    }
-
-    public int getWorldLobbyId() {
-        return worldLobbyId;
-    }
-
-    public void setWorldLobbyId(int worldLobbyId) {
-        this.worldLobbyId = worldLobbyId;
-    }
-
-    public void setSpawnLocation(Location spawnLocation) {
-        this.spawnLocation = spawnLocation;
-    }
-
-    public void setSpawnLocation(float x, float y) {
-        this.spawnLocation.x = x;
-        this.spawnLocation.y = y;
-    }
-
-    public ConcurrentMap<Integer, Entity> getEntities() {
+    public ConcurrentMap<Integer, LunarEntity> getEntities() {
         return entities;
     }
 
-    public ConcurrentMap<Integer, Player> getPlayers() {
+    public ConcurrentMap<Integer, LunarPlayer> getPlayers() {
         return players;
+    }
+
+    public <T extends LunarEntity> T getEntity(int id) {
+        return (T) entities.get(id);
+    }
+
+    public <T extends LunarPlayer> T getPlayer(int id) {
+        return (T) entities.get(id);
     }
 
     /**
      * @param player the player
      * @return {@code true} if this player is timed out based on {@code playerTimeoutMs}
      */
-    protected boolean isTimedOut(Player player) {
-        return System.currentTimeMillis() - player.getConnection().getLastPacketReceived() >= playerTimeoutMs;
+    protected boolean isTimedOut(LunarPlayer player) {
+        return System.currentTimeMillis() - player.getConnection().getLastPacketReceived() >= configuration.getPlayerTimeoutMs();
     }
 
     /**
@@ -119,30 +78,27 @@ public abstract class World implements Disposable {
      *
      * @param player the player
      */
-    protected void timeoutPlayer(Player player) {
-        player.getConnection().disconnect();
-        if (player.inWorld()) {
-            player.getWorld().removePlayerInWorld(player);
-        }
+    protected void timeoutPlayer(LunarPlayer player) {
+        player.kickPlayer("Timed out.");
+
+        removePlayerInWorld(player);
         player.getServer().handlePlayerDisconnect(player);
     }
 
     /**
      * Assign an entity ID within this world.
-     * <p>
-     * Sync this to ensure entity IDs aren't duplicated?
      *
      * @return the new entity ID.
      */
-    public synchronized int assignEntityId() {
+    public int assignEntityId() {
         return players.size() + 1 + ThreadLocalRandom.current().nextInt(111, 999);
     }
 
     /**
      * @return {@code true} if this world is full.
      */
-    public boolean isFull() {
-        return players.size() >= capacity;
+    public boolean isWorldFull() {
+        return players.size() >= configuration.getCapacity();
     }
 
     /**
@@ -152,37 +108,27 @@ public abstract class World implements Disposable {
      * @param x      X
      * @param y      Y
      */
-    public void spawnPlayerInWorld(Player player, float x, float y) {
+    public void spawnPlayerInWorld(LunarPlayer player, float x, float y) {
         player.setWorldIn(this);
+        player.setPosition(x, y);
 
         // send all current players in this world to the connecting player.
-        for (Player value : players.values()) value.sendTo(player);
+        for (LunarPlayer other : players.values()) other.sendPlayerToOtherPlayer(player);
 
         // broadcast the joining of this player to others.
-        broadcastPacketInWorld(new SPacketCreatePlayer(player.getConnection().alloc(), player.getName(), player.getEntityId(), x, y));
+        // TODO: broadcast(send())
 
-        // add this new player to the map.
+        // add this new player to the list
         players.put(player.getEntityId(), player);
     }
-
 
     /**
      * Spawn a player in this world
      *
      * @param player the player
      */
-    public void spawnPlayerInWorld(Player player) {
-        player.setWorldIn(this);
-
-        // send all current players in this world to the connecting player.
-        for (Player value : players.values()) value.sendTo(player);
-
-        player.setLocation(spawnLocation.x, spawnLocation.y);
-        // broadcast the joining of this player to others.
-        broadcastPacketInWorld(new SPacketCreatePlayer(player.getConnection().alloc(), player.getName(), player.getEntityId(), this.spawnLocation.x, this.spawnLocation.y));
-
-        // add this new player to the map.
-        players.put(player.getEntityId(), player);
+    public void spawnPlayerInWorld(LunarPlayer player) {
+        spawnPlayerInWorld(player, 0, 0);
     }
 
     /**
@@ -190,11 +136,11 @@ public abstract class World implements Disposable {
      *
      * @param player the player
      */
-    public void removePlayerInWorld(Player player) {
+    public void removePlayerInWorld(LunarPlayer player) {
+        if (!players.containsKey(player.getEntityId())) return;
         players.remove(player.getEntityId());
 
-        // broadcast removal to all.
-        broadcastPacketInWorld(new SPacketRemovePlayer(player.getConnection().alloc(), player.getEntityId()));
+        broadcastPacketImmediately(player.getEntityId(), new SPacketRemovePlayer(player.getEntityId()));
     }
 
     /**
@@ -205,7 +151,7 @@ public abstract class World implements Disposable {
      * @param velocityY Y vel
      * @param rotation  rotation
      */
-    public void handlePlayerVelocity(Player player, float velocityX, float velocityY, int rotation) {
+    public void handlePlayerVelocity(LunarPlayer player, float velocityX, float velocityY, int rotation) {
         queuedPackets.add(new QueuedPlayerPacket(player.getEntityId(),
                 new SPacketPlayerVelocity(player.getConnection().alloc(), player.getEntityId(), velocityX, velocityY, rotation)));
     }
@@ -218,7 +164,7 @@ public abstract class World implements Disposable {
      * @param y        y
      * @param rotation rotation
      */
-    public void handlePlayerPosition(Player player, float x, float y, int rotation) {
+    public void handlePlayerPosition(LunarPlayer player, float x, float y, int rotation) {
         player.setLocation(x, y);
 
         queuedPackets.add(new QueuedPlayerPacket(player.getEntityId(), new SPacketPlayerPosition(player.getConnection().alloc(), player.getEntityId(), rotation, x, y)));
@@ -235,9 +181,20 @@ public abstract class World implements Disposable {
      * @param packet the packet
      */
     public void broadcastPacketInWorld(Packet packet) {
-        for (Player player : players.values()) {
+        for (LunarPlayer player : players.values()) {
             player.getConnection().queue(packet);
         }
+    }
+
+    /**
+     * Broadcast a packet and send it to all immediately.
+     *
+     * @param excluded the excluded ID
+     * @param packet   the packet
+     */
+    public void broadcastPacketImmediately(int excluded, Packet packet) {
+        for (LunarPlayer player : players.values())
+            if (player.getEntityId() != excluded) player.getConnection().sendImmediately(packet);
     }
 
     /**
@@ -247,7 +204,7 @@ public abstract class World implements Disposable {
      * @param direct           the direct
      */
     public void broadcast(int entityIdExcluded, Packet direct) {
-        for (Player value : players.values()) {
+        for (LunarPlayer value : players.values()) {
             if (value.getEntityId() != entityIdExcluded) {
                 value.getConnection().queue(direct);
             }
