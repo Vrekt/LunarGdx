@@ -2,6 +2,7 @@ package gdx.lunar.network;
 
 import gdx.lunar.entity.player.impl.LunarPlayerMP;
 import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.network.handlers.ConnectionHandlers;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
@@ -11,7 +12,7 @@ import io.netty.channel.Channel;
  */
 public class PlayerConnection extends AbstractConnection {
 
-    private boolean authenticationFailed = true;
+    private boolean authenticationFailed = false;
 
     public PlayerConnection(Channel channel, LunarProtocol protocol) {
         super(channel, protocol);
@@ -25,7 +26,6 @@ public class PlayerConnection extends AbstractConnection {
     public void handleAuthentication(SPacketAuthentication packet) {
         if (!packet.isAllowed()) {
             this.authenticationFailed = true;
-            handleAuthenticationFailed("");
             this.close();
         } else {
             this.authenticationFailed = false;
@@ -34,26 +34,26 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleDisconnect(SPacketDisconnect packet) {
-        handleDisconnection();
         this.close();
     }
 
     @Override
     public void handleCreatePlayer(SPacketCreatePlayer packet) {
-        // checks if the handle method was handled, if not automatically spawn them.
-        if (!handleCreatePlayer(packet.getUsername(), packet.getEntityId(), packet.getX(), packet.getY())) {
-            final LunarNetworkEntityPlayer player = new LunarPlayerMP(true);
-            player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
-            player.getConfig().setConfig(16, 16, (1 / 16.0f));
-            this.local.getInstance().worldIn.spawnEntityInWorld(player);
-        }
+        final LunarNetworkEntityPlayer player = new LunarPlayerMP(true);
+        player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
+        player.getConfig().setConfig(16, 16, (1 / 16.0f));
+
+        this.local.getInstance().worldIn.spawnEntityInWorld(player);
+        if (handlers.containsKey(ConnectionHandlers.CREATE_PLAYER))
+            handlers.get(ConnectionHandlers.CREATE_PLAYER).accept(packet);
     }
 
     @Override
     public void handleRemovePlayer(SPacketRemovePlayer packet) {
-        if (!handleRemovePlayer(packet.getEntityId())) {
-            this.local.getInstance().worldIn.removeEntityInWorld(packet.getEntityId(), true);
-        }
+        this.local.getInstance().worldIn.removeEntityInWorld(packet.getEntityId(), true);
+
+        if (handlers.containsKey(ConnectionHandlers.REMOVE_PLAYER))
+            handlers.get(ConnectionHandlers.REMOVE_PLAYER).accept(packet);
     }
 
     @Override
@@ -72,7 +72,8 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleJoinWorld(SPacketJoinWorld packet) {
-        this.handleJoinWorld(packet.getWorldName(), packet.getEntityId());
+        if (handlers.containsKey(ConnectionHandlers.JOIN_WORLD))
+            handlers.get(ConnectionHandlers.JOIN_WORLD).accept(packet);
     }
 
     @Override
@@ -120,41 +121,5 @@ public class PlayerConnection extends AbstractConnection {
     @Override
     public void handlePlayerEnterInstance(SPacketPlayerEnterInstance packet) {
 
-    }
-
-    @Override
-    public void handleAuthenticationFailed(String reason) {
-        this.authenticationFailed = true;
-    }
-
-    @Override
-    public void handleEntityJoinedWorld() {
-
-    }
-
-    @Override
-    public void handleDisconnection() {
-        if (local.isInWorld()) local.removeEntityInWorld(local.getInstance().worldIn);
-    }
-
-    @Override
-    public boolean handleCreatePlayer(String username, int entityId, float x, float y) {
-        return false;
-    }
-
-    @Override
-    public boolean handleRemovePlayer(int entityId) {
-        return false;
-    }
-
-    @Override
-    public void handleJoinWorldDenied(String reason) {
-
-    }
-
-    @Override
-    public boolean handleJoinWorld(String world, int entityId) {
-        this.local.getProperties().entityId = entityId;
-        return true;
     }
 }

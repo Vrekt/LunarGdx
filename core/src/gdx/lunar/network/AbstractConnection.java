@@ -3,6 +3,7 @@ package gdx.lunar.network;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.LunarEntityPlayer;
+import gdx.lunar.network.handlers.ConnectionHandlers;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.PacketFactory;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
@@ -11,6 +12,8 @@ import gdx.lunar.protocol.packet.client.*;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,6 +39,8 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
     protected final ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<>();
     protected final ExecutorService single = Executors.newCachedThreadPool();
 
+    protected final Map<ConnectionHandlers, Consumer<Packet>> handlers = new HashMap<>();
+
     public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
         this.protocol = protocol;
@@ -60,52 +65,14 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
     }
 
     /**
-     * Handle server authentication failed
+     * Register a custom handler to handle certain packets that are incoming.
      *
-     * @param reason the reason
+     * @param handler the handler
+     * @param c       the consumer
      */
-    public abstract void handleAuthenticationFailed(String reason);
-
-    /**
-     * Handle entities joining the local world.
-     */
-    public abstract void handleEntityJoinedWorld();
-
-    /**
-     * Handle general disconnection from server.
-     */
-    public abstract void handleDisconnection();
-
-    /**
-     * Handle creating a new player.
-     * <p>
-     * This could be used for custom handlers.
-     *
-     * @return {@code true} if this method was handled.
-     */
-    public abstract boolean handleCreatePlayer(String username, int entityId, float x, float y);
-
-    /**
-     * Handle removing a player
-     *
-     * @param entityId EID
-     * @return {@code true} if the method was handled.
-     */
-    public abstract boolean handleRemovePlayer(int entityId);
-
-    /**
-     * Handle when a join world request is denied
-     */
-    public abstract void handleJoinWorldDenied(String reason);
-
-    /**
-     * Handle joining the requested world.
-     *
-     * @param entityId the new entity ID
-     * @param world    the world
-     * @return {@code true} if handled.
-     */
-    public abstract boolean handleJoinWorld(String world, int entityId);
+    public void registerHandler(ConnectionHandlers handler, Consumer<Packet> c) {
+        handlers.put(handler, c);
+    }
 
     /**
      * Register a custom packet handler.

@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.entity.components.config.EntityConfigurationComponent;
 import gdx.lunar.entity.components.instance.EntityInstanceComponent;
 import gdx.lunar.entity.components.position.EntityPositionComponent;
@@ -17,7 +18,7 @@ import gdx.lunar.world.LunarWorld;
 /**
  * A basic entity within the Lunar framework.
  */
-public abstract class LunarEntity {
+public abstract class LunarEntity implements Disposable {
 
     // this entity
     protected Entity entity;
@@ -260,4 +261,8 @@ public abstract class LunarEntity {
         getInstance().worldIn.getLocalConnection().send(new CPacketApplyEntityBodyForce(getProperties().entityId, fx, fy, px, py));
     }
 
+    @Override
+    public void dispose() {
+        entity.removeAll();
+    }
 }

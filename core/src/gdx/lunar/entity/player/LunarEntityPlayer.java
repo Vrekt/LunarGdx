@@ -10,7 +10,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import gdx.lunar.entity.components.drawing.EntityAnimation;
 import gdx.lunar.entity.components.drawing.EntityAnimationComponent;
-import gdx.lunar.entity.drawing.v2.LunarAnimatedEntity;
+import gdx.lunar.entity.drawing.LunarAnimatedEntity;
 import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;

@@ -1,4 +1,4 @@
-package gdx.lunar.entity.drawing.v2;
+package gdx.lunar.entity.drawing;
 
 import com.badlogic.ashley.core.Entity;
 import gdx.lunar.entity.components.drawing.EntityTextureComponent;
