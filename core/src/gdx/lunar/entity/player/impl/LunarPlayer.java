@@ -1,6 +1,7 @@
 package gdx.lunar.entity.player.impl;
 
 import gdx.lunar.entity.player.LunarEntityPlayer;
+import gdx.lunar.network.AbstractConnection;
 
 /**
  * A default player with basic input and movement handling.
@@ -11,9 +12,10 @@ public class LunarPlayer extends LunarEntityPlayer {
         super(initializeComponents);
     }
 
-    @Override
-    public void update(float delta) {
-
+    public LunarPlayer(boolean initializeComponents, String name, AbstractConnection connection) {
+        super(initializeComponents);
+        setEntityName(name);
+        setConnection(connection);
     }
 
 }

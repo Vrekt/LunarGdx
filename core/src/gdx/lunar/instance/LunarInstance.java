@@ -64,7 +64,7 @@ public abstract class LunarInstance extends ScreenAdapter {
         accumulator += delta;
 
         while (accumulator >= stepTime) {
-            player.preUpdate();
+
 
             world.step(stepTime, velocityIterations, positionIterations);
             accumulator -= stepTime;

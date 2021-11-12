@@ -33,6 +33,7 @@ public abstract class LunarEntity {
     }
 
     public LunarEntity(boolean initializeComponents) {
+        this.entity = new Entity();
         if (initializeComponents) addComponents();
     }
 
@@ -97,6 +98,10 @@ public abstract class LunarEntity {
 
     public void setEntityName(String name) {
         getProperties().entityName = name;
+    }
+
+    public String getName() {
+        return getProperties().entityName;
     }
 
     /**

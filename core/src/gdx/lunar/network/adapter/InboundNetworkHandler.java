@@ -27,8 +27,7 @@ public class InboundNetworkHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelActive(ChannelHandlerContext context) {
-        // Channel is connected, here establish authentication.
-        context.writeAndFlush(new CPacketAuthentication(context.alloc(), Lunar.gameVersion, Lunar.protocolVersion));
+        connection.sendImmediately(new CPacketAuthentication(Lunar.gameVersion, Lunar.protocolVersion));
     }
 
     @Override

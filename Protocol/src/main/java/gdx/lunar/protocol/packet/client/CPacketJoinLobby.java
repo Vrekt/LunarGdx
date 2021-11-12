@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class CPacketJoinLobby extends Packet {
 
-    public static final int PID = 25;
+    public static final int PID = 8811;
 
     private String lobbyName;
     private int lobbyId;

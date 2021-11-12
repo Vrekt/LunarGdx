@@ -3,14 +3,13 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Server denies request to join a lobby.
  */
 public class SPacketJoinLobbyDenied extends Packet {
 
-    public static final int PID = 23;
+    public static final int PID = 9913;
 
     private String reason;
 
@@ -18,8 +17,7 @@ public class SPacketJoinLobbyDenied extends Packet {
         handler.handleJoinLobbyDenied(new SPacketJoinLobbyDenied(buf));
     }
 
-    public SPacketJoinLobbyDenied(ByteBufAllocator allocator, String reason) {
-        super(allocator);
+    public SPacketJoinLobbyDenied(String reason) {
         this.reason = reason;
     }
 

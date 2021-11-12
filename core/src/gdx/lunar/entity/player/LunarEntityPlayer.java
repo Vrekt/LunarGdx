@@ -28,8 +28,8 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     protected boolean ignorePlayerCollision;
 
     // definition for this player.
-    protected BodyDef definition = new BodyDef();
-    protected FixtureDef fixture = new FixtureDef();
+    protected BodyDef definition;
+    protected FixtureDef fixture;
     // if user specified custom rotation or density
     protected boolean hasSetFixedRotation, hasSetDensity;
 
@@ -145,20 +145,26 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
         getPrevious().set(x, y);
         getInterpolated().set(x, y);
 
+        this.definition = new BodyDef();
+        this.fixture = new FixtureDef();
+
         if (definition.type == null) definition.type = BodyDef.BodyType.DynamicBody;
         if (!hasSetFixedRotation) definition.fixedRotation = true;
         definition.position.set(x, y);
 
         body = world.getWorld().createBody(definition);
+        PolygonShape shape = null;
+
         if (fixture.shape == null) {
-            final PolygonShape shape = new PolygonShape();
+            shape = new PolygonShape();
             shape.setAsBox(getWidth() / 2f, getHeight() / 2f);
             fixture.shape = shape;
             if (!hasSetDensity) fixture.density = 1.0f;
-            shape.dispose();
         }
 
         body.createFixture(fixture).setUserData(this);
+        if (shape != null) shape.dispose();
+
         world.spawnEntityInWorld(this, x, y);
         this.inWorld = true;
     }
@@ -172,6 +178,11 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
         world.removeEntityInWorld(this);
         world.getWorld().destroyBody(body);
+    }
+
+    @Override
+    public void update(float delta) {
+        if (connection != null) connection.update();
     }
 
     /**

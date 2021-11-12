@@ -3,14 +3,13 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * The spawn entity request was denied.
  */
 public class SPacketSpawnEntityDenied extends Packet {
 
-    public static final int PID = 18;
+    public static final int PID = 9910;
 
     private int temporaryEntityId;
     private String reason;
@@ -19,8 +18,7 @@ public class SPacketSpawnEntityDenied extends Packet {
         handler.handleSpawnEntityDenied(new SPacketSpawnEntityDenied(buf));
     }
 
-    public SPacketSpawnEntityDenied(ByteBufAllocator allocator, int temporaryEntityId, String reason) {
-        super(allocator);
+    public SPacketSpawnEntityDenied(int temporaryEntityId, String reason) {
         this.temporaryEntityId = temporaryEntityId;
         this.reason = reason;
     }

@@ -51,7 +51,6 @@ public abstract class InstanceManager implements Disposable {
 
     @Override
     public void dispose() {
-        getInstances().forEach(InstanceWorld::dispose);
         instances.clear();
     }
 

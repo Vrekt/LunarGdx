@@ -3,14 +3,13 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * A packet for telling a player to join an instance
  */
 public class SPacketEnterInstance extends Packet {
 
-    public static final int PID = 29;
+    public static final int PID = 9915;
 
     private boolean isAllowed;
     private String notAllowedReason;
@@ -19,8 +18,7 @@ public class SPacketEnterInstance extends Packet {
         handler.handleEnterInstance(new SPacketEnterInstance(buf));
     }
 
-    public SPacketEnterInstance(ByteBufAllocator allocator, boolean isAllowed, String notAllowedReason) {
-        super(allocator);
+    public SPacketEnterInstance( boolean isAllowed, String notAllowedReason) {
         this.isAllowed = isAllowed;
         this.notAllowedReason = notAllowedReason;
     }

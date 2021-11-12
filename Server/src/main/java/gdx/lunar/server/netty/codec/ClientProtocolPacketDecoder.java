@@ -9,7 +9,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 /**
  * Handles decoding packets sent from clients
  */
-public final class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
+public class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
 
     /**
      * The local session packet handler
@@ -40,7 +40,7 @@ public final class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDeco
                 // ignore the length of the packet.
                 buf.readInt();
                 // retrieve packet from PID
-                final int pid = buf.readByte() & 0xFF;
+                final int pid = buf.readInt();
                 if (protocol.isClientPacket(pid)) {
                     handler.setLastPacketReceived(System.currentTimeMillis());
                     protocol.handleClientPacket(pid, buf, handler, ctx);

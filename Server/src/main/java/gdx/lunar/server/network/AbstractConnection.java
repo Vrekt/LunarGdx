@@ -44,7 +44,6 @@ public abstract class AbstractConnection extends ChannelInboundHandlerAdapter im
         return channel.alloc();
     }
 
-
     /**
      * Disconnect
      */
@@ -68,6 +67,7 @@ public abstract class AbstractConnection extends ChannelInboundHandlerAdapter im
      * @param packet the packet
      */
     public void sendImmediately(Packet packet) {
+        packet.alloc(alloc());
         channel.writeAndFlush(packet);
     }
 
@@ -77,6 +77,7 @@ public abstract class AbstractConnection extends ChannelInboundHandlerAdapter im
      * @param packet the packet
      */
     public void queue(Packet packet) {
+        packet.alloc(alloc());
         channel.write(packet);
     }
 

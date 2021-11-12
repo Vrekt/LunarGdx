@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class CPacketApplyEntityBodyForce extends Packet {
 
-    public static final int PID = 14;
+    public static final int PID = 887;
 
     private int entityId;
     private float forceX, forceY, pointX, pointY;

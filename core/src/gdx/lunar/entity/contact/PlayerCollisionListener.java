@@ -27,7 +27,7 @@ public final class PlayerCollisionListener implements ContactListener {
         if (fixtureA.getUserData() instanceof LunarEntityPlayer
                 && fixtureB.getUserData() instanceof LunarEntityPlayer) {
             final LunarEntityPlayer a = (LunarEntityPlayer) fixtureA.getUserData();
-            if (a.ignorePlayerCollision()) contact.setEnabled(false);
+            if (a.isIgnorePlayerCollision()) contact.setEnabled(false);
         }
     }
 

@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class SPacketRemovePlayer extends Packet {
 
-    public static final int PID = 6;
+    public static final int PID = 994;
 
     /**
      * entity ID

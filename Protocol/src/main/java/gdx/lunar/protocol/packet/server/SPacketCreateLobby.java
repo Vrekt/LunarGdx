@@ -3,13 +3,12 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Sent in response to {@link gdx.lunar.protocol.packet.client.CPacketCreateLobby}
  */
 public class SPacketCreateLobby extends Packet {
-    public static final int PID = 20;
+    public static final int PID = 9912;
 
     private boolean isAllowed;
     private String notAllowedReason;
@@ -19,14 +18,12 @@ public class SPacketCreateLobby extends Packet {
         handler.handleCreateLobby(new SPacketCreateLobby(buf));
     }
 
-    public SPacketCreateLobby(ByteBufAllocator allocator, String notAllowedReason) {
-        super(allocator);
+    public SPacketCreateLobby(String notAllowedReason) {
         this.isAllowed = false;
         this.notAllowedReason = notAllowedReason;
     }
 
-    public SPacketCreateLobby(ByteBufAllocator allocator, int entityId, int lobbyId) {
-        super(allocator);
+    public SPacketCreateLobby(int entityId, int lobbyId) {
         this.isAllowed = true;
         this.entityId = entityId;
         this.lobbyId = lobbyId;
@@ -54,7 +51,7 @@ public class SPacketCreateLobby extends Packet {
 
     @Override
     public int getId() {
-        return 20;
+        return PID;
     }
 
     @Override

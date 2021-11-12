@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class CPacketRequestSpawnEntity extends Packet {
 
-    public static final int PID = 16;
+    public static final int PID = 888;
 
     private String entityName;
     private float x, y;

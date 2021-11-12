@@ -1,6 +1,5 @@
 package gdx.lunar.protocol.handler;
 
-import gdx.lunar.protocol.packet.permission.PermissionAttachment;
 import gdx.lunar.protocol.packet.server.*;
 
 /**
@@ -9,11 +8,11 @@ import gdx.lunar.protocol.packet.server.*;
 public interface ServerPacketHandler {
 
     /**
-     * Handle permission attachment
+     * Handle authentication response
      *
-     * @param permission permission
+     * @param packet packet
      */
-    void handlePermissionAttachment(PermissionAttachment permission);
+    void handleAuthentication(SPacketAuthentication packet);
 
     /**
      * Handle server disconnection

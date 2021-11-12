@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class CPacketVelocity extends Packet {
 
-    public static final int PID = 10;
+    public static final int PID = 884;
 
     private float velocityX, velocityY, rotation;
 

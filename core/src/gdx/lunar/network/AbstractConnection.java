@@ -102,9 +102,10 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * Handle joining the requested world.
      *
      * @param entityId the new entity ID
+     * @param world    the world
      * @return {@code true} if handled.
      */
-    public abstract boolean handleJoinWorld(int entityId);
+    public abstract boolean handleJoinWorld(String world, int entityId);
 
     /**
      * Register a custom packet handler.
@@ -149,7 +150,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * Send world loaded
      */
     public void updateWorldLoaded() {
-        this.send(new CPacketWorldLoaded(channel.alloc()));
+        this.sendImmediately(new CPacketWorldLoaded());
     }
 
     /**
@@ -157,8 +158,8 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      *
      * @param world the world name
      */
-    public void joinWorld(String world) {
-        this.send(new CPacketJoinWorld(world));
+    public void joinWorld(String world, String username) {
+        this.sendImmediately(new CPacketJoinWorld(world, username));
     }
 
     /**

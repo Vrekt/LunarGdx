@@ -74,6 +74,10 @@ public abstract class LunarEntity implements Disposable {
         return ServerGlobalEntityMappings.velocity.get(entity).velocity;
     }
 
+    public EntityVelocityComponent getVelocityComponent() {
+        return ServerGlobalEntityMappings.velocity.get(entity);
+    }
+
     /**
      * @return previous position of this entity.
      */

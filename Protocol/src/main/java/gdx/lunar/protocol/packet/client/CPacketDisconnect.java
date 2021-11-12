@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class CPacketDisconnect extends Packet {
 
-    public static final int PID = 4;
+    public static final int PID = 882;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleDisconnect(new CPacketDisconnect());

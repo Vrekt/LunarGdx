@@ -9,10 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class SPacketDisconnect extends Packet {
 
-    /**
-     * PID
-     */
-    public static final int PID = 2;
+    public static final int PID = 991;
 
     /**
      * The reason for the disconnect

@@ -2,6 +2,7 @@ package gdx.lunar;
 
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.network.PlayerConnection;
 import gdx.lunar.network.adapter.InboundNetworkHandler;
 import gdx.lunar.network.codec.ServerProtocolPacketDecoder;
 import gdx.lunar.network.provider.ConnectionProvider;
@@ -148,7 +149,7 @@ public final class LunarClientServer implements Disposable {
      */
     private void handleSocketConnection(SocketChannel channel) {
         connection = this.provider == null
-                ? new PlayerConnection(lunar, protocol, channel)
+                ? new PlayerConnection(channel, protocol)
                 : this.provider.createConnection(channel);
         if (this.adapter == null) adapter = new InboundNetworkHandler(connection);
         if (this.decoder == null) decoder = new ServerProtocolPacketDecoder(connection, protocol);

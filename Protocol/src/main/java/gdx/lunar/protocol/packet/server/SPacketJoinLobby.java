@@ -3,14 +3,13 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Indicate to join a lobby.
  */
 public class SPacketJoinLobby extends Packet {
 
-    public static final int PID = 24;
+    public static final int PID = 9914;
 
     private String lobbyName;
     private int lobbyId, entityId;
@@ -19,21 +18,18 @@ public class SPacketJoinLobby extends Packet {
         handler.handleJoinLobby(new SPacketJoinLobby(buf));
     }
 
-    public SPacketJoinLobby(ByteBufAllocator allocator, String lobbyName, int lobbyId, int entityId) {
-        super(allocator);
+    public SPacketJoinLobby(String lobbyName, int lobbyId, int entityId) {
         this.lobbyName = lobbyName;
         this.lobbyId = lobbyId;
         this.entityId = entityId;
     }
 
-    public SPacketJoinLobby(ByteBufAllocator allocator, String lobbyName, int entityId) {
-        super(allocator);
+    public SPacketJoinLobby(String lobbyName, int entityId) {
         this.lobbyName = lobbyName;
         this.entityId = entityId;
     }
 
-    public SPacketJoinLobby(ByteBufAllocator allocator, int lobbyId, int entityId) {
-        super(allocator);
+    public SPacketJoinLobby(int lobbyId, int entityId) {
         this.lobbyId = lobbyId;
         this.entityId = entityId;
     }

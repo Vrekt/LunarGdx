@@ -62,7 +62,7 @@ public abstract class Packet {
      * Write PID
      */
     protected void writeId() {
-        buffer.writeByte(getId());
+        buffer.writeInt(getId());
     }
 
     /**

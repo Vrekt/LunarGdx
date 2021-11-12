@@ -3,11 +3,10 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 public class SPacketPlayerEnterInstance extends Packet {
 
-    public static final int PID = 30;
+    public static final int PID = 9916;
 
     private int entityId;
 
@@ -20,8 +19,7 @@ public class SPacketPlayerEnterInstance extends Packet {
      *
      * @param entityId ID
      */
-    public SPacketPlayerEnterInstance(ByteBufAllocator allocator, int entityId) {
-        super(allocator);
+    public SPacketPlayerEnterInstance(int entityId) {
         this.entityId = entityId;
     }
 

@@ -4,24 +4,22 @@ import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * A broadcasted packet built from {@link CPacketApplyEntityBodyForce}
  */
 public class SPacketApplyEntityBodyForce extends Packet {
 
-    public static final int PID = 15;
+    public static final int PID = 998;
 
     private int entityId;
     private float forceX, forceY, pointX, pointY;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
-        handler.handleBodyForce(new SPacketApplyEntityBodyForce(buf));
+        handler.handleEntityBodyForce(new SPacketApplyEntityBodyForce(buf));
     }
 
-    public SPacketApplyEntityBodyForce(ByteBufAllocator allocator, CPacketApplyEntityBodyForce other) {
-        super(allocator);
+    public SPacketApplyEntityBodyForce(CPacketApplyEntityBodyForce other) {
         this.entityId = other.getEntityId();
         this.forceX = other.getForceX();
         this.forceY = other.getForceY();
@@ -29,8 +27,7 @@ public class SPacketApplyEntityBodyForce extends Packet {
         this.pointY = other.getPointY();
     }
 
-    public SPacketApplyEntityBodyForce(ByteBufAllocator allocator, int entityId, float forceX, float forceY, float pointX, float pointY) {
-        super(allocator);
+    public SPacketApplyEntityBodyForce(int entityId, float forceX, float forceY, float pointX, float pointY) {
         this.entityId = entityId;
         this.forceX = forceX;
         this.forceY = forceY;

@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class CPacketPosition extends Packet {
 
-    public static final int PID = 9;
+    public static final int PID = 883;
 
     private float rotation, x, y;
 

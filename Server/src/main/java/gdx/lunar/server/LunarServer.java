@@ -74,6 +74,15 @@ public abstract class LunarServer implements Disposable {
     public abstract boolean handleJoinProcess(AbstractConnection connection);
 
     /**
+     * Check if a username is valid.
+     *
+     * @param username the username
+     * @param world    the world
+     * @return {@code true} if so
+     */
+    public abstract boolean isUsernameValidInWorld(String world, String username);
+
+    /**
      * Retrieve the server configuration
      *
      * @return the configuration
@@ -137,7 +146,7 @@ public abstract class LunarServer implements Disposable {
      * @return {@code true} if the player can join.
      */
     public boolean isFull() {
-        return allPlayers.size() + 1 <= getConfiguration().maxPlayers;
+        return allPlayers.size() + 1 >= getConfiguration().maxPlayers;
     }
 
     public List<LunarPlayer> getAllPlayers() {

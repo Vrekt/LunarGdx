@@ -24,6 +24,7 @@ public class EntityAnimationSystem extends IteratingSystem {
     public EntityAnimationSystem() {
         super(Family.all(EntityPositionComponent.class, EntityAnimationComponent.class).get());
         p = ComponentMapper.getFor(EntityPositionComponent.class);
+        a = ComponentMapper.getFor(EntityAnimationComponent.class);
     }
 
     public EntityAnimationSystem(Family family, int priority) {
@@ -44,7 +45,7 @@ public class EntityAnimationSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         final EntityAnimationComponent component = a.get(entity);
-        for (int i = 0; i < component.animationsPlaying.getCapacity(); i++) {
+        for (int i = 0; i < component.animationsPlaying.size(); i++) {
             final EntityAnimation animation = component.animations.get(i);
             if (animation.animate) {
                 animation.animationTime += deltaTime;

@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf;
  * A request to create a lobby.
  */
 public class CPacketCreateLobby extends Packet {
-    public static final int PID = 19;
+    public static final int PID = 8810;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleCreateLobby(new CPacketCreateLobby(buf));

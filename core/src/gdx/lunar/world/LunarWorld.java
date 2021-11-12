@@ -70,6 +70,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         configuration.updateNetworkPlayers = updateNetworkPlayers;
         configuration.updateEntities = updateEntities;
 
+        player.spawnEntityInWorld(this);
         addWorldSystems();
     }
 
@@ -85,6 +86,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         this.configuration = configuration;
         this.engine = engine;
 
+        player.spawnEntityInWorld(this);
         addWorldSystems();
     }
 
@@ -300,5 +302,6 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         players.clear();
         entities.clear();
         engine.clearPools();
+        world.dispose();
     }
 }

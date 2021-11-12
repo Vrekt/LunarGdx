@@ -2,9 +2,11 @@ package gdx.lunar.server.network;
 
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.client.*;
-import gdx.lunar.protocol.packet.server.SPacketApplyEntityBodyForce;
+import gdx.lunar.protocol.packet.server.SPacketAuthentication;
+import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
 import gdx.lunar.server.LunarServer;
 import gdx.lunar.server.game.entity.player.LunarPlayer;
+import gdx.lunar.server.world.World;
 import io.netty.channel.Channel;
 
 /**
@@ -31,6 +33,8 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
         if (server.handlePlayerAuthentication(packet.getGameVersion(), packet.getProtocolVersion())) {
             if (!server.handleJoinProcess(this)) {
                 channel.close();
+            } else {
+                sendImmediately(new SPacketAuthentication(true));
             }
         } else {
             channel.close();
@@ -64,7 +68,17 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
 
     @Override
     public void handleJoinWorld(CPacketJoinWorld packet) {
-        // TODO: this.player = new LunarPlayer();
+        if (packet.getUsername() == null || !server.getWorldManager().worldExists(packet.getWorldName())) {
+            return;
+        }
+
+        final World world = server.getWorldManager().getWorld(packet.getWorldName());
+        this.player = new LunarPlayer(true, server, this);
+        this.player.setEntityName(packet.getUsername());
+        this.player.setWorldIn(world);
+        this.player.setEntityId(world.assignEntityId());
+
+        sendImmediately(new SPacketJoinWorld(packet.getWorldName(), player.getEntityId()));
     }
 
     @Override
@@ -77,8 +91,8 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
 
     @Override
     public void handleBodyForce(CPacketApplyEntityBodyForce packet) {
-        if (player != null && player.getWorld() != null) {
-            player.getWorld().broadcastPacketInWorld(new SPacketApplyEntityBodyForce(alloc(), packet));
+        if (player != null) {
+            player.getVelocityComponent().setForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
         }
     }
 
@@ -118,7 +132,7 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
         this.disconnected = true;
 
         if (server != null) server.removePlayerConnection(this);
-        if (player.inWorld()) player.getWorld().removePlayerInWorld(player);
+        if (player != null && player.inWorld()) player.getWorld().removePlayerInWorld(player);
 
         channel.pipeline().remove(this);
         channel.close();

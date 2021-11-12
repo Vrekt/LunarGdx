@@ -3,13 +3,12 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Sent to indicate the client should spawn an entity.
  */
 public class SPacketSpawnEntity extends Packet {
-    public static final int PID = 17;
+    public static final int PID = 999;
 
     private String entityName;
     private float x, y;
@@ -19,13 +18,11 @@ public class SPacketSpawnEntity extends Packet {
         handler.handleSpawnEntity(new SPacketSpawnEntity(buf));
     }
 
-    public SPacketSpawnEntity(ByteBufAllocator allocator,
-                              String entityName,
+    public SPacketSpawnEntity(String entityName,
                               float x,
                               float y,
                               int temporaryEntityId,
                               int entityId) {
-        super(allocator);
         this.entityName = entityName;
         this.x = x;
         this.y = y;

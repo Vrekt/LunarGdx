@@ -45,4 +45,10 @@ public class GameServer extends LunarServer {
         this.connections.add(connection);
         return true;
     }
+
+    @Override
+    public boolean isUsernameValidInWorld(String world, String username) {
+        if (username == null) return false;
+        return worldManager.worldExists(world) && !worldManager.getWorld(world).doesUsernameExist(username);
+    }
 }

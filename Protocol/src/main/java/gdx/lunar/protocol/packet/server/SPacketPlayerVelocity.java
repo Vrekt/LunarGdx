@@ -3,29 +3,16 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Sent by the server to update a client velocity
  */
 public class SPacketPlayerVelocity extends Packet {
 
-    public static final int PID = 8;
+    public static final int PID = 996;
 
-    /**
-     * The entity ID
-     */
     private int entityId;
-
-    /**
-     * Velocity
-     */
-    private float velocityX, velocityY;
-
-    /**
-     * Rotation index
-     */
-    private int rotation;
+    private float velocityX, velocityY, rotation;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handlePlayerVelocity(new SPacketPlayerVelocity(buf));
@@ -39,8 +26,7 @@ public class SPacketPlayerVelocity extends Packet {
      * @param velocityY velocity Y
      * @param rotation  rotation index
      */
-    public SPacketPlayerVelocity(ByteBufAllocator allocator, int entityId, float velocityX, float velocityY, int rotation) {
-        super(allocator);
+    public SPacketPlayerVelocity(int entityId, float rotation, float velocityX, float velocityY) {
         this.entityId = entityId;
         this.velocityX = velocityX;
         this.velocityY = velocityY;
@@ -75,7 +61,7 @@ public class SPacketPlayerVelocity extends Packet {
     /**
      * @return the rotation value
      */
-    public int getRotation() {
+    public float getRotation() {
         return rotation;
     }
 
@@ -90,7 +76,7 @@ public class SPacketPlayerVelocity extends Packet {
         buffer.writeInt(entityId);
         buffer.writeFloat(velocityX);
         buffer.writeFloat(velocityY);
-        buffer.writeInt(rotation);
+        buffer.writeFloat(rotation);
     }
 
     @Override
@@ -98,7 +84,7 @@ public class SPacketPlayerVelocity extends Packet {
         entityId = buffer.readInt();
         velocityX = buffer.readFloat();
         velocityY = buffer.readFloat();
-        rotation = buffer.readInt();
+        rotation = buffer.readFloat();
     }
 
 }

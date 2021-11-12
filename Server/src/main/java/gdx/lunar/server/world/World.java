@@ -1,8 +1,6 @@
 package gdx.lunar.server.world;
 
 import gdx.lunar.protocol.packet.Packet;
-import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
-import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import gdx.lunar.server.game.entity.LunarEntity;
 import gdx.lunar.server.game.entity.player.LunarPlayer;
@@ -40,6 +38,10 @@ public abstract class World implements Disposable {
     public World(String worldName, WorldConfiguration configuration) {
         this.worldName = worldName;
         this.configuration = configuration;
+    }
+
+    public boolean doesUsernameExist(String username) {
+        return players.values().stream().anyMatch(player -> player.getEntityName().equalsIgnoreCase(username));
     }
 
     /**
@@ -151,9 +153,9 @@ public abstract class World implements Disposable {
      * @param velocityY Y vel
      * @param rotation  rotation
      */
-    public void handlePlayerVelocity(LunarPlayer player, float velocityX, float velocityY, int rotation) {
-        queuedPackets.add(new QueuedPlayerPacket(player.getEntityId(),
-                new SPacketPlayerVelocity(player.getConnection().alloc(), player.getEntityId(), velocityX, velocityY, rotation)));
+    public void handlePlayerVelocity(LunarPlayer player, float velocityX, float velocityY, float rotation) {
+        player.getVelocity().set(velocityX, velocityY);
+        player.setRotation(rotation);
     }
 
     /**
@@ -164,10 +166,9 @@ public abstract class World implements Disposable {
      * @param y        y
      * @param rotation rotation
      */
-    public void handlePlayerPosition(LunarPlayer player, float x, float y, int rotation) {
-        player.setLocation(x, y);
-
-        queuedPackets.add(new QueuedPlayerPacket(player.getEntityId(), new SPacketPlayerPosition(player.getConnection().alloc(), player.getEntityId(), rotation, x, y)));
+    public void handlePlayerPosition(LunarPlayer player, float x, float y, float rotation) {
+        player.setPosition(x, y);
+        player.setRotation(rotation);
     }
 
     /**
@@ -181,9 +182,7 @@ public abstract class World implements Disposable {
      * @param packet the packet
      */
     public void broadcastPacketInWorld(Packet packet) {
-        for (LunarPlayer player : players.values()) {
-            player.getConnection().queue(packet);
-        }
+        for (LunarPlayer player : players.values()) player.getConnection().queue(packet);
     }
 
     /**

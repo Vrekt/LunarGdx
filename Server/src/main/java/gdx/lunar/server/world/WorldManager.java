@@ -40,6 +40,10 @@ public abstract class WorldManager implements Disposable {
         return worlds.get(name);
     }
 
+    public boolean worldExists(String name) {
+        return worlds.containsKey(name);
+    }
+
     /**
      * @return all worlds
      */

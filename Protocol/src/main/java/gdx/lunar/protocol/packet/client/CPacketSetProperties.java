@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class CPacketSetProperties extends Packet {
 
-    public static final int PID = 21;
+    public static final int PID = 889;
 
     private String username;
 

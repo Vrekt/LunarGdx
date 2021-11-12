@@ -3,14 +3,13 @@ package gdx.lunar.protocol.packet.server;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 
 /**
  * Set properties of an entity.
  */
 public class SPacketSetEntityProperties extends Packet {
 
-    public static final int PID = 22;
+    public static final int PID = 9911;
 
     private int entityId;
     private String entityName;
@@ -19,8 +18,7 @@ public class SPacketSetEntityProperties extends Packet {
         handler.handleSetEntityProperties(new SPacketSetEntityProperties(buf));
     }
 
-    public SPacketSetEntityProperties(ByteBufAllocator allocator, int entityId, String entityName) {
-        super(allocator);
+    public SPacketSetEntityProperties(int entityId, String entityName) {
         this.entityId = entityId;
         this.entityName = entityName;
     }

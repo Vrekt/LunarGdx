@@ -1,10 +1,10 @@
 package gdx.lunar.network.codec;
 
-import com.badlogic.gdx.Gdx;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
@@ -44,12 +44,12 @@ public class ServerProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
             // ignore the length of the packet.
             buf.readInt();
             // retrieve packet from PID
-            final int pid = buf.readByte() & 0xFF;
+            final int pid = buf.readInt();
             protocol.handleServerPacket(pid, buf, handler, ctx);
 
             buf.release();
         } else {
-            Gdx.app.log("Decoder", "Buffer from server is null?");
+            throw new DecoderException("ByteBuf from server is null.");
         }
         return null;
     }
