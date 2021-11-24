@@ -1,4 +1,4 @@
-package gdx.lunar.entity.system.moving;
+package gdx.lunar.entity.systems.moving;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
@@ -17,6 +17,8 @@ public class EntityMovementSystem extends IteratingSystem {
     protected ComponentMapper<EntityPositionComponent> p;
     protected ComponentMapper<EntityVelocityComponent> v;
     protected ComponentMapper<EntityPropertiesComponent> prop;
+
+    protected float velocityFactor = 0.01f;
 
     public EntityMovementSystem() {
         super(Family.all(EntityPositionComponent.class, EntityVelocityComponent.class).get());
@@ -44,8 +46,12 @@ public class EntityMovementSystem extends IteratingSystem {
         this.prop = prop;
     }
 
+    public void setVelocityFactor(float velocityFactor) {
+        this.velocityFactor = velocityFactor;
+    }
+
     @Override
-    protected void processEntity(Entity entity, float deltaTime) {
+    public void processEntity(Entity entity, float deltaTime) {
         final EntityPropertiesComponent prop = this.prop.get(entity);
         if (prop.isMoving) {
             handleEntityMovement(entity, p.get(entity), v.get(entity), prop, deltaTime);
@@ -60,13 +66,13 @@ public class EntityMovementSystem extends IteratingSystem {
      * @param pv     vel
      * @param prop   prop
      */
-    protected void handleEntityMovement(Entity entity,
-                                        EntityPositionComponent pm,
-                                        EntityVelocityComponent pv,
-                                        EntityPropertiesComponent prop,
-                                        float delta) {
-        pm.position.x += pv.velocity.x * delta;
-        pm.position.y += pv.velocity.y * delta;
+    public void handleEntityMovement(Entity entity,
+                                     EntityPositionComponent pm,
+                                     EntityVelocityComponent pv,
+                                     EntityPropertiesComponent prop,
+                                     float delta) {
+        pm.position.x += pv.velocity.x * velocityFactor;
+        pm.position.y += pv.velocity.y * velocityFactor;
     }
 
 }

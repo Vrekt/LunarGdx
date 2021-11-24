@@ -1,7 +1,6 @@
 package gdx.lunar.network;
 
 import com.badlogic.gdx.utils.Disposable;
-import gdx.lunar.entity.drawing.Rotation;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.network.handlers.ConnectionHandlers;
 import gdx.lunar.protocol.LunarProtocol;
@@ -91,8 +90,8 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * @param x        X
      * @param y        Y
      */
-    public void updatePosition(Rotation rotation, float x, float y) {
-        this.send(new CPacketPosition(rotation.ordinal(), x, y));
+    public void updatePosition(float rotation, float x, float y) {
+        this.send(new CPacketPosition(rotation, x, y));
     }
 
     /**
@@ -102,8 +101,8 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * @param velX     X
      * @param velY     Y
      */
-    public void updateVelocity(Rotation rotation, float velX, float velY) {
-        this.send(new CPacketVelocity(rotation.ordinal(), velX, velY));
+    public void updateVelocity(float rotation, float velX, float velY) {
+        this.send(new CPacketVelocity(rotation, velX, velY));
     }
 
     /**
@@ -195,7 +194,8 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * Update this connection
      */
     public void update() {
-        if (System.currentTimeMillis() - lastUpdate >= updateInterval * 1000) {
+        if (System.currentTimeMillis() - lastUpdate
+                >= updateInterval * 1000) {
             single.execute(this::flush);
             lastUpdate = System.currentTimeMillis();
         }

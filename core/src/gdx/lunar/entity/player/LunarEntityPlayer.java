@@ -1,15 +1,10 @@
 package gdx.lunar.entity.player;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
-import gdx.lunar.entity.components.drawing.EntityAnimation;
-import gdx.lunar.entity.components.drawing.EntityAnimationComponent;
 import gdx.lunar.entity.drawing.LunarAnimatedEntity;
 import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
 import gdx.lunar.network.AbstractConnection;
@@ -20,9 +15,6 @@ import gdx.lunar.world.LunarWorld;
  * Represents a local or network player.
  */
 public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
-
-    // animation comp system
-    protected ComponentMapper<EntityAnimationComponent> animationComponent = ComponentMapper.getFor(EntityAnimationComponent.class);
 
     // if other player collisions should be turned off.
     protected boolean ignorePlayerCollision;
@@ -121,22 +113,6 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
         this.fixture.shape = shape;
     }
 
-    public void setAnimationComponent(ComponentMapper<EntityAnimationComponent> animationComponent) {
-        this.animationComponent = animationComponent;
-    }
-
-    public EntityAnimationComponent getAnimationComponent() {
-        return animationComponent.get(entity);
-    }
-
-    public void registerAnimation(int id, EntityAnimation animation) {
-        getAnimationComponent().animations.put(id, animation);
-    }
-
-    public void registerAnimation(int id, Animation<TextureRegion> animation) {
-        getAnimationComponent().animations.put(id, new EntityAnimation(animation));
-    }
-
     @Override
     public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
@@ -177,12 +153,16 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     @Override
     public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
         world.removeEntityInWorld(this);
-        world.getWorld().destroyBody(body);
+        if (body != null) world.getWorld().destroyBody(body);
     }
 
     @Override
     public void update(float delta) {
-        if (connection != null) connection.update();
+        if (connection != null) {
+            connection.update();
+            connection.updatePosition(rotation, getX(), getY());
+            connection.updateVelocity(rotation, getVelocity().x, getVelocity().y);
+        }
     }
 
     /**

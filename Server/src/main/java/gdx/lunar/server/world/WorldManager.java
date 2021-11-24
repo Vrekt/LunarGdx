@@ -55,7 +55,9 @@ public abstract class WorldManager implements Disposable {
      * Update all worlds.
      */
     public void update(float delta) {
-
+        for (World value : worlds.values()) {
+            value.tick();
+        }
     }
 
     @Override

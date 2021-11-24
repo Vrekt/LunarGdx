@@ -51,7 +51,7 @@ public class WorldAdapter extends World {
 
     private void queuePlayerVelocity(LunarPlayer player) {
         broadcast(player.getEntityId(),
-                new SPacketPlayerVelocity(player.getEntityId(), player.getRotation(), player.getPosition().x, player.getPosition().y));
+                new SPacketPlayerVelocity(player.getEntityId(), player.getRotation(), player.getVelocity().x, player.getVelocity().y));
     }
 
     private void queuePlayerForce(LunarPlayer player) {

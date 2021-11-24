@@ -42,8 +42,8 @@ public class PlayerConnection extends AbstractConnection {
         final LunarNetworkEntityPlayer player = new LunarPlayerMP(true);
         player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
         player.getConfig().setConfig(16, 16, (1 / 16.0f));
+        player.spawnEntityInWorld(local.getInstance().worldIn);
 
-        this.local.getInstance().worldIn.spawnEntityInWorld(player);
         if (handlers.containsKey(ConnectionHandlers.CREATE_PLAYER))
             handlers.get(ConnectionHandlers.CREATE_PLAYER).accept(packet);
     }

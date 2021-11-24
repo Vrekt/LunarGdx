@@ -1,6 +1,7 @@
 package gdx.lunar.world.impl;
 
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.World;
 import gdx.lunar.entity.player.LunarEntity;
 import gdx.lunar.entity.player.impl.LunarPlayer;
@@ -24,4 +25,9 @@ public class WorldAdapter extends LunarWorld<LunarPlayer, LunarPlayerMP, LunarEn
     public WorldAdapter(LunarPlayer player, World world) {
         super(player, world);
     }
+
+    public void renderWorld(SpriteBatch batch) {
+
+    }
+
 }

@@ -7,8 +7,7 @@ import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.entity.player.LunarEntity;
 import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
-import gdx.lunar.entity.system.animation.EntityAnimationSystem;
-import gdx.lunar.entity.system.moving.EntityMovementSystem;
+import gdx.lunar.entity.systems.moving.EntityMovementSystem;
 import gdx.lunar.network.AbstractConnection;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +27,6 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
 
     // system
     protected EntityMovementSystem movementSystem;
-    protected EntityAnimationSystem animationSystem;
 
     // network players and entities
     protected ConcurrentMap<Integer, N> players = new ConcurrentHashMap<>();
@@ -69,8 +67,6 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         configuration.updatePlayer = updatePlayer;
         configuration.updateNetworkPlayers = updateNetworkPlayers;
         configuration.updateEntities = updateEntities;
-
-        addWorldSystems();
     }
 
     /**
@@ -84,8 +80,6 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         this.world = world;
         this.configuration = configuration;
         this.engine = engine;
-
-        addWorldSystems();
     }
 
     /**
@@ -115,9 +109,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      */
     public void addWorldSystems() {
         movementSystem = new EntityMovementSystem();
-        animationSystem = new EntityAnimationSystem();
         engine.addSystem(movementSystem);
-        engine.addSystem(animationSystem);
     }
 
     /**
@@ -171,6 +163,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         engine.addEntity(entity.getEntity());
         selectType(entity);
 
+        entity.getPosition().set(x, y);
         entity.getInstance().worldIn = this;
     }
 
@@ -183,6 +176,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         engine.addEntity(entity.getEntity());
         selectType(entity);
 
+        entity.getPosition().set(spawn.x, spawn.y);
         entity.getInstance().worldIn = this;
     }
 
@@ -256,14 +250,14 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
 
         // update local
         if (configuration.updatePlayer) {
-            player.interpolatePosition(0.5f);
+            player.interpolatePosition(1.0f);
             player.update(delta);
         }
 
         // update network
         if (configuration.updateNetworkPlayers) {
             for (LunarNetworkEntityPlayer player : players.values()) {
-                player.interpolatePosition(0.5f);
+                player.interpolatePosition(1.0f);
                 player.update(delta);
             }
         }

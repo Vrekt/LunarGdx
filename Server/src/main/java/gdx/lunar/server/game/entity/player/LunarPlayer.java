@@ -1,6 +1,7 @@
 package gdx.lunar.server.game.entity.player;
 
 import com.badlogic.ashley.core.Entity;
+import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketDisconnect;
 import gdx.lunar.server.LunarServer;
 import gdx.lunar.server.game.entity.LunarEntity;
@@ -88,7 +89,7 @@ public class LunarPlayer extends LunarEntity {
      * @param other the other player
      */
     public void sendPlayerToOtherPlayer(LunarPlayer other) {
-        // TODO: other.getConn().send()
+        other.getConnection().sendImmediately(new SPacketCreatePlayer(entityName, entityId, getPosition().x, getPosition().y));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package gdx.lunar.server.world;
 
 import gdx.lunar.protocol.packet.Packet;
+import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import gdx.lunar.server.game.entity.LunarEntity;
 import gdx.lunar.server.game.entity.player.LunarPlayer;
@@ -118,7 +119,8 @@ public abstract class World implements Disposable {
         for (LunarPlayer other : players.values()) other.sendPlayerToOtherPlayer(player);
 
         // broadcast the joining of this player to others.
-        // TODO: broadcast(send())
+        broadcastPacketImmediately(player.getEntityId(),
+                new SPacketCreatePlayer(player.getEntityName(), player.getEntityId(), x, y));
 
         // add this new player to the list
         players.put(player.getEntityId(), player);

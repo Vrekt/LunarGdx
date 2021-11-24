@@ -1,7 +1,6 @@
 package gdx.lunar.entity.drawing;
 
 import com.badlogic.ashley.core.Entity;
-import gdx.lunar.entity.components.drawing.EntityAnimationComponent;
 import gdx.lunar.entity.player.LunarEntity;
 
 /**
@@ -15,12 +14,6 @@ public abstract class LunarAnimatedEntity extends LunarEntity {
 
     public LunarAnimatedEntity(boolean initializeComponents) {
         super(initializeComponents);
-    }
-
-    @Override
-    protected void addComponents() {
-        entity.add(new EntityAnimationComponent());
-        super.addComponents();
     }
 
 }

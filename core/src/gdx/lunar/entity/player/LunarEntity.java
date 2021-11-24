@@ -26,7 +26,7 @@ public abstract class LunarEntity implements Disposable {
     // box2d body of this entity
     protected Body body;
     protected boolean inWorld;
-    protected float rotation;
+    protected float rotation, moveSpeed = 1.0f;
 
     public LunarEntity(Entity entity, boolean initializeComponents) {
         this.entity = entity;
@@ -52,6 +52,18 @@ public abstract class LunarEntity implements Disposable {
 
     public float getHeight() {
         return GlobalEntityMapper.config.get(entity).size.y;
+    }
+
+    public void setMoveSpeed(float moveSpeed) {
+        this.moveSpeed = moveSpeed;
+    }
+
+    public float getMoveSpeed() {
+        return moveSpeed;
+    }
+
+    public void setMoving(boolean moving) {
+        getProperties().isMoving = moving;
     }
 
     /**
@@ -122,6 +134,14 @@ public abstract class LunarEntity implements Disposable {
      */
     public Vector2 getPosition() {
         return GlobalEntityMapper.position.get(entity).position;
+    }
+
+    public float getX() {
+        return getPosition().x;
+    }
+
+    public float getY() {
+        return getPosition().y;
     }
 
     /**

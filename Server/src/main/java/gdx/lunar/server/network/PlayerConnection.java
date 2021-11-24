@@ -53,16 +53,14 @@ public class PlayerConnection extends AbstractConnection implements ClientPacket
     @Override
     public void handlePlayerPosition(CPacketPosition packet) {
         if (player != null && player.inWorld()) {
-            player.setPosition(packet.getX(), packet.getY());
-            player.setRotation(packet.getRotation());
+            player.getWorld().handlePlayerPosition(player, packet.getX(), packet.getY(), packet.getRotation());
         }
     }
 
     @Override
     public void handlePlayerVelocity(CPacketVelocity packet) {
         if (player != null && player.inWorld()) {
-            player.setVelocity(packet.getVelocityX(), packet.getVelocityY());
-            player.setRotation(packet.getRotation());
+            player.getWorld().handlePlayerVelocity(player, packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
         }
     }
 
