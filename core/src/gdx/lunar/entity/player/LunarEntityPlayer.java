@@ -143,6 +143,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
 
         world.spawnEntityInWorld(this, x, y);
         this.inWorld = true;
+        this.getInstance().setWorldIn(world);
     }
 
     @Override
@@ -153,6 +154,8 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     @Override
     public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
         world.removeEntityInWorld(this);
+        this.getInstance().setWorldIn(null);
+        this.inWorld = false;
         if (body != null) world.getWorld().destroyBody(body);
     }
 

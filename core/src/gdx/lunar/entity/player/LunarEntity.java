@@ -177,6 +177,26 @@ public abstract class LunarEntity implements Disposable {
         if (transform) body.setTransform(x, y, body.getTransform().getRotation());
     }
 
+    /**
+     * Set the velocity
+     *
+     * @param x         X
+     * @param y         Y
+     * @param transform if body transform should be used
+     */
+    public void setVelocity(float x, float y, boolean transform) {
+        getVelocity().set(x, y);
+        if (transform) body.setTransform(x, y, body.getTransform().getRotation());
+    }
+
+    public float getRotation() {
+        return rotation;
+    }
+
+    public void setRotation(float rotation) {
+        this.rotation = rotation;
+    }
+
     public Body getBody() {
         return body;
     }
@@ -229,6 +249,12 @@ public abstract class LunarEntity implements Disposable {
 
     public boolean isInWorld() {
         return inWorld;
+    }
+
+    public <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> LunarWorld<P, N, E> getWorldIn() {
+        return getInstance().getWorldIn();
     }
 
     /**
