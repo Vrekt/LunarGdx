@@ -1,6 +1,7 @@
 package gdx.lunar.world;
 
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentMap;
  * @param <N> any local network entity instance type you wish
  * @param <E> any local entity instance type you wish
  */
-public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> implements Disposable {
+public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> extends ScreenAdapter implements Disposable {
 
     // engine for this world.
     protected PooledEngine engine;
@@ -188,7 +189,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
     private void selectType(LunarEntity entity) {
         if (entity instanceof LunarNetworkEntityPlayer) {
             this.players.put(entity.getProperties().entityId, (N) entity);
-        } else {
+        } else if (entity != null) {
             this.entities.put(entity.getProperties().entityId, (E) entity);
         }
     }
@@ -235,8 +236,9 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      * Update this world
      *
      * @param d delta time.
+     * @return capped frame time
      */
-    public void update(float d) {
+    public float update(float d) {
         final float delta = Math.min(d, configuration.maxFrameTime);
 
         // step world
@@ -265,6 +267,8 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         if (configuration.updateEngine) {
             engine.update(delta);
         }
+
+        return delta;
     }
 
     /**

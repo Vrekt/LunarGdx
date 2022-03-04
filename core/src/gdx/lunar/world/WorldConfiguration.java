@@ -11,10 +11,10 @@ public class WorldConfiguration {
     public boolean updateEngine = true;
 
     // physics
-    protected int velocityIterations = 8, positionIterations = 3;
-    protected float stepTime = 1.0f / 60.0f;
-    protected float maxFrameTime = 0.25f;
+    public int velocityIterations = 8, positionIterations = 3;
+    public float stepTime = 1.0f / 60.0f;
+    public float maxFrameTime = 0.25f;
 
-    protected float worldScale;
+    public float worldScale;
 
 }

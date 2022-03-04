@@ -86,6 +86,10 @@ public abstract class LunarEntity implements Disposable {
         GlobalEntityMapper.config.get(entity).size.z = scaling;
     }
 
+    public float getScaling() {
+        return GlobalEntityMapper.config.get(entity).size.z;
+    }
+
     /**
      * Set general configuration
      *
@@ -107,6 +111,10 @@ public abstract class LunarEntity implements Disposable {
 
     public void setEntityId(int entityId) {
         getProperties().entityId = entityId;
+    }
+
+    public int getEntityId() {
+        return getProperties().entityId;
     }
 
     public void setEntityName(String name) {
