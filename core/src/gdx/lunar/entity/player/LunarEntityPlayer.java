@@ -90,7 +90,6 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
      * @param fixedRotation state
      */
     public void setFixedRotation(boolean fixedRotation) {
-        this.definition.fixedRotation = fixedRotation;
         hasSetFixedRotation = true;
     }
 
@@ -119,21 +118,24 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
             E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
         getPosition().set(x, y);
         getPrevious().set(x, y);
-        getInterpolated().set(x, y);
+        setInterpolated(x, y);
 
-        this.definition = new BodyDef();
+        if (definition == null) {
+            definition = new BodyDef();
+            definition.type = BodyDef.BodyType.DynamicBody;
+        }
+
         this.fixture = new FixtureDef();
 
-        if (definition.type == null) definition.type = BodyDef.BodyType.DynamicBody;
         if (!hasSetFixedRotation) definition.fixedRotation = true;
-        definition.position.set(x, y);
+        definition.position.set(x + getWidthScaled() / 2f, y + getHeightScaled() / 2f);
 
         body = world.getWorld().createBody(definition);
         PolygonShape shape = null;
 
         if (fixture.shape == null) {
             shape = new PolygonShape();
-            shape.setAsBox(getWidth() / 2f, getHeight() / 2f);
+            shape.setAsBox(getWidthScaled() / 2f, getHeightScaled() / 2f);
             fixture.shape = shape;
             if (!hasSetDensity) fixture.density = 1.0f;
         }
@@ -153,10 +155,13 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
 
     @Override
     public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
+        if (body != null) {
+            world.getWorld().destroyBody(body);
+            body = null;
+        }
         world.removeEntityInWorld(this);
         this.getInstance().setWorldIn(null);
         this.inWorld = false;
-        if (body != null) world.getWorld().destroyBody(body);
     }
 
     @Override

@@ -17,16 +17,12 @@ public class LunarPlayer extends LunarEntityPlayer {
         super(initializeComponents);
         setEntityName(name);
         setConnection(connection);
-        setMoveSpeed(6.0f);
-        setSize(1.0f, 1.0f);
     }
 
     public LunarPlayer(boolean initializeComponents, String name, AbstractConnection connection, float width, float height) {
         super(initializeComponents);
         setEntityName(name);
         setConnection(connection);
-        setMoveSpeed(1.0f);
-        setSize(width, height);
     }
 
     @Override
@@ -35,7 +31,8 @@ public class LunarPlayer extends LunarEntityPlayer {
         pollInput();
 
         // update body vel
-        if (body != null) body.setLinearVelocity(getVelocity());
+        if (body != null && inWorld)
+            body.setLinearVelocity(getVelocity());
     }
 
     public void render(SpriteBatch batch, float delta) {

@@ -25,7 +25,7 @@ public abstract class LunarEntity implements Disposable {
 
     // box2d body of this entity
     protected Body body;
-    protected boolean inWorld;
+    protected boolean inWorld, hasMoved;
     protected float rotation, moveSpeed = 1.0f;
 
     public LunarEntity(Entity entity, boolean initializeComponents) {
@@ -52,6 +52,14 @@ public abstract class LunarEntity implements Disposable {
 
     public float getHeight() {
         return GlobalEntityMapper.config.get(entity).size.y;
+    }
+
+    public float getWidthScaled() {
+        return GlobalEntityMapper.config.get(entity).getScaledWidth();
+    }
+
+    public float getHeightScaled() {
+        return GlobalEntityMapper.config.get(entity).getScaledHeight();
     }
 
     public void setMoveSpeed(float moveSpeed) {
@@ -152,6 +160,14 @@ public abstract class LunarEntity implements Disposable {
         return getPosition().y;
     }
 
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
+    }
+
     /**
      * @return velocity of this entity.
      */
@@ -182,7 +198,20 @@ public abstract class LunarEntity implements Disposable {
      */
     public void setPosition(float x, float y, boolean transform) {
         getPosition().set(x, y);
-        if (transform) body.setTransform(x, y, body.getTransform().getRotation());
+        if (transform && body != null && body.getWorld() != null)
+            body.setTransform(x, y, body.getTransform().getRotation());
+    }
+
+    /**
+     * Set the position
+     *
+     * @param position  new pos
+     * @param transform if body transform should be used
+     */
+    public void setPosition(Vector2 position, boolean transform) {
+        getPosition().set(position);
+        if (transform && body != null && body.getWorld() != null)
+            body.setTransform(position.x, position.y, body.getTransform().getRotation());
     }
 
     /**
@@ -194,7 +223,12 @@ public abstract class LunarEntity implements Disposable {
      */
     public void setVelocity(float x, float y, boolean transform) {
         getVelocity().set(x, y);
-        if (transform) body.setTransform(x, y, body.getTransform().getRotation());
+        if (transform && body != null && body.getWorld() != null)
+            body.setTransform(x, y, body.getTransform().getRotation());
+    }
+
+    public void setInterpolated(float x, float y) {
+        getInterpolated().set(x, y);
     }
 
     public float getRotation() {
@@ -228,6 +262,7 @@ public abstract class LunarEntity implements Disposable {
         this.entity = entity;
     }
 
+
     /**
      * Interpolate the players position.
      *
@@ -244,10 +279,10 @@ public abstract class LunarEntity implements Disposable {
      * @param alpha         linear alpha
      */
     public void interpolatePosition(Interpolation interpolation, float alpha) {
-        if (getPrevious() != getPosition()) {
+        if (hasMoved) {
             final Vector2 previous = getPrevious();
-            final Vector2 current = getPosition();
-            getInterpolated().set(interpolation.apply(previous.x, current.x, alpha), interpolation.apply(previous.y, current.y, alpha));
+            final Vector2 current = body.getPosition();
+            setInterpolated(interpolation.apply(previous.x, current.x, alpha), interpolation.apply(previous.y, current.y, alpha));
         }
     }
 
@@ -314,6 +349,7 @@ public abstract class LunarEntity implements Disposable {
         getBody().applyForce(fx, fy, px, py, wake);
         getInstance().worldIn.getLocalConnection().send(new CPacketApplyEntityBodyForce(getProperties().entityId, fx, fy, px, py));
     }
+
 
     @Override
     public void dispose() {

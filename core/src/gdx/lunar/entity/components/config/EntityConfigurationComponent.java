@@ -22,6 +22,14 @@ public class EntityConfigurationComponent implements Component, Pool.Poolable {
         size.set(width, height, scaling);
     }
 
+    public float getScaledWidth() {
+        return size.x * size.z;
+    }
+
+    public float getScaledHeight() {
+        return size.y * size.z;
+    }
+
     @Override
     public void reset() {
         size.set(0, 0, 0);

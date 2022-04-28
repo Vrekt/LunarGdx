@@ -282,11 +282,14 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         while (accumulator >= configuration.stepTime) {
             if (configuration.updateNetworkPlayers) {
                 for (N player : players.values()) {
-                    player.getPrevious().set(player.getBody().getPosition());
+                    player.getPrevious().set(player.getPosition());
                 }
             }
 
-            player.getPrevious().set(player.getBody().getPosition());
+            if (configuration.updatePlayer) {
+                player.getPrevious().set(player.getPosition());
+                player.setPosition(player.getBody().getPosition(), false);
+            }
 
             world.step(configuration.stepTime, configuration.velocityIterations, configuration.positionIterations);
             accumulator -= configuration.stepTime;
