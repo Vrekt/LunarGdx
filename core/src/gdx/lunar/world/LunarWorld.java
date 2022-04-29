@@ -1,18 +1,13 @@
 package gdx.lunar.world;
 
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
-import gdx.lunar.entity.player.LunarEntity;
-import gdx.lunar.entity.player.LunarEntityPlayer;
-import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
-import gdx.lunar.entity.systems.moving.EntityMovementSystem;
 import gdx.lunar.network.AbstractConnection;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import lunar.shared.entity.player.LunarEntity;
+import lunar.shared.entity.player.LunarEntityPlayer;
+import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
+import lunar.shared.entity.systems.moving.EntityMovementSystem;
 
 /**
  * Represents a networked world players and entities exist in.
@@ -21,20 +16,14 @@ import java.util.concurrent.ConcurrentMap;
  * @param <N> any local network entity instance type you wish
  * @param <E> any local entity instance type you wish
  */
-public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> extends ScreenAdapter implements Disposable {
+public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity>
+        extends LunarWorldSkeleton<N, E> implements Disposable {
 
     // engine for this world.
     protected PooledEngine engine;
 
     // system
     protected EntityMovementSystem movementSystem;
-
-    // network players and entities
-    protected ConcurrentMap<Integer, N> players = new ConcurrentHashMap<>();
-    protected ConcurrentMap<Integer, E> entities = new ConcurrentHashMap<>();
-
-    // starting/spawn point of this world.
-    protected final Vector2 spawn = new Vector2();
 
     // local player
     protected final P player;
@@ -125,111 +114,6 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      */
     public World getWorld() {
         return world;
-    }
-
-    /**
-     * @return network players in this world
-     */
-    public ConcurrentMap<Integer, N> getPlayers() {
-        return players;
-    }
-
-    /**
-     * @return entities in this world
-     */
-    public ConcurrentMap<Integer, E> getEntities() {
-        return entities;
-    }
-
-    public Vector2 getSpawn() {
-        return spawn;
-    }
-
-    public void setSpawn(Vector2 where) {
-        this.spawn.set(where);
-    }
-
-    public void setSpawn(float x, float y) {
-        this.spawn.set(x, y);
-    }
-
-    /**
-     * Spawn the entity in this world
-     *
-     * @param entity the entity
-     * @param x      location X
-     * @param y      location Y
-     */
-    public void spawnEntityInWorld(LunarEntity entity, float x, float y) {
-        engine.addEntity(entity.getEntity());
-        selectType(entity);
-
-        entity.getPosition().set(x, y);
-        entity.getInstance().worldIn = this;
-    }
-
-    /**
-     * This method will spawn the entity in this world at the spawn location
-     *
-     * @param entity the entity
-     */
-    public void spawnEntityInWorld(LunarEntity entity) {
-        engine.addEntity(entity.getEntity());
-        selectType(entity);
-
-        entity.getPosition().set(spawn.x, spawn.y);
-        entity.getInstance().worldIn = this;
-    }
-
-    /**
-     * Add the entity to the internal lists
-     *
-     * @param entity entity
-     */
-    private void selectType(LunarEntity entity) {
-        if (entity instanceof LunarNetworkEntityPlayer) {
-            this.players.put(entity.getProperties().entityId, (N) entity);
-        } else if (entity != null) {
-            this.entities.put(entity.getProperties().entityId, (E) entity);
-        }
-    }
-
-    /**
-     * Remove the entity from this world
-     *
-     * @param entity the entity
-     */
-    public void removeEntityInWorld(LunarEntity entity) {
-        engine.removeEntity(entity.getEntity());
-        if (entity instanceof LunarNetworkEntityPlayer) {
-            this.players.remove(entity.getProperties().entityId);
-        } else {
-            this.entities.remove(entity.getProperties().entityId);
-        }
-    }
-
-    /**
-     * Remove the entity from this world
-     *
-     * @param entity   the entity
-     * @param isPlayer if the entity is a player
-     */
-    public void removeEntityInWorld(int entity, boolean isPlayer) {
-        if (isPlayer && this.players.containsKey(entity)) {
-            final N player = this.players.get(entity);
-            player.removeEntityInWorld(this);
-        } else if (this.entities.containsKey(entity)) {
-            final E e = this.entities.get(entity);
-            e.removeEntityInWorld(this);
-        }
-    }
-
-    public boolean hasNetworkPlayer(int id) {
-        return this.players.containsKey(id);
-    }
-
-    public N getNetworkPlayer(int id) {
-        return this.players.get(id);
     }
 
     /**

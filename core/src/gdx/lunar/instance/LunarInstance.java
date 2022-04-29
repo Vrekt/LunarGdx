@@ -3,7 +3,7 @@ package gdx.lunar.instance;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import gdx.lunar.entity.player.LunarEntityPlayer;
+import lunar.shared.entity.player.LunarEntityPlayer;
 
 /**
  * Represents a separate instance that could be networked.

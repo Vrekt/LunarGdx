@@ -1,30 +1,8 @@
 package gdx.examples;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import gdx.lunar.Lunar;
-import gdx.lunar.LunarClientServer;
-import gdx.lunar.entity.player.impl.LunarPlayer;
-import gdx.lunar.entity.player.impl.LunarPlayerMP;
-import gdx.lunar.network.AbstractConnection;
-import gdx.lunar.network.PlayerConnection;
-import gdx.lunar.protocol.LunarProtocol;
-import gdx.lunar.protocol.packet.client.CPacketWorldLoaded;
-import gdx.lunar.world.impl.WorldAdapter;
+public class Testing {
 
-public class Testing extends Game {
-
-    private Player player;
+    /*private Player player;
     private WorldAdapter world;
     private OrthographicCamera camera;
     private ExtendViewport viewport;
@@ -36,7 +14,7 @@ public class Testing extends Game {
 
     @Override
     public void create() {
-        try {
+      *//*  try {
             Gdx.app.log("Testing", "Creating new testing game @ localhost:6969");
 
             // initialize our default protocol and connect to the remote server,
@@ -97,7 +75,7 @@ public class Testing extends Game {
             r = true;
         } catch (Exception any) {
             any.printStackTrace();
-        }
+        }*//*
     }
 
     @Override
@@ -196,6 +174,6 @@ public class Testing extends Game {
         public void render(SpriteBatch batch, float delta) {
             batch.draw(texture, getX(), getY(), getConfig().size.x * getConfig().size.z, getConfig().size.y * getConfig().size.z);
         }
-    }
+    }*/
 
 }

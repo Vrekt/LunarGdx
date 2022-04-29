@@ -2,9 +2,9 @@ package gdx.lunar.server;
 
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.server.configuration.ServerConfiguration;
-import gdx.lunar.server.game.entity.player.LunarPlayer;
+import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.game.utilities.Disposable;
-import gdx.lunar.server.network.AbstractConnection;
+import gdx.lunar.server.network.ServerAbstractConnection;
 import gdx.lunar.server.world.WorldManager;
 import gdx.lunar.server.world.impl.WorldManagerAdapter;
 
@@ -22,9 +22,9 @@ public abstract class LunarServer implements Disposable {
     private static LunarServer instance;
 
     // TODO: Probably low performance with a COW.
-    protected final List<LunarPlayer> allPlayers = new CopyOnWriteArrayList<>();
+    protected final List<LunarServerPlayerEntity> allPlayers = new CopyOnWriteArrayList<>();
     // set of connections that are connected, but not in a world.
-    protected final List<AbstractConnection> connections = new CopyOnWriteArrayList<>();
+    protected final List<ServerAbstractConnection> connections = new CopyOnWriteArrayList<>();
     // the last time it took to tick all worlds.
     protected long worldTickTime;
     protected final AtomicBoolean running = new AtomicBoolean(true);
@@ -71,7 +71,7 @@ public abstract class LunarServer implements Disposable {
      * @param connection their connection
      * @return {@code true} if successful, other-wise connection will be closed.
      */
-    public abstract boolean handleJoinProcess(AbstractConnection connection);
+    public abstract boolean handleJoinProcess(ServerAbstractConnection connection);
 
     /**
      * Check if a username is valid.
@@ -118,15 +118,15 @@ public abstract class LunarServer implements Disposable {
      *
      * @param player the player
      */
-    public void handlePlayerConnection(LunarPlayer player) {
+    public void handlePlayerConnection(LunarServerPlayerEntity player) {
         this.allPlayers.add(player);
     }
 
-    public void removePlayerConnection(AbstractConnection connection) {
+    public void removePlayerConnection(ServerAbstractConnection connection) {
         this.connections.remove(connection);
     }
 
-    public void handleConnection(AbstractConnection connection) {
+    public void handleConnection(ServerAbstractConnection connection) {
         this.connections.add(connection);
     }
 
@@ -135,9 +135,9 @@ public abstract class LunarServer implements Disposable {
      *
      * @param player the player
      */
-    public void handlePlayerDisconnect(LunarPlayer player) {
+    public void handlePlayerDisconnect(LunarServerPlayerEntity player) {
         this.allPlayers.remove(player);
-        this.connections.remove(player.getConnection());
+        this.connections.remove(player.getServerConnection());
     }
 
     /**
@@ -149,7 +149,7 @@ public abstract class LunarServer implements Disposable {
         return allPlayers.size() + 1 >= getConfiguration().maxPlayers;
     }
 
-    public List<LunarPlayer> getAllPlayers() {
+    public List<LunarServerPlayerEntity> getAllPlayers() {
         return allPlayers;
     }
 

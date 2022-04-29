@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'me.vrekt'
+group 'lunar'
 version '1.0'
 
 repositories {
@@ -13,8 +13,8 @@ repositories {
 
 dependencies {
     implementation group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
-    implementation "com.badlogicgames.ashley:ashley:1.7.4"
+    implementation 'com.badlogicgames.ashley:ashley:1.7.4'
+    implementation "com.badlogicgames.gdx:gdx-box2d:1.10.0"
     implementation project(":Protocol")
-    implementation project(":Entity")
     implementation project(":core")
 }

@@ -1,11 +1,11 @@
 package gdx.lunar.network;
 
-import gdx.lunar.entity.player.impl.LunarPlayerMP;
-import gdx.lunar.entity.player.mp.LunarNetworkEntityPlayer;
 import gdx.lunar.network.handlers.ConnectionHandlers;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
+import lunar.shared.entity.player.impl.LunarPlayerMP;
+import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 /**
  * Default implementation of {@link gdx.lunar.network.AbstractConnection}
@@ -39,21 +39,22 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleCreatePlayer(SPacketCreatePlayer packet) {
-        final LunarNetworkEntityPlayer player = new LunarPlayerMP(true);
-        player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
-        player.getConfig().setConfig(16, 16, (1 / 16.0f));
-        player.spawnEntityInWorld(local.getInstance().worldIn);
-
-        if (handlers.containsKey(ConnectionHandlers.CREATE_PLAYER))
+        if (handlers.containsKey(ConnectionHandlers.CREATE_PLAYER)) {
             handlers.get(ConnectionHandlers.CREATE_PLAYER).accept(packet);
+        } else {
+            final LunarNetworkEntityPlayer player = new LunarPlayerMP(true);
+            player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
+            player.spawnEntityInWorld(local.getInstance().worldIn);
+        }
     }
 
     @Override
     public void handleRemovePlayer(SPacketRemovePlayer packet) {
-        this.local.getInstance().worldIn.removeEntityInWorld(packet.getEntityId(), true);
-
-        if (handlers.containsKey(ConnectionHandlers.REMOVE_PLAYER))
+        if (handlers.containsKey(ConnectionHandlers.REMOVE_PLAYER)) {
             handlers.get(ConnectionHandlers.REMOVE_PLAYER).accept(packet);
+        } else {
+            this.local.getInstance().worldIn.removeEntityInWorld(packet.getEntityId(), true);
+        }
     }
 
     @Override

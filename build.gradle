@@ -23,7 +23,7 @@ allprojects {
         gdxVersion = '1.10.0'
         roboVMVersion = '2.3.12'
         box2DLightsVersion = '1.5'
-        ashleyVersion = '1.7.3'
+        ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
         gdxControllersVersion = '2.1.0'
     }
@@ -62,5 +62,6 @@ project(":core") {
         api "com.badlogicgames.ashley:ashley:$ashleyVersion"
         compile group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
         compile project(path: ':Protocol', configuration: 'default')
+        compile project(path: ':Entity', configuration: 'default')
     }
 }

@@ -1,7 +1,6 @@
 package gdx.lunar.network;
 
 import com.badlogic.gdx.utils.Disposable;
-import gdx.lunar.entity.player.LunarEntityPlayer;
 import gdx.lunar.network.handlers.ConnectionHandlers;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.PacketFactory;
@@ -10,6 +9,7 @@ import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.client.*;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
+import lunar.shared.entity.player.LunarEntityPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +33,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
     // default is 50 ms
     protected float updateInterval = .05f;
     protected long lastUpdate = System.currentTimeMillis();
+    protected long lastPacketReceived;
 
     // queue of packets
     protected final ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<>();
@@ -43,6 +44,14 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
     public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
         this.protocol = protocol;
+    }
+
+    public long getLastPacketReceived() {
+        return lastPacketReceived;
+    }
+
+    public void setLastPacketReceived(long lastPacketReceived) {
+        this.lastPacketReceived = lastPacketReceived;
     }
 
     public void setLocalPlayer(LunarEntityPlayer local) {
@@ -201,7 +210,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
         }
     }
 
-    protected void flush() {
+    public void flush() {
         for (Packet packet = queue.poll(); packet != null; packet = queue.poll()) {
             channel.write(packet);
         }

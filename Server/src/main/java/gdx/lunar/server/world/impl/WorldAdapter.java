@@ -1,33 +1,32 @@
 package gdx.lunar.server.world.impl;
 
-import gdx.lunar.protocol.packet.server.SPacketApplyEntityBodyForce;
 import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
 import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
-import gdx.lunar.server.game.entity.player.LunarPlayer;
-import gdx.lunar.server.game.entity.position.EntityVelocityComponent;
-import gdx.lunar.server.world.World;
-import gdx.lunar.server.world.config.WorldConfiguration;
+import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import gdx.lunar.server.world.ServerWorld;
+import gdx.lunar.server.world.config.ServerWorldConfiguration;
 
 /**
- * Represents a basic world with packet processing and a default {@link gdx.lunar.server.world.config.WorldConfiguration}
+ * Represents a basic world with packet processing and a default {@link ServerWorldConfiguration}
  */
-public class WorldAdapter extends World {
+public class WorldAdapter extends ServerWorld {
 
-    public WorldAdapter(String worldName, WorldConfiguration configuration) {
-        super(worldName, configuration);
+    public WorldAdapter(ServerWorldConfiguration configuration, String worldName) {
+        super(configuration, worldName);
     }
 
     public WorldAdapter() {
-        super("WorldAdapter", new WorldConfiguration());
+        super(new ServerWorldConfiguration(), "TutorialWorld");
     }
 
     @Override
     public void tick() {
         final long now = System.currentTimeMillis();
 
-        for (LunarPlayer player : players.values()) {
+        for (LunarServerPlayerEntity player : players.values()) {
             // flush anything that was sent to the player
-            player.getConnection().flush();
+            player.getServerConnection().flush();
+
             if (!checkPlayerTimeout(now, player)) {
                 queuePlayerPosition(player);
                 queuePlayerVelocity(player);
@@ -36,30 +35,27 @@ public class WorldAdapter extends World {
         }
     }
 
-    private boolean checkPlayerTimeout(long now, LunarPlayer player) {
-        if (now - player.getConnection().getLastPacketReceived() >= configuration.getPlayerTimeoutMs()) {
-            player.getConnection().disconnect();
+    private boolean checkPlayerTimeout(long now, LunarServerPlayerEntity player) {
+        if (now - player.getServerConnection().getLastPacketReceived() >= configuration.getPlayerTimeoutMs()) {
+            System.err.println("Timed out: " + player.getEntityId());
+            //  player.getServerConnection().disconnect();
             return true;
         }
         return false;
     }
 
-    private void queuePlayerPosition(LunarPlayer player) {
+    private void queuePlayerPosition(LunarServerPlayerEntity player) {
         broadcast(player.getEntityId(),
                 new SPacketPlayerPosition(player.getEntityId(), player.getRotation(), player.getPosition().x, player.getPosition().y));
     }
 
-    private void queuePlayerVelocity(LunarPlayer player) {
+    private void queuePlayerVelocity(LunarServerPlayerEntity player) {
         broadcast(player.getEntityId(),
                 new SPacketPlayerVelocity(player.getEntityId(), player.getRotation(), player.getVelocity().x, player.getVelocity().y));
     }
 
-    private void queuePlayerForce(LunarPlayer player) {
-        if (player.getVelocityComponent().hasForceApplied) {
-            final EntityVelocityComponent component = player.getVelocityComponent();
-            broadcast(player.getEntityId(), new SPacketApplyEntityBodyForce(player.getEntityId(),
-                    component.force.x, component.force.y, component.point.x, component.point.y));
-        }
+    private void queuePlayerForce(LunarServerPlayerEntity player) {
+        // TODO:
     }
 
 }

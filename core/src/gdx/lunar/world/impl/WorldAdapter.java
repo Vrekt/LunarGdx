@@ -3,11 +3,11 @@ package gdx.lunar.world.impl;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.World;
-import gdx.lunar.entity.player.LunarEntity;
-import gdx.lunar.entity.player.impl.LunarPlayer;
-import gdx.lunar.entity.player.impl.LunarPlayerMP;
 import gdx.lunar.world.LunarWorld;
 import gdx.lunar.world.WorldConfiguration;
+import lunar.shared.entity.player.LunarEntity;
+import lunar.shared.entity.player.impl.LunarPlayer;
+import lunar.shared.entity.player.impl.LunarPlayerMP;
 
 /**
  * Represents a basic (default) world.

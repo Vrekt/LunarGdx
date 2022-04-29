@@ -2,12 +2,12 @@ package gdx.lunar.network;
 
 import com.badlogic.gdx.Gdx;
 import gdx.lunar.Lunar;
-import gdx.lunar.entity.drawing.Rotation;
-import gdx.lunar.entity.network.NetworkEntity;
-import gdx.lunar.entity.player.LunarNetworkEntityPlayer;
-import gdx.lunar.entity.player.impl.LunarNetworkPlayer;
-import gdx.lunar.entity.player.prop.PlayerProperties;
-import gdx.lunar.entity.player.LunarEntityPlayer;
+import gdx.lunar.shared.drawing.Rotation;
+import gdx.lunar.shared.network.NetworkEntity;
+import gdx.lunar.shared.player.LunarNetworkEntityPlayer;
+import gdx.lunar.shared.player.impl.LunarNetworkPlayer;
+import gdx.lunar.shared.player.prop.PlayerProperties;
+import gdx.lunar.shared.player.LunarEntityPlayer;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.client.CPacketSetProperties;
 import gdx.lunar.protocol.packet.server.*;

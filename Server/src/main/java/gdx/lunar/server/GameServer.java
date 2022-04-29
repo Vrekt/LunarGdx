@@ -2,8 +2,8 @@ package gdx.lunar.server;
 
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.server.configuration.LunarServerConfiguration;
-import gdx.lunar.server.game.entity.player.LunarPlayer;
-import gdx.lunar.server.network.AbstractConnection;
+import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import gdx.lunar.server.network.ServerAbstractConnection;
 
 /**
  * Represents a default game server implementation.
@@ -33,15 +33,14 @@ public class GameServer extends LunarServer {
     }
 
     @Override
-    public void handlePlayerDisconnect(LunarPlayer player) {
+    public void handlePlayerDisconnect(LunarServerPlayerEntity player) {
         super.handlePlayerDisconnect(player);
 
-        if (player.getWorld() != null)
-            player.getWorld().removePlayerInWorld(player);
+        if (player.getWorld() != null) player.getWorld().removeEntityInWorld(player);
     }
 
     @Override
-    public boolean handleJoinProcess(AbstractConnection connection) {
+    public boolean handleJoinProcess(ServerAbstractConnection connection) {
         this.connections.add(connection);
         return true;
     }

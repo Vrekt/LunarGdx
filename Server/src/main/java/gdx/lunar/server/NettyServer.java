@@ -4,8 +4,8 @@ import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.channel.ServerChannels;
 import gdx.lunar.protocol.codec.ProtocolPacketEncoder;
 import gdx.lunar.server.netty.codec.ClientProtocolPacketDecoder;
-import gdx.lunar.server.network.AbstractConnection;
-import gdx.lunar.server.network.PlayerConnection;
+import gdx.lunar.server.network.ServerAbstractConnection;
+import gdx.lunar.server.network.ServerPlayerConnection;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
@@ -33,7 +33,7 @@ public class NettyServer {
     private final String ip;
     private final int port;
 
-    private Supplier<AbstractConnection> connectionSupplier;
+    private Supplier<ServerAbstractConnection> connectionSupplier;
     private Supplier<LengthFieldBasedFrameDecoder> decoderSupplier;
     private final SslContext sslContext;
 
@@ -108,7 +108,7 @@ public class NettyServer {
         this.decoderSupplier = decoderSupplier;
     }
 
-    public void setConnectionSupplier(Supplier<AbstractConnection> connectionSupplier) {
+    public void setConnectionSupplier(Supplier<ServerAbstractConnection> connectionSupplier) {
         this.connectionSupplier = connectionSupplier;
     }
 
@@ -122,7 +122,7 @@ public class NettyServer {
      * @param channel the channel
      */
     private void handleSocketConnection(SocketChannel channel) {
-        final AbstractConnection connection = connectionSupplier == null ? new PlayerConnection(channel, server) : connectionSupplier.get();
+        final ServerAbstractConnection connection = connectionSupplier == null ? new ServerPlayerConnection(channel, server) : connectionSupplier.get();
         final LengthFieldBasedFrameDecoder decoder = this.decoderSupplier == null ? new ClientProtocolPacketDecoder(connection, protocol)
                 : decoderSupplier.get();
 

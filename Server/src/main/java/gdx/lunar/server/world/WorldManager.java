@@ -14,7 +14,7 @@ public abstract class WorldManager implements Disposable {
     /**
      * Map of all worlds
      */
-    protected final Map<String, World> worlds = new HashMap<>();
+    protected final Map<String, ServerWorld> worlds = new HashMap<>();
 
     public WorldManager() {
 
@@ -26,7 +26,7 @@ public abstract class WorldManager implements Disposable {
      * @param name  the name
      * @param world the world
      */
-    public void addWorld(String name, World world) {
+    public void addWorld(String name, ServerWorld world) {
         this.worlds.put(name, world);
     }
 
@@ -36,7 +36,7 @@ public abstract class WorldManager implements Disposable {
      * @param name the name
      * @return the world
      */
-    public World getWorld(String name) {
+    public ServerWorld getWorld(String name) {
         return worlds.get(name);
     }
 
@@ -47,7 +47,7 @@ public abstract class WorldManager implements Disposable {
     /**
      * @return all worlds
      */
-    public Collection<World> getWorlds() {
+    public Collection<ServerWorld> getWorlds() {
         return worlds.values();
     }
 
@@ -55,14 +55,14 @@ public abstract class WorldManager implements Disposable {
      * Update all worlds.
      */
     public void update(float delta) {
-        for (World value : worlds.values()) {
+        for (ServerWorld value : worlds.values()) {
             value.tick();
         }
     }
 
     @Override
     public void dispose() {
-        getWorlds().forEach(World::dispose);
+        getWorlds().forEach(ServerWorld::dispose);
         worlds.clear();
     }
 }

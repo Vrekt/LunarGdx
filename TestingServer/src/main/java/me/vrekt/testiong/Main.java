@@ -15,8 +15,11 @@ public class Main {
         final NettyServer server = new NettyServer("localhost", 6969, protocol, gameServer);
         server.bind();
 
-        gameServer.getWorldManager().addWorld("Athena", new WorldAdapter());
+        gameServer.getWorldManager().addWorld("TutorialWorld", new WorldAdapter());
         gameServer.start();
+
+        System.err.println("Server running.");
+
     }
 
 }
