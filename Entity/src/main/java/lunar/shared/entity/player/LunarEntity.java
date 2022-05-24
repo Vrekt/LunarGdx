@@ -74,6 +74,14 @@ public abstract class LunarEntity implements Disposable {
         getProperties().isMoving = moving;
     }
 
+
+    /**
+     * Load any assets with this entity.
+     */
+    public void load() {
+
+    }
+
     /**
      * Set the size of this entity
      *

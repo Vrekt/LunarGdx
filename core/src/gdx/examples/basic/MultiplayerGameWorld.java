@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.World;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
+import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import gdx.lunar.world.impl.WorldAdapter;
 import lunar.shared.entity.player.impl.LunarPlayer;
 import lunar.shared.entity.player.impl.LunarPlayerMP;
@@ -63,6 +64,18 @@ public final class MultiplayerGameWorld extends WorldAdapter {
         player.setConfig(16, 16, (1 / 16.0f));
         // spawn player in your local world.
         player.spawnEntityInWorld(this.player.getWorldIn(), packet.getX(), packet.getY());
+    }
+
+    /**
+     * Handle a network player leaving
+     *
+     * @param packet the packet
+     */
+    public void handlePlayerLeave(SPacketRemovePlayer packet) {
+        Gdx.app.log(BasicMultiplayerDemoGame.TAG, "Player " + packet.getEntityId() + " left.");
+        if (hasNetworkPlayer(packet.getEntityId())) {
+            removeEntityInWorld(packet.getEntityId(), true);
+        }
     }
 
 }

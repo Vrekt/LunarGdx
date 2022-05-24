@@ -11,11 +11,12 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import gdx.lunar.Lunar;
 import gdx.lunar.LunarClientServer;
-import gdx.lunar.network.PlayerConnection;
-import gdx.lunar.network.handlers.ConnectionHandlers;
+import gdx.lunar.network.types.ConnectionOption;
+import gdx.lunar.network.types.PlayerConnectionHandler;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
+import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import lunar.shared.entity.player.impl.LunarPlayerMP;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -66,6 +67,8 @@ public final class BasicMultiplayerDemoGame extends Game {
         // initialize our default protocol and connect to the remote server,
         final LunarProtocol protocol = new LunarProtocol(true);
         final LunarClientServer server = new LunarClientServer(new Lunar(), protocol, "localhost", 6969);
+        // set provider because we want {@link PlayerConnectionHandler}
+        server.setProvider(channel -> new PlayerConnectionHandler(channel, protocol));
         server.connect().join();
 
         // failed to connect, so exit() out.
@@ -75,12 +78,21 @@ public final class BasicMultiplayerDemoGame extends Game {
 
         // retrieve our players connection and create a new world and local player.
         Gdx.app.log(TAG, "Connected to the server successfully.");
-        final PlayerConnection connection = (PlayerConnection) server.getConnection();
+
+        final PlayerConnectionHandler connection = (PlayerConnectionHandler) server.getConnection();
         player.setConnection(connection);
 
+        // enable options we want Lunar to handle by default.
+        connection.enableOptions(
+                ConnectionOption.HANDLE_PLAYER_POSITION,
+                ConnectionOption.HANDLE_PLAYER_VELOCITY,
+                ConnectionOption.AUTHENTICATION,
+                ConnectionOption.HANDLE_PLAYER_FORCE);
+
         // register handlers in the world, this could also be in the player class if you choose.
-        connection.registerHandler(ConnectionHandlers.JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
-        connection.registerHandler(ConnectionHandlers.CREATE_PLAYER, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
+        connection.registerHandler(ConnectionOption.JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
+        connection.registerHandler(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
+        connection.registerHandler(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
 
         // once connected, spawn into local world but request server first.
         // world handles spawning the player.

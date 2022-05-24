@@ -99,6 +99,10 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
         this.rotation = angle;
     }
 
+    public void updateServerForce(float x, float y, float px, float py) {
+
+    }
+
     @Override
     public void update(float delta) {
         if (doPositionInterpolation) {

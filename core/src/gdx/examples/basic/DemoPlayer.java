@@ -38,16 +38,16 @@ public final class DemoPlayer extends LunarPlayer {
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             rotation = 0f;
-            setVelocity(0.0f, -moveSpeed, false);
+            setVelocity(0.0f, moveSpeed, false);
         } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             rotation = 1f;
-            setVelocity(0.0f, moveSpeed, false);
+            setVelocity(0.0f, -moveSpeed, false);
         } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             rotation = 2f;
-            setVelocity(moveSpeed, 0.0f, false);
+            setVelocity(-moveSpeed, 0.0f, false);
         } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             rotation = 3f;
-            setVelocity(-moveSpeed, 0.0f, false);
+            setVelocity(moveSpeed, 0.0f, false);
         }
 
     }

@@ -1,7 +1,7 @@
 package gdx.lunar.network;
 
 import com.badlogic.gdx.utils.Disposable;
-import gdx.lunar.network.handlers.ConnectionHandlers;
+import gdx.lunar.network.types.ConnectionOption;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.PacketFactory;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
@@ -39,7 +39,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
     protected final ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<>();
     protected final ExecutorService single = Executors.newCachedThreadPool();
 
-    protected final Map<ConnectionHandlers, Consumer<Packet>> handlers = new HashMap<>();
+    protected final Map<ConnectionOption, Consumer<Packet>> handlers = new HashMap<>();
 
     public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
@@ -78,7 +78,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * @param handler the handler
      * @param c       the consumer
      */
-    public void registerHandler(ConnectionHandlers handler, Consumer<Packet> c) {
+    public void registerHandler(ConnectionOption handler, Consumer<Packet> c) {
         handlers.put(handler, c);
     }
 

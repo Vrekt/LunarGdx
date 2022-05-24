@@ -1,18 +1,18 @@
 package gdx.lunar.network;
 
-import gdx.lunar.network.handlers.ConnectionHandlers;
+import gdx.lunar.network.types.ConnectionOption;
 import gdx.lunar.protocol.LunarProtocol;
+import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.server.*;
+import gdx.lunar.world.LunarWorld;
 import io.netty.channel.Channel;
-import lunar.shared.entity.player.impl.LunarPlayerMP;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 /**
  * Default implementation of {@link gdx.lunar.network.AbstractConnection}
  */
 public class PlayerConnection extends AbstractConnection {
 
-    private boolean authenticationFailed = false;
+    protected boolean authenticationFailed = false;
 
     public PlayerConnection(Channel channel, LunarProtocol protocol) {
         super(channel, protocol);
@@ -20,6 +20,39 @@ public class PlayerConnection extends AbstractConnection {
 
     public boolean isAuthenticationFailed() {
         return authenticationFailed;
+    }
+
+    protected boolean inWorld() {
+        return local.getInstance().worldIn != null;
+    }
+
+    protected LunarWorld<?, ?, ?> getWorldIn() {
+        return local.getInstance().worldIn;
+    }
+
+    /**
+     * Verify local player is in a world and a network player exists
+     *
+     * @param id network player ID
+     * @return {@code true} if so
+     */
+    protected boolean verifyPlayerExists(int id) {
+        return inWorld() && getWorldIn().hasNetworkPlayer(id);
+    }
+
+    /**
+     * Handle an incoming packet to the handlers list.
+     *
+     * @param handler handler
+     * @param packet  packet
+     * @return {@code true} if handled.
+     */
+    protected boolean handle(ConnectionOption handler, Packet packet) {
+        if (handlers.containsKey(handler)) {
+            handlers.get(handler).accept(packet);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -34,54 +67,38 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleDisconnect(SPacketDisconnect packet) {
+        handle(ConnectionOption.DISCONNECT, packet);
         this.close();
     }
 
     @Override
     public void handleCreatePlayer(SPacketCreatePlayer packet) {
-        if (handlers.containsKey(ConnectionHandlers.CREATE_PLAYER)) {
-            handlers.get(ConnectionHandlers.CREATE_PLAYER).accept(packet);
-        } else {
-            final LunarNetworkEntityPlayer player = new LunarPlayerMP(true);
-            player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
-            player.spawnEntityInWorld(local.getInstance().worldIn);
-        }
+        handle(ConnectionOption.HANDLE_PLAYER_JOIN, packet);
     }
 
     @Override
     public void handleRemovePlayer(SPacketRemovePlayer packet) {
-        if (handlers.containsKey(ConnectionHandlers.REMOVE_PLAYER)) {
-            handlers.get(ConnectionHandlers.REMOVE_PLAYER).accept(packet);
-        } else {
-            this.local.getInstance().worldIn.removeEntityInWorld(packet.getEntityId(), true);
-        }
+        handle(ConnectionOption.HANDLE_PLAYER_LEAVE, packet);
     }
 
     @Override
     public void handlePlayerPosition(SPacketPlayerPosition packet) {
-        if (!local.getInstance().worldIn.hasNetworkPlayer(packet.getEntityId())) return;
-
-        this.local.getInstance().worldIn.getNetworkPlayer(packet.getEntityId()).updateServerPosition(packet.getX(), packet.getY(), packet.getRotation());
+        handle(ConnectionOption.HANDLE_PLAYER_POSITION, packet);
     }
 
     @Override
     public void handlePlayerVelocity(SPacketPlayerVelocity packet) {
-        if (!local.getInstance().worldIn.hasNetworkPlayer(packet.getEntityId())) return;
-
-        this.local.getInstance().worldIn.getNetworkPlayer(packet.getEntityId()).updateServerVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
+        handle(ConnectionOption.HANDLE_PLAYER_VELOCITY, packet);
     }
 
     @Override
     public void handleJoinWorld(SPacketJoinWorld packet) {
-        if (handlers.containsKey(ConnectionHandlers.JOIN_WORLD))
-            handlers.get(ConnectionHandlers.JOIN_WORLD).accept(packet);
+        handle(ConnectionOption.JOIN_WORLD, packet);
     }
 
     @Override
     public void handleEntityBodyForce(SPacketApplyEntityBodyForce packet) {
-        //  if (!local.getInstance().worldIn.hasNetworkPlayer(packet.getEntityId())) return;
-
-        //     local.getInstance().worldIn.getNetworkPlayer(packet.getEntityId()).updateForces(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
+        handle(ConnectionOption.HANDLE_PLAYER_FORCE, packet);
     }
 
     @Override
