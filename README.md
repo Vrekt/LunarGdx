@@ -4,18 +4,24 @@
 
 Lunar is a networking library for LibGDX. With lunar you can easily create multiplayer games quickly and efficiently. Lunar provides many common utilities such as entities, worlds, protocol, and box2d support!
 
-**Lunar is still very early, so please be nice :)**
+**Lunar is still in very early development, expect many, many changes.**
 
-#### Actual Game Demo
-https://github.com/Vrekt/OasisGame
+#### What's Coming
+Lunar has been majorly overhauled since last release in October. None of the documentation reflects the new API.
+
+I will soon be updating this repo with all current information and more examples once a few more issues are ironed out.
+
+Until then you can;
+- a) Use the old release from October, all current documentation will show you how to use Lunar.
+- b) Go in blind and use current repo and try to build something. The code does have comments and documentation spread around.
+- c) Wait.
+
 
 #### Features
-- Player and entity renderers with animation loading.
-- Partially Networked Box2d worlds.
+- Networked box2d worlds.. (WIP)
 - Networked player moving and velocity.
 - Networked player creation/removing.
-- Game lobbies and worlds.
-- Basic entity support
+- Ashley entity system
 - A expandable protocol with SSL support.
 - Very customizable and extendable.
 
