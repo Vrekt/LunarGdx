@@ -71,6 +71,10 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
         }
 
         final ServerWorld world = server.getWorldManager().getWorld(packet.getWorldName());
+        if (world.isWorldFull()) {
+            return;
+        }
+
         this.player = new LunarServerPlayerEntity(true, server, this);
         this.player.setEntityName(packet.getUsername());
         this.player.setWorldIn(world);
@@ -129,10 +133,10 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
         if (disconnected) return;
         this.disconnected = true;
 
-        // if (server != null) server.removePlayerConnection(this);
+        if (server != null) server.removePlayerConnection(this);
         if (player != null && player.inWorld()) player.getWorld().removePlayerInWorld(player);
 
-        //   channel.pipeline().remove(this);
+        channel.pipeline().remove(this);
         channel.close();
     }
 }

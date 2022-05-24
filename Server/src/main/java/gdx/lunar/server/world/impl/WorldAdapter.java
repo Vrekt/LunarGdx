@@ -16,32 +16,24 @@ public class WorldAdapter extends ServerWorld {
     }
 
     public WorldAdapter() {
-        super(new ServerWorldConfiguration(), "TutorialWorld");
+        super(new ServerWorldConfiguration(), "WorldAdapter");
     }
 
     @Override
     public void tick() {
-        final long now = System.currentTimeMillis();
-
         for (LunarServerPlayerEntity player : players.values()) {
             // flush anything that was sent to the player
             player.getServerConnection().flush();
 
-            if (!checkPlayerTimeout(now, player)) {
+            if (!isTimedOut(player)) {
                 queuePlayerPosition(player);
                 queuePlayerVelocity(player);
                 queuePlayerForce(player);
+            } else {
+                timeoutPlayer(player);
+                player.dispose();
             }
         }
-    }
-
-    private boolean checkPlayerTimeout(long now, LunarServerPlayerEntity player) {
-        if (now - player.getServerConnection().getLastPacketReceived() >= configuration.getPlayerTimeoutMs()) {
-            System.err.println("Timed out: " + player.getEntityId());
-            //  player.getServerConnection().disconnect();
-            return true;
-        }
-        return false;
     }
 
     private void queuePlayerPosition(LunarServerPlayerEntity player) {

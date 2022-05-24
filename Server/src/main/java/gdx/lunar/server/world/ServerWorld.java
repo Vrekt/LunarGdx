@@ -85,26 +85,18 @@ public abstract class ServerWorld extends LunarWorldSkeleton<LunarServerPlayerEn
      * @param y      Y
      */
     public void spawnPlayerInWorld(LunarServerPlayerEntity player, float x, float y) {
-        System.err.println(player.getName());
-        System.err.println(player.getEntityId());
-        System.err.println(players.size());
+        player.setWorldIn(this);
+        player.setPosition(x, y, true);
 
-        try {
-            player.setWorldIn(this);
-            player.setPosition(x, y, true);
+        // send all current players in this world to the connecting player.
+        for (LunarServerPlayerEntity other : players.values()) other.sendPlayerToPlayer(player);
 
-            // send all current players in this world to the connecting player.
-            for (LunarServerPlayerEntity other : players.values()) other.sendPlayerToOtherPlayer(player);
+        // broadcast the joining of this player to others.
+        broadcastPacketImmediately(player.getEntityId(),
+                new SPacketCreatePlayer(player.getName(), player.getEntityId(), x, y));
 
-            // broadcast the joining of this player to others.
-            broadcastPacketImmediately(player.getEntityId(),
-                    new SPacketCreatePlayer(player.getName(), player.getEntityId(), x, y));
-
-            // add this new player to the list
-            players.put(player.getEntityId(), player);
-        } catch (Exception a) {
-            a.printStackTrace();
-        }
+        // add this new player to the list
+        players.put(player.getEntityId(), player);
     }
 
     /**

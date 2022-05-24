@@ -99,7 +99,7 @@ public class LunarServerPlayerEntity extends LunarNetworkEntityPlayer {
      *
      * @param other the other player
      */
-    public void sendPlayerToOtherPlayer(LunarServerPlayerEntity other) {
+    public void sendPlayerToPlayer(LunarServerPlayerEntity other) {
         other.getServerConnection().sendImmediately(new SPacketCreatePlayer(getName(), getEntityId(), getPosition().x, getPosition().y));
     }
 

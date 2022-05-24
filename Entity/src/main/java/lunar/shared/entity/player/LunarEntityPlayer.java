@@ -7,7 +7,6 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
-import gdx.lunar.protocol.packet.client.CPacketDisconnect;
 import gdx.lunar.world.LunarWorld;
 import lunar.shared.entity.drawing.LunarAnimatedEntity;
 import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
@@ -28,6 +27,8 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
 
     // connection for this player
     protected AbstractConnection connection;
+    protected long positionSendRate, velocitySendRate;
+    protected long lastPosition, lastVelocity;
 
     public LunarEntityPlayer(Entity entity, boolean initializeComponents) {
         super(entity, initializeComponents);
@@ -53,6 +54,11 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
      */
     public void setIgnorePlayerCollision(boolean ignorePlayerCollision) {
         this.ignorePlayerCollision = ignorePlayerCollision;
+    }
+
+    public void setNetworkSendRatesInMs(long velocitySendRate, long positionSendRate) {
+        this.velocitySendRate = velocitySendRate;
+        this.positionSendRate = positionSendRate;
     }
 
     /**
@@ -168,9 +174,17 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     @Override
     public void update(float delta) {
         if (connection != null) {
+            final long now = System.currentTimeMillis();
+            if (lastPosition == 0 || (now - lastPosition) >= positionSendRate) {
+                connection.updatePosition(rotation, getX(), getY());
+                lastPosition = now;
+            }
+
+            if (lastVelocity == 0 || (now - lastVelocity) >= velocitySendRate) {
+                connection.updateVelocity(rotation, getVelocity().x, getVelocity().y);
+                lastVelocity = now;
+            }
             connection.update();
-            connection.updatePosition(rotation, getX(), getY());
-            connection.updateVelocity(rotation, getVelocity().x, getVelocity().y);
         }
     }
 
@@ -185,7 +199,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
      */
     public void applyForce(float fx, float fy, float px, float py, boolean wake) {
         getBody().applyForce(fx, fy, px, py, wake);
-        connection.send(new CPacketApplyEntityBodyForce(getProperties().entityId, fx, fy, px, py));
+        connection.sendImmediately(new CPacketApplyEntityBodyForce(getProperties().entityId, fx, fy, px, py));
     }
 
 }

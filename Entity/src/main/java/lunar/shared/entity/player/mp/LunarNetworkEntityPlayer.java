@@ -76,14 +76,14 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
         // interpolate to position if too far away (de sync)
         if (dst >= interpolateDesyncDistance) {
             if (snapToPositionIfDesync) {
-                // setPosition(x, y, true);
+                setPosition(x, y, true);
             } else {
                 doPositionInterpolation = true;
                 interpolateToX = x;
                 interpolateToY = y;
             }
         } else {
-
+            // TODO: ??
         }
 
         this.rotation = angle;
@@ -117,11 +117,11 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
             // update body position.
             final float diffX = body.getPosition().x - interpolateToX;
             final float diffY = body.getPosition().y - interpolateToY;
-            // body.setLinearVelocity(diffX * interpolateAlpha, diffY * interpolateAlpha);
-            //  setPosition(body.getPosition().x, body.getPosition().y, false);
+            body.setLinearVelocity(diffX * interpolateAlpha, diffY * interpolateAlpha);
+            setPosition(body.getPosition().x, body.getPosition().y, false);
 
             doPositionInterpolation = false;
-            //  return;
+            return;
         }
 
         // update velocity and set player position.

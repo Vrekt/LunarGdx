@@ -100,7 +100,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * @param y        Y
      */
     public void updatePosition(float rotation, float x, float y) {
-        this.send(new CPacketPosition(rotation, x, y));
+        this.sendImmediately(new CPacketPosition(rotation, x, y));
     }
 
     /**
@@ -111,7 +111,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * @param velY     Y
      */
     public void updateVelocity(float rotation, float velX, float velY) {
-        this.send(new CPacketVelocity(rotation, velX, velY));
+        this.sendImmediately(new CPacketVelocity(rotation, velX, velY));
     }
 
     /**

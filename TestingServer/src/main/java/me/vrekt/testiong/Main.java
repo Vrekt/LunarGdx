@@ -3,6 +3,7 @@ package me.vrekt.testiong;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.server.GameServer;
 import gdx.lunar.server.NettyServer;
+import gdx.lunar.server.world.config.ServerWorldConfiguration;
 import gdx.lunar.server.world.impl.WorldAdapter;
 
 public class Main {
@@ -15,7 +16,7 @@ public class Main {
         final NettyServer server = new NettyServer("localhost", 6969, protocol, gameServer);
         server.bind();
 
-        gameServer.getWorldManager().addWorld("TutorialWorld", new WorldAdapter());
+        gameServer.getWorldManager().addWorld("TutorialWorld", new WorldAdapter(new ServerWorldConfiguration(), "TutorialWorld"));
         gameServer.start();
 
         System.err.println("Server running.");

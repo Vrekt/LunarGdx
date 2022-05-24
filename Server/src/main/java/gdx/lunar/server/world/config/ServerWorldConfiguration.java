@@ -13,7 +13,7 @@ public class ServerWorldConfiguration {
     protected int maxEntities = 100;
 
     // how long a player can go until timing out (no packet sends)
-    protected long playerTimeoutMs = 999999999;
+    protected long playerTimeoutMs = 3000;
 
     public ServerWorldConfiguration(int maxPacketsPerTick, int capacity, int maxEntities, long playerTimeoutMs) {
         this.maxPacketsPerTick = maxPacketsPerTick;
