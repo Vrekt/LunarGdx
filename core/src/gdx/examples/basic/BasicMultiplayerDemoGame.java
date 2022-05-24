@@ -60,6 +60,8 @@ public final class BasicMultiplayerDemoGame extends Game {
         world = new MultiplayerGameWorld(player, new World(Vector2.Zero, true), this);
         // add default world systems
         world.addWorldSystems();
+        // ignore player collisions
+        world.addDefaultPlayerCollisionListener();
 
         // initialize our default protocol and connect to the remote server,
         final LunarProtocol protocol = new LunarProtocol(true);

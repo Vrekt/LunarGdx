@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.network.AbstractConnection;
+import lunar.shared.entity.contact.PlayerCollisionListener;
 import lunar.shared.entity.player.LunarEntity;
 import lunar.shared.entity.player.LunarEntityPlayer;
 import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
@@ -70,6 +71,13 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         this.world = world;
         this.configuration = configuration;
         this.engine = engine;
+    }
+
+    /**
+     * Add the default {@link  PlayerCollisionListener} to ignore player collisions
+     */
+    public void addDefaultPlayerCollisionListener() {
+        world.setContactListener(new PlayerCollisionListener());
     }
 
     /**

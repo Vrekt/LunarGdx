@@ -20,7 +20,7 @@ public final class MultiplayerGameWorld extends WorldAdapter {
 
     @Override
     public void renderWorld(SpriteBatch batch) {
-
+        // This is not used here, but you could. Regardless we handle all rendering in main game loop.
     }
 
     /**
@@ -57,6 +57,7 @@ public final class MultiplayerGameWorld extends WorldAdapter {
         final LunarPlayerMP player = new LunarPlayerMP(true);
         // load player assets.
 
+        player.setIgnorePlayerCollision(true);
         player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
         // set your local game properties
         player.setConfig(16, 16, (1 / 16.0f));

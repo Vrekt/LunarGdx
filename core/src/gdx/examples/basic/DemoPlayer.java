@@ -18,6 +18,7 @@ public final class DemoPlayer extends LunarPlayer {
         setFixedRotation(false);
         setHasMoved(true);
         setNetworkSendRatesInMs(10, 10);
+        setIgnorePlayerCollision(true);
 
         // default player texture
         putRegion("player", playerTexture);
