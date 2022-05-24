@@ -15,7 +15,7 @@ public abstract class ServerConfiguration {
 
     // Default amount of time to sleep after each tick
     // only if the server is not behind.
-    public long tickSleepTime = 5;
+    public long tickSleepTime = 1;
     // allow players to join worlds before setting their username.
     public boolean allowJoinWorldBeforeSetUsername = false;
     public boolean allowChangeUsername = false;

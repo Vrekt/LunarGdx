@@ -146,28 +146,6 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
         this.send(new CPacketSetProperties(username));
     }
 
-    public void createLobby() {
-        this.send(new CPacketCreateLobby());
-    }
-
-    /**
-     * Join a lobby by name
-     *
-     * @param lobbyName the name
-     */
-    public void sendJoinLobby(String lobbyName) {
-        //  this.send(new CPacketJoinLobby(alloc(), lobbyName));
-    }
-
-    /**
-     * Join a lobby by ID.
-     *
-     * @param lobbyId lobby id.
-     */
-    public void sendJoinLobby(int lobbyId) {
-        //   this.send(new CPacketJoinLobby(alloc(), lobbyId));
-    }
-
     /**
      * @return if this connection is connected in any way.
      */

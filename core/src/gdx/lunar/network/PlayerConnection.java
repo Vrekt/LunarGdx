@@ -79,9 +79,9 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleEntityBodyForce(SPacketApplyEntityBodyForce packet) {
-        if (!local.getInstance().worldIn.hasNetworkPlayer(packet.getEntityId())) return;
+        //  if (!local.getInstance().worldIn.hasNetworkPlayer(packet.getEntityId())) return;
 
-        local.getInstance().worldIn.getNetworkPlayer(packet.getEntityId()).updateForces(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
+        //     local.getInstance().worldIn.getNetworkPlayer(packet.getEntityId()).updateForces(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
     }
 
     @Override
