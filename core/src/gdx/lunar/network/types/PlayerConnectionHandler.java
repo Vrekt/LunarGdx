@@ -1,5 +1,6 @@
 package gdx.lunar.network.types;
 
+import com.badlogic.gdx.Gdx;
 import gdx.lunar.network.PlayerConnection;
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.Packet;
@@ -54,7 +55,7 @@ public class PlayerConnectionHandler extends PlayerConnection {
 
     @Override
     public void handleDisconnect(SPacketDisconnect packet) {
-        handle(ConnectionOption.DISCONNECT, packet);
+        handle(ConnectionOption.HANDLE_DISCONNECT, packet);
         this.close();
     }
 
@@ -109,10 +110,16 @@ public class PlayerConnectionHandler extends PlayerConnection {
 
     @Override
     public void handleSetEntityProperties(SPacketSetEntityProperties packet) {
-        if (!verifyPlayerExists(packet.getEntityId()) || handle(ConnectionOption.SET_ENTITY_PROPERTIES, packet))
+        if (!verifyPlayerExists(packet.getEntityId()) || handle(ConnectionOption.HANDLE_SET_ENTITY_PROPERTIES, packet))
             return;
 
         getWorldIn().getNetworkPlayer(packet.getEntityId()).setProperties(packet.getEntityName(), packet.getEntityId());
+    }
+
+    @Override
+    public void handleWorldInvalid(SPacketWorldInvalid packet) {
+        if (handle(ConnectionOption.HANDLE_WORLD_INVALID, packet)) return;
+        Gdx.app.log("PlayerConnectionHandler", "World " + packet.getWorldName() + " does not exist! (" + packet.getReason() + ")");
     }
 
     @Override

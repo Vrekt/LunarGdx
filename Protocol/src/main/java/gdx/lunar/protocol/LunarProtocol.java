@@ -131,6 +131,7 @@ public class LunarProtocol {
         server.put(SPacketJoinLobby.PID, (buf, handler) -> SPacketJoinLobby.handle(handler, buf));
         server.put(SPacketEnterInstance.PID, (buf, handler) -> SPacketEnterInstance.handle(handler, buf));
         server.put(SPacketPlayerEnterInstance.PID, (buf, handler) -> SPacketPlayerEnterInstance.handle(handler, buf));
+        server.put(SPacketWorldInvalid.PID, (buf, handler) -> SPacketWorldInvalid.handle(handler, buf));
     }
 
     /**

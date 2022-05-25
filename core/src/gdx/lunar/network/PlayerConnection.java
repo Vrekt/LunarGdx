@@ -67,7 +67,7 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleDisconnect(SPacketDisconnect packet) {
-        handle(ConnectionOption.DISCONNECT, packet);
+        handle(ConnectionOption.HANDLE_DISCONNECT, packet);
         this.close();
     }
 
@@ -93,7 +93,7 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleJoinWorld(SPacketJoinWorld packet) {
-        handle(ConnectionOption.JOIN_WORLD, packet);
+        handle(ConnectionOption.HANDLE_JOIN_WORLD, packet);
     }
 
     @Override
@@ -113,7 +113,12 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleSetEntityProperties(SPacketSetEntityProperties packet) {
-        handle(ConnectionOption.SET_ENTITY_PROPERTIES, packet);
+        handle(ConnectionOption.HANDLE_SET_ENTITY_PROPERTIES, packet);
+    }
+
+    @Override
+    public void handleWorldInvalid(SPacketWorldInvalid packet) {
+        handle(ConnectionOption.HANDLE_WORLD_INVALID, packet);
     }
 
     @Override

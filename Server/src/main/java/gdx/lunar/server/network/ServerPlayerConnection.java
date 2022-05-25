@@ -5,6 +5,7 @@ import gdx.lunar.protocol.packet.client.*;
 import gdx.lunar.protocol.packet.server.SPacketApplyEntityBodyForce;
 import gdx.lunar.protocol.packet.server.SPacketAuthentication;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
+import gdx.lunar.protocol.packet.server.SPacketWorldInvalid;
 import gdx.lunar.server.LunarServer;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.world.ServerWorld;
@@ -67,7 +68,11 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
 
     @Override
     public void handleJoinWorld(CPacketJoinWorld packet) {
-        if (packet.getUsername() == null || !server.getWorldManager().worldExists(packet.getWorldName())) {
+        if (packet.getUsername() == null) {
+            this.sendImmediately(new SPacketWorldInvalid(packet.getWorldName(), "Invalid username."));
+            return;
+        } else if (!server.getWorldManager().worldExists(packet.getWorldName())) {
+            this.sendImmediately(new SPacketWorldInvalid(packet.getWorldName(), "World does not exist."));
             return;
         }
 

@@ -119,4 +119,11 @@ public interface ServerPacketHandler {
      */
     void handlePlayerEnterInstance(SPacketPlayerEnterInstance packet);
 
+    /**
+     * The world is invalid or doesn't exist.
+     *
+     * @param packet the packet
+     */
+    void handleWorldInvalid(SPacketWorldInvalid packet);
+
 }

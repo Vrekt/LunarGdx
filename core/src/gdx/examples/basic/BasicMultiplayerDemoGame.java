@@ -86,11 +86,11 @@ public final class BasicMultiplayerDemoGame extends Game {
         connection.enableOptions(
                 ConnectionOption.HANDLE_PLAYER_POSITION,
                 ConnectionOption.HANDLE_PLAYER_VELOCITY,
-                ConnectionOption.AUTHENTICATION,
+                ConnectionOption.HANDLE_AUTHENTICATION,
                 ConnectionOption.HANDLE_PLAYER_FORCE);
 
         // register handlers in the world, this could also be in the player class if you choose.
-        connection.registerHandler(ConnectionOption.JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
+        connection.registerHandler(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
         connection.registerHandler(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
         connection.registerHandler(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
 
