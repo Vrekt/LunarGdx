@@ -24,6 +24,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     protected FixtureDef fixture;
     // if user specified custom rotation or density
     protected boolean hasSetFixedRotation, hasSetDensity;
+    protected float density;
 
     // connection for this player
     protected AbstractConnection connection;
@@ -36,6 +37,18 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
 
     public LunarEntityPlayer(boolean initializeComponents) {
         super(initializeComponents);
+
+        // for example
+        setFixedRotation(true);
+        definition = new BodyDef();
+        definition.type = BodyDef.BodyType.KinematicBody;
+        definition.angle = 6f;
+
+        fixture = new FixtureDef();
+        fixture.density = 5.0f;
+
+        // you can also use this instead.
+        setDensity(5.0f);
     }
 
     public void setConnection(AbstractConnection connection) {
@@ -106,8 +119,8 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
      * @param density density
      */
     public void setDensity(float density) {
-        this.fixture.density = density;
-        hasSetDensity = true;
+        this.density = density;
+        this.hasSetDensity = true;
     }
 
     /**
@@ -132,7 +145,8 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
             definition.type = BodyDef.BodyType.DynamicBody;
         }
 
-        this.fixture = new FixtureDef();
+        if (this.fixture == null)
+            this.fixture = new FixtureDef();
 
         if (!hasSetFixedRotation) definition.fixedRotation = true;
         definition.position.set(x + getWidthScaled() / 2f, y + getHeightScaled() / 2f);
@@ -144,7 +158,11 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
             shape = new PolygonShape();
             shape.setAsBox(getWidthScaled() / 2f, getHeightScaled() / 2f);
             fixture.shape = shape;
-            if (!hasSetDensity) fixture.density = 1.0f;
+            if (!hasSetDensity) {
+                fixture.density = 1.0f;
+            } else {
+                fixture.density = density;
+            }
         }
 
         body.createFixture(fixture).setUserData(this);

@@ -49,7 +49,7 @@ public class PlayerConnection extends AbstractConnection {
      */
     protected boolean handle(ConnectionOption handler, Packet packet) {
         if (handlers.containsKey(handler)) {
-            handlers.get(handler).accept(packet);
+            handlers.get(handler).handle(packet);
             return true;
         }
         return false;

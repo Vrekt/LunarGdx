@@ -1,5 +1,6 @@
 package gdx.lunar.network;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.network.types.ConnectionOption;
 import gdx.lunar.protocol.LunarProtocol;
@@ -31,7 +32,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
 
     // packet flush interval.
     // default is 50 ms
-    protected float updateInterval = .05f;
+    protected float updateInterval = 50f;
     protected long lastUpdate = System.currentTimeMillis();
     protected long lastPacketReceived;
 
@@ -39,7 +40,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
     protected final ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<>();
     protected final ExecutorService single = Executors.newCachedThreadPool();
 
-    protected final Map<ConnectionOption, Consumer<Packet>> handlers = new HashMap<>();
+    protected final Map<ConnectionOption, Handler> handlers = new HashMap<>();
 
     public AbstractConnection(Channel channel, LunarProtocol protocol) {
         this.channel = channel;
@@ -74,12 +75,24 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
 
     /**
      * Register a custom handler to handle certain packets that are incoming.
+     * This method is invoked from the network thread.
      *
      * @param handler the handler
      * @param c       the consumer
      */
-    public void registerHandler(ConnectionOption handler, Consumer<Packet> c) {
-        handlers.put(handler, c);
+    public void registerHandlerAsync(ConnectionOption handler, Consumer<Packet> c) {
+        handlers.put(handler, new Handler(c, true));
+    }
+
+    /**
+     * Register a custom handler to handle certain packets that are incoming.
+     * This method is invoked from the Main GDX thread.
+     *
+     * @param handler the handler
+     * @param c       the consumer
+     */
+    public void registerHandlerSync(ConnectionOption handler, Consumer<Packet> c) {
+        handlers.put(handler, new Handler(c, true));
     }
 
     /**
@@ -182,7 +195,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      */
     public void update() {
         if (System.currentTimeMillis() - lastUpdate
-                >= updateInterval * 1000) {
+                >= updateInterval) {
             single.execute(this::flush);
             lastUpdate = System.currentTimeMillis();
         }
@@ -206,4 +219,27 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
         flush();
         close();
     }
+
+    /**
+     * A basic packet handler.
+     */
+    protected static final class Handler {
+        private final Consumer<Packet> handler;
+        private final boolean isSync;
+
+        private Handler(Consumer<Packet> handler, boolean isSync) {
+            this.handler = handler;
+            this.isSync = isSync;
+        }
+
+        void handle(Packet packet) {
+            if (isSync) {
+                Gdx.app.postRunnable(() -> handler.accept(packet));
+            } else {
+                handler.accept(packet);
+            }
+        }
+
+    }
+
 }

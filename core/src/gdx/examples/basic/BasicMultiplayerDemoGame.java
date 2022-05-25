@@ -90,15 +90,9 @@ public final class BasicMultiplayerDemoGame extends Game {
                 ConnectionOption.HANDLE_PLAYER_FORCE);
 
         // register handlers in the world, this could also be in the player class if you choose.
-        connection.registerHandler(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
-        connection.registerHandler(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
-        connection.registerHandler(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
-
-        // once connected, spawn into local world but request server first.
-        // world handles spawning the player.
-        // remote server MUST have a world registered with the name.
-        player.getConnection().joinWorld("TutorialWorld", player.getName());
-
+        connection.registerHandlerAsync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
+        connection.registerHandlerAsync(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
+        connection.registerHandlerAsync(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
         // TODO: Implement a join world timeout if you desire.
     }
 
