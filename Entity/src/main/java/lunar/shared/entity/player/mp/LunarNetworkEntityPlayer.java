@@ -132,6 +132,5 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
         // update velocity and set player position.
         body.setLinearVelocity(getVelocity());
         setPosition(body.getPosition().x, body.getPosition().y, false);
-
     }
 }

@@ -7,9 +7,6 @@ import gdx.lunar.protocol.packet.server.SPacketDisconnect;
 import gdx.lunar.server.LunarServer;
 import gdx.lunar.server.network.ServerAbstractConnection;
 import gdx.lunar.server.world.ServerWorld;
-import gdx.lunar.world.LunarWorld;
-import lunar.shared.entity.player.LunarEntity;
-import lunar.shared.entity.player.LunarEntityPlayer;
 import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 /**
@@ -101,21 +98,6 @@ public class LunarServerPlayerEntity extends LunarNetworkEntityPlayer {
      */
     public void sendPlayerToPlayer(LunarServerPlayerEntity other) {
         other.getServerConnection().sendImmediately(new SPacketCreatePlayer(getName(), getEntityId(), getPosition().x, getPosition().y));
-    }
-
-    @Override
-    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
-        throw new UnsupportedOperationException("Fix thIS");
-    }
-
-    @Override
-    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world) {
-        throw new UnsupportedOperationException("Fix thIS");
-    }
-
-    @Override
-    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
-        throw new UnsupportedOperationException("Fix thIS");
     }
 
     @Override

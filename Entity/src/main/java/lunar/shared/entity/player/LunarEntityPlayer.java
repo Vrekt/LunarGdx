@@ -37,18 +37,6 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
 
     public LunarEntityPlayer(boolean initializeComponents) {
         super(initializeComponents);
-
-        // for example
-        setFixedRotation(true);
-        definition = new BodyDef();
-        definition.type = BodyDef.BodyType.KinematicBody;
-        definition.angle = 6f;
-
-        fixture = new FixtureDef();
-        fixture.density = 5.0f;
-
-        // you can also use this instead.
-        setDensity(5.0f);
     }
 
     public void setConnection(AbstractConnection connection) {

@@ -40,7 +40,19 @@ public class PlayerConnectionHandler extends PlayerConnection {
 
     @Override
     protected boolean handle(ConnectionOption handler, Packet packet) {
-        return super.handle(handler, packet) && options.getOrDefault(handler, false);
+        return super.handle(handler, packet);
+    }
+
+    protected boolean isLocalPlayer(int id) {
+        return id == local.getEntityId();
+    }
+
+    protected boolean shouldHandle(int id, Packet packet, ConnectionOption option) {
+        return handle(option, packet) || !isLocalPlayer(id) && !isOptionEnabled(option);
+    }
+
+    protected boolean shouldHandle(Packet packet, ConnectionOption option) {
+        return handle(option, packet) || !isOptionEnabled(option);
     }
 
     @Override
@@ -61,7 +73,7 @@ public class PlayerConnectionHandler extends PlayerConnection {
 
     @Override
     public void handleCreatePlayer(SPacketCreatePlayer packet) {
-        if (handle(ConnectionOption.HANDLE_PLAYER_JOIN, packet)) return;
+        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_JOIN)) return;
 
         final LunarPlayerMP player = new LunarPlayerMP(true);
         // load player assets.
@@ -77,32 +89,32 @@ public class PlayerConnectionHandler extends PlayerConnection {
 
     @Override
     public void handleRemovePlayer(SPacketRemovePlayer packet) {
-        if (handle(ConnectionOption.HANDLE_PLAYER_LEAVE, packet)) return;
-        if (verifyPlayerExists(packet.getEntityId())) {
+        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_LEAVE)) return;
+
+        if (verifyPlayerExists(packet.getEntityId()))
             getWorldIn().removeEntityInWorld(getWorldIn().getNetworkPlayer(packet.getEntityId()));
-        }
     }
 
     @Override
     public void handlePlayerPosition(SPacketPlayerPosition packet) {
-        if (!verifyPlayerExists(packet.getEntityId()) || handle(ConnectionOption.HANDLE_PLAYER_POSITION, packet))
-            return;
+        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_POSITION)) return;
+        if (!verifyPlayerExists(packet.getEntityId())) return;
 
         getWorldIn().getNetworkPlayer(packet.getEntityId()).updateServerPosition(packet.getX(), packet.getY(), packet.getRotation());
     }
 
     @Override
     public void handlePlayerVelocity(SPacketPlayerVelocity packet) {
-        if (!verifyPlayerExists(packet.getEntityId()) || handle(ConnectionOption.HANDLE_PLAYER_VELOCITY, packet))
-            return;
+        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_VELOCITY)) return;
+        if (!verifyPlayerExists(packet.getEntityId())) return;
 
         getWorldIn().getNetworkPlayer(packet.getEntityId()).updateServerVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
     }
 
     @Override
     public void handleEntityBodyForce(SPacketApplyEntityBodyForce packet) {
-        if (!verifyPlayerExists(packet.getEntityId()) || handle(ConnectionOption.HANDLE_PLAYER_FORCE, packet))
-            return;
+        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_FORCE)) return;
+        if (!verifyPlayerExists(packet.getEntityId())) return;
 
         getWorldIn().getNetworkPlayer(packet.getEntityId())
                 .updateServerForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
@@ -110,15 +122,15 @@ public class PlayerConnectionHandler extends PlayerConnection {
 
     @Override
     public void handleSetEntityProperties(SPacketSetEntityProperties packet) {
-        if (!verifyPlayerExists(packet.getEntityId()) || handle(ConnectionOption.HANDLE_SET_ENTITY_PROPERTIES, packet))
-            return;
+        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_SET_ENTITY_PROPERTIES)) return;
+        if (!verifyPlayerExists(packet.getEntityId())) return;
 
         getWorldIn().getNetworkPlayer(packet.getEntityId()).setProperties(packet.getEntityName(), packet.getEntityId());
     }
 
     @Override
     public void handleWorldInvalid(SPacketWorldInvalid packet) {
-        if (handle(ConnectionOption.HANDLE_WORLD_INVALID, packet)) return;
+        if (shouldHandle(packet, ConnectionOption.HANDLE_WORLD_INVALID)) return;
         Gdx.app.log("PlayerConnectionHandler", "World " + packet.getWorldName() + " does not exist! (" + packet.getReason() + ")");
     }
 

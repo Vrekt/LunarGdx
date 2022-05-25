@@ -23,11 +23,11 @@ public class PlayerConnection extends AbstractConnection {
     }
 
     protected boolean inWorld() {
-        return local.getInstance().worldIn != null;
+        return local.getWorldIn() != null;
     }
 
     protected LunarWorld<?, ?, ?> getWorldIn() {
-        return local.getInstance().worldIn;
+        return local.getWorldIn();
     }
 
     /**

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -39,6 +40,8 @@ public final class BasicMultiplayerDemoGame extends Game {
     // our local player
     private DemoPlayer player;
 
+    private TextureAtlas assets;
+
     // a basic world.
     private MultiplayerGameWorld world;
     public boolean ready;
@@ -48,7 +51,7 @@ public final class BasicMultiplayerDemoGame extends Game {
         Gdx.app.log(TAG, "Initializing multiplayer demo.");
 
         // default assets in this project
-        final TextureAtlas assets = new TextureAtlas(Gdx.files.internal("character.atlas"));
+        assets = new TextureAtlas(Gdx.files.internal("character.atlas"));
 
         batch = new SpriteBatch();
         initializeCameraAndViewport();
@@ -94,6 +97,12 @@ public final class BasicMultiplayerDemoGame extends Game {
         connection.registerHandlerAsync(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
         connection.registerHandlerAsync(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
         // TODO: Implement a join world timeout if you desire.
+
+        player.getConnection().joinWorld("TutorialWorld", player.getName());
+    }
+
+    public TextureRegion getTexture() {
+        return assets.findRegion("display");
     }
 
     /**
@@ -106,7 +115,7 @@ public final class BasicMultiplayerDemoGame extends Game {
         viewport = new ExtendViewport(Gdx.graphics.getWidth() / (1 / 16.0f), Gdx.graphics.getHeight() / (1 / 16.0f));
 
         // Set the initial camera position
-        camera.position.set(0.0f, 2.0f, 0.0f);
+        camera.position.set(0.0f, 0.0f, 0.0f);
         camera.update();
     }
 
@@ -115,14 +124,14 @@ public final class BasicMultiplayerDemoGame extends Game {
         ScreenUtils.clear(69 / 255f, 8f / 255f, 163f / 255, 0.5f);
 
         if (ready) {
-            world.update(Gdx.graphics.getDeltaTime());
+            final float delta = Gdx.graphics.getDeltaTime();
+            world.update(delta);
 
             // update our camera
             camera.position.set(player.getInterpolated().x, player.getInterpolated().y, 0f);
             camera.update();
 
             // update the world.
-            final float delta = Gdx.graphics.getDeltaTime();
 
             // begin batch
             batch.setProjectionMatrix(camera.combined);
@@ -133,7 +142,7 @@ public final class BasicMultiplayerDemoGame extends Game {
 
             // render other entities, with default player textures
             for (LunarPlayerMP player : world.getPlayers().values()) {
-                batch.draw(this.player.getRegion("player"), player.getX(), player.getY(),
+                batch.draw(player.getRegion("player"), player.getX(), player.getY(),
                         player.getWidthScaled(), player.getHeightScaled());
             }
 
@@ -159,6 +168,7 @@ public final class BasicMultiplayerDemoGame extends Game {
 
     @Override
     public void dispose() {
+        player.getConnection().dispose();
         batch.dispose();
         player.dispose();
     }

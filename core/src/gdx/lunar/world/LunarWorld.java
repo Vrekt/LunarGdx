@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
+import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
 import lunar.shared.entity.contact.PlayerCollisionListener;
 import lunar.shared.entity.player.LunarEntity;
 import lunar.shared.entity.player.LunarEntityPlayer;
@@ -185,6 +187,30 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
 
             world.step(configuration.stepTime, configuration.velocityIterations, configuration.positionIterations);
             accumulator -= configuration.stepTime;
+        }
+    }
+
+    public void updatePlayerPosition(int id, float x, float y, float angle) {
+        if (hasNetworkPlayer(id)) {
+            getNetworkPlayer(id).updateServerPosition(x, y, angle);
+        }
+    }
+
+    public void updatePlayerVelocity(int id, float x, float y, float angle) {
+        if (hasNetworkPlayer(id)) {
+            getNetworkPlayer(id).updateServerVelocity(x, y, angle);
+        }
+    }
+
+    public void updatePlayerPosition(SPacketPlayerPosition packet) {
+        if (hasNetworkPlayer(packet.getEntityId())) {
+            getNetworkPlayer(packet.getEntityId()).updateServerPosition(packet.getX(), packet.getY(), packet.getRotation());
+        }
+    }
+
+    public void updatePlayerVelocity(SPacketPlayerVelocity packet) {
+        if (hasNetworkPlayer(packet.getEntityId())) {
+            getNetworkPlayer(packet.getEntityId()).updateServerVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
         }
     }
 

@@ -57,6 +57,7 @@ public final class MultiplayerGameWorld extends WorldAdapter {
 
         final LunarPlayerMP player = new LunarPlayerMP(true);
         // load player assets.
+        player.putRegion("player", game.getTexture());
 
         player.setIgnorePlayerCollision(true);
         player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
