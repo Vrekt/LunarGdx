@@ -7,7 +7,9 @@ Lunar is a networking library for LibGDX. With lunar you can easily create multi
 **Lunar is still in very early development, expect many, many changes.**
 
 #### What's Coming
-Lunar has been majorly overhauled since last release in October. None of the documentation reflects the new API.
+Lunar has been majorly overhauled since last release in October. The wiki is being re-written for these changes.
+
+You can check out a demo game with the new API [here](https://github.com/Vrekt/LunarGdx/tree/main/core/src/gdx/examples/basic)
 
 I will soon be updating this repo with all current information and more examples once a few more issues are ironed out.
 
