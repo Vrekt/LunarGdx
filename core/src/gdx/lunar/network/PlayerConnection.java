@@ -113,7 +113,7 @@ public class PlayerConnection extends AbstractConnection {
 
     @Override
     public void handleSetEntityProperties(SPacketSetEntityProperties packet) {
-
+        handle(ConnectionOption.SET_ENTITY_PROPERTIES, packet);
     }
 
     @Override

@@ -108,18 +108,11 @@ public class PlayerConnectionHandler extends PlayerConnection {
     }
 
     @Override
-    public void handleSpawnEntity(SPacketSpawnEntity packet) {
-        // TODO
-    }
-
-    @Override
-    public void handleSpawnEntityDenied(SPacketSpawnEntityDenied packet) {
-        // TODO
-    }
-
-    @Override
     public void handleSetEntityProperties(SPacketSetEntityProperties packet) {
-        // TODO
+        if (!verifyPlayerExists(packet.getEntityId()) || handle(ConnectionOption.SET_ENTITY_PROPERTIES, packet))
+            return;
+
+        getWorldIn().getNetworkPlayer(packet.getEntityId()).setProperties(packet.getEntityName(), packet.getEntityId());
     }
 
     @Override

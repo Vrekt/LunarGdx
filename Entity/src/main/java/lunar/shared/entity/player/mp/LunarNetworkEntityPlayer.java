@@ -99,8 +99,16 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
         this.rotation = angle;
     }
 
+    /**
+     * Update the box2d body force.
+     *
+     * @param x  x
+     * @param y  y
+     * @param px point x
+     * @param py point y
+     */
     public void updateServerForce(float x, float y, float px, float py) {
-
+        body.applyForce(x, y, px, py, true);
     }
 
     @Override

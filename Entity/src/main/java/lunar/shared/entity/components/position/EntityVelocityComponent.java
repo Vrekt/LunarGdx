@@ -10,6 +10,15 @@ import com.badlogic.gdx.utils.Pool;
 public class EntityVelocityComponent implements Component, Pool.Poolable {
 
     public final Vector2 velocity = new Vector2(0, 0);
+    public float forceX, forceY, pointX, pointY;
+
+
+    public void setForce(float fx, float fy, float px, float py) {
+        this.forceX = fx;
+        this.forceY = fy;
+        this.pointX = px;
+        this.pointY = py;
+    }
 
     @Override
     public void reset() {

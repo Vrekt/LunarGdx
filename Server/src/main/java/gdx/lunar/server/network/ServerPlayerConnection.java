@@ -2,6 +2,7 @@ package gdx.lunar.server.network;
 
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.client.*;
+import gdx.lunar.protocol.packet.server.SPacketApplyEntityBodyForce;
 import gdx.lunar.protocol.packet.server.SPacketAuthentication;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
 import gdx.lunar.server.LunarServer;
@@ -93,8 +94,9 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
 
     @Override
     public void handleBodyForce(CPacketApplyEntityBodyForce packet) {
-        if (player != null) {
-            //    player.getVelocityComponent().setForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
+        if (player != null && player.getWorld().hasNetworkPlayer(packet.getEntityId())) {
+            player.getWorld().getNetworkPlayer(packet.getEntityId()).getVelocityComponent().setForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
+            player.getWorld().broadcast(packet.getEntityId(), new SPacketApplyEntityBodyForce(packet.getEntityId(), packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY()));
         }
     }
 
@@ -105,7 +107,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
 
     @Override
     public void handleSetProperties(CPacketSetProperties packet) {
-
+        player.setEntityName(packet.getUsername());
     }
 
     @Override

@@ -74,6 +74,10 @@ public abstract class LunarEntity implements Disposable {
         getProperties().isMoving = moving;
     }
 
+    public void setProperties(String name, int id) {
+        setEntityName(name);
+        setEntityId(id);
+    }
 
     /**
      * Load any assets with this entity.
@@ -298,6 +302,10 @@ public abstract class LunarEntity implements Disposable {
         return GlobalEntityMapper.instance.get(entity);
     }
 
+    public EntityVelocityComponent getVelocityComponent() {
+        return GlobalEntityMapper.velocity.get(entity);
+    }
+
     public boolean isInWorld() {
         return inWorld;
     }
@@ -355,7 +363,7 @@ public abstract class LunarEntity implements Disposable {
      */
     public void applyForce(float fx, float fy, float px, float py, boolean wake) {
         getBody().applyForce(fx, fy, px, py, wake);
-        getInstance().worldIn.getLocalConnection().send(new CPacketApplyEntityBodyForce(getProperties().entityId, fx, fy, px, py));
+        getWorldIn().getLocalConnection().send(new CPacketApplyEntityBodyForce(getEntityId(), fx, fy, px, py));
     }
 
 
