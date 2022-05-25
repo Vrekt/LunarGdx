@@ -363,7 +363,7 @@ public abstract class LunarEntity implements Disposable {
      */
     public void applyForce(float fx, float fy, float px, float py, boolean wake) {
         getBody().applyForce(fx, fy, px, py, wake);
-        getWorldIn().getLocalConnection().send(new CPacketApplyEntityBodyForce(getEntityId(), fx, fy, px, py));
+        getWorldIn().getLocalConnection().sendImmediately(new CPacketApplyEntityBodyForce(getEntityId(), fx, fy, px, py));
     }
 
 

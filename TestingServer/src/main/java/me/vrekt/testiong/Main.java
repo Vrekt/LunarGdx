@@ -20,7 +20,6 @@ public class Main {
         gameServer.start();
 
         System.err.println("Server running.");
-
     }
 
 }
