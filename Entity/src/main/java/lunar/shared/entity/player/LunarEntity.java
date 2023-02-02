@@ -121,6 +121,15 @@ public abstract class LunarEntity implements Disposable {
         GlobalEntityMapper.config.get(entity).setConfig(width, height, scaling);
     }
 
+    /**
+     * Set general configuration
+     *
+     * @param config the config
+     */
+    public void setConfig(EntityConfigurationComponent config) {
+        GlobalEntityMapper.config.get(entity).setConfig(config);
+    }
+
     public EntityConfigurationComponent getConfig() {
         return GlobalEntityMapper.config.get(entity);
     }

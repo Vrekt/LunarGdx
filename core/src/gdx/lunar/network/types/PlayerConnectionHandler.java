@@ -6,6 +6,7 @@ import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
+import lunar.shared.entity.components.config.EntityConfigurationComponent;
 import lunar.shared.entity.player.impl.LunarPlayerMP;
 
 import java.util.HashMap;
@@ -17,9 +18,14 @@ import java.util.Map;
 public class PlayerConnectionHandler extends PlayerConnection {
 
     private final Map<ConnectionOption, Boolean> options = new HashMap<>();
+    private EntityConfigurationComponent config;
 
     public PlayerConnectionHandler(Channel channel, LunarProtocol protocol) {
         super(channel, protocol);
+    }
+
+    public void setDefaultEntityConfiguration(EntityConfigurationComponent config) {
+        this.config = config;
     }
 
     public void enableOptions(ConnectionOption... options) {
@@ -79,10 +85,11 @@ public class PlayerConnectionHandler extends PlayerConnection {
         // load player assets.
         player.load();
 
+        // might be removed later.
         player.setIgnorePlayerCollision(true);
         player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
         // set your local game properties
-        player.setConfig(16, 16, (1 / 16.0f));
+        player.setConfig(config);
         // spawn player in your local world.
         player.spawnEntityInWorld(getWorldIn(), packet.getX(), packet.getY());
     }
