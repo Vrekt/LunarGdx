@@ -4,8 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketDisconnect;
-import gdx.lunar.server.LunarServer;
-import gdx.lunar.server.network.ServerAbstractConnection;
+import gdx.lunar.server.game.LunarServer;
+import gdx.lunar.server.network.connection.ServerAbstractConnection;
 import gdx.lunar.server.world.ServerWorld;
 import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 

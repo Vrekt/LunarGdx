@@ -52,7 +52,7 @@ public abstract class LunarWorldSkeleton<N extends LunarNetworkEntityPlayer, E e
      * @param y      location Y
      */
     public void spawnEntityInWorld(LunarEntity entity, float x, float y) {
-        selectType(entity);
+        addEntityToCollection(entity);
         entity.getPosition().set(x, y);
     }
 
@@ -62,17 +62,17 @@ public abstract class LunarWorldSkeleton<N extends LunarNetworkEntityPlayer, E e
      * @param entity the entity
      */
     public void spawnEntityInWorld(LunarEntity entity) {
-        selectType(entity);
+        addEntityToCollection(entity);
 
         entity.getPosition().set(spawn.x, spawn.y);
     }
 
     /**
-     * Add the entity to the internal lists
+     * Add an entity to the internal lists
      *
      * @param entity entity
      */
-    private void selectType(LunarEntity entity) {
+    public void addEntityToCollection(LunarEntity entity) {
         if (entity instanceof LunarNetworkEntityPlayer) {
             this.players.put(entity.getProperties().entityId, (N) entity);
         } else if (entity != null) {
@@ -88,7 +88,7 @@ public abstract class LunarWorldSkeleton<N extends LunarNetworkEntityPlayer, E e
     public void removeEntityInWorld(LunarEntity entity) {
         if (entity instanceof LunarNetworkEntityPlayer) {
             this.players.remove(entity.getProperties().entityId);
-        } else {
+        } else if (entity != null) {
             this.entities.remove(entity.getProperties().entityId);
         }
     }
@@ -124,7 +124,6 @@ public abstract class LunarWorldSkeleton<N extends LunarNetworkEntityPlayer, E e
     public float update(float d) {
         return d;
     }
-
 
     @Override
     public void dispose() {

@@ -20,12 +20,12 @@ allprojects {
     version = '1.0'
     ext {
         appName = "Lunar"
-        gdxVersion = '1.10.0'
-        roboVMVersion = '2.3.12'
+        gdxVersion = '1.11.0'
+        roboVMVersion = '2.3.16'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
-        gdxControllersVersion = '2.1.0'
+        gdxControllersVersion = '2.2.2'
     }
 
     repositories {
@@ -60,7 +60,7 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         api "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        compile group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
+        compile group: 'io.netty', name: 'netty-all', version: '4.1.87.Final'
         compile project(path: ':Protocol', configuration: 'default')
         compile project(path: ':Entity', configuration: 'default')
     }

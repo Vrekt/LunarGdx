@@ -1,16 +1,16 @@
-package gdx.lunar.server;
+package gdx.lunar.server.game;
 
 import gdx.lunar.protocol.LunarProtocol;
-import gdx.lunar.server.configuration.LunarServerConfiguration;
+import gdx.lunar.server.configuration.DefaultServerConfiguration;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
-import gdx.lunar.server.network.ServerAbstractConnection;
+import gdx.lunar.server.network.connection.ServerAbstractConnection;
 
 /**
  * Represents a default game server implementation.
  */
 public class GameServer extends LunarServer {
 
-    private final LunarServerConfiguration configuration = new LunarServerConfiguration();
+    private final DefaultServerConfiguration configuration = new DefaultServerConfiguration();
 
     public GameServer(LunarProtocol protocol, String gameVersion) {
         super(protocol);
@@ -23,7 +23,7 @@ public class GameServer extends LunarServer {
     }
 
     @Override
-    public LunarServerConfiguration getConfiguration() {
+    public DefaultServerConfiguration getConfiguration() {
         return configuration;
     }
 

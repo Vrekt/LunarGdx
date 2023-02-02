@@ -187,7 +187,7 @@ public abstract class ServerWorld extends LunarWorldSkeleton<LunarServerPlayerEn
 
     @Override
     public void dispose() {
-        players.clear();
+        super.dispose();
         queuedPackets.clear();
     }
 

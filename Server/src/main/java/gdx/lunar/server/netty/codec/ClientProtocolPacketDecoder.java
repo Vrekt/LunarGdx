@@ -1,7 +1,7 @@
 package gdx.lunar.server.netty.codec;
 
 import gdx.lunar.protocol.LunarProtocol;
-import gdx.lunar.server.network.ServerAbstractConnection;
+import gdx.lunar.server.network.connection.ServerAbstractConnection;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;

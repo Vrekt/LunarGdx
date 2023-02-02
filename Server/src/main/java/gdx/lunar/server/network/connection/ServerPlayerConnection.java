@@ -1,4 +1,4 @@
-package gdx.lunar.server.network;
+package gdx.lunar.server.network.connection;
 
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.client.*;
@@ -6,7 +6,7 @@ import gdx.lunar.protocol.packet.server.SPacketApplyEntityBodyForce;
 import gdx.lunar.protocol.packet.server.SPacketAuthentication;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.SPacketWorldInvalid;
-import gdx.lunar.server.LunarServer;
+import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.world.ServerWorld;
 import io.netty.channel.Channel;

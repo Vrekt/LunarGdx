@@ -1,10 +1,10 @@
-package gdx.lunar.server;
+package gdx.lunar.server.game;
 
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.server.configuration.ServerConfiguration;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.game.utilities.Disposable;
-import gdx.lunar.server.network.ServerAbstractConnection;
+import gdx.lunar.server.network.connection.ServerAbstractConnection;
 import gdx.lunar.server.world.WorldManager;
 import gdx.lunar.server.world.impl.WorldManagerAdapter;
 

@@ -1,11 +1,12 @@
-package gdx.lunar.server;
+package gdx.lunar.server.netty;
 
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.channel.ServerChannels;
 import gdx.lunar.protocol.codec.ProtocolPacketEncoder;
+import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.netty.codec.ClientProtocolPacketDecoder;
-import gdx.lunar.server.network.ServerAbstractConnection;
-import gdx.lunar.server.network.ServerPlayerConnection;
+import gdx.lunar.server.network.connection.ServerAbstractConnection;
+import gdx.lunar.server.network.connection.ServerPlayerConnection;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;

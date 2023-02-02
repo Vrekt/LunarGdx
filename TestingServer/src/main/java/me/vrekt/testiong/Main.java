@@ -1,8 +1,8 @@
 package me.vrekt.testiong;
 
 import gdx.lunar.protocol.LunarProtocol;
-import gdx.lunar.server.GameServer;
-import gdx.lunar.server.NettyServer;
+import gdx.lunar.server.game.GameServer;
+import gdx.lunar.server.netty.NettyServer;
 import gdx.lunar.server.world.config.ServerWorldConfiguration;
 import gdx.lunar.server.world.impl.WorldAdapter;
 

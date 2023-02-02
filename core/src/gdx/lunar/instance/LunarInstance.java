@@ -3,7 +3,6 @@ package gdx.lunar.instance;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import lunar.shared.entity.player.LunarEntityPlayer;
 
 /**
  * Represents a separate instance that could be networked.
@@ -52,23 +51,6 @@ public abstract class LunarInstance extends ScreenAdapter {
 
     public void setMaxFrameTime(float maxFrameTime) {
         this.maxFrameTime = maxFrameTime;
-    }
-
-    /**
-     * Step the internal physics world
-     *
-     * @param player the player to pre-update.
-     * @param delta  delta time
-     */
-    public void stepPhysicsWorld(LunarEntityPlayer player, float delta) {
-        accumulator += delta;
-
-        while (accumulator >= stepTime) {
-
-
-            world.step(stepTime, velocityIterations, positionIterations);
-            accumulator -= stepTime;
-        }
     }
 
     /**
