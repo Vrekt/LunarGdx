@@ -2,25 +2,12 @@
 
 #### What is Lunar?
 
-Lunar is a networking library for LibGDX. With lunar you can easily create multiplayer games quickly and efficiently. Lunar provides many common utilities such as entities, worlds, protocol, and box2d support!
+Lunar is a networking library for LibGDX. With Lunar you can quickly create multiplayer game prototypes or full multiplayer games, quickly and efficiently! Lunar provides many common utilities such as entities, worlds, protocol, and box2d support!
 
 **Lunar is still in very early development, expect many, many changes.**
 
-#### What's Coming
-Lunar has been majorly overhauled since last release in October. The wiki is being re-written for these changes.
-
-You can check out a demo game with the new API [here](https://github.com/Vrekt/LunarGdx/tree/main/core/src/gdx/examples/basic)
-
-I will soon be updating this repo with all current information and more examples once a few more issues are ironed out.
-
-Until then you can;
-- a) Use the old release from October, all current documentation will show you how to use Lunar.
-- b) Go in blind and use current repo and try to build something. The code does have comments and documentation spread around.
-- c) Wait.
-
-
 #### Features
-- Networked box2d worlds.. (WIP)
+- Networked box2d worlds..
 - Networked player moving and velocity.
 - Networked player creation/removing.
 - Ashley entity system
@@ -58,9 +45,9 @@ server.connect().join();
 final PlayerConnection connection = (PlayerConnection) server.getConnection();
 ```
 
-Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt/LunarGdx/wiki/Getting-Started-Guide:-Building-a-simple-game)
+Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt/LunarGdx/wiki/Building-a-simple-multiplayer-game)
 
-# Documentation and Examples
+## Documentation and Examples
 
 [Examples](https://github.com/Vrekt/LunarGdx/tree/main/core/src/gdx/examples)
 
@@ -69,15 +56,16 @@ Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt
 # Planned Features
 - Networked collision
 - Better movement sync.
-- Better protocol security.
+- Better protocol security [#9](https://github.com/Vrekt/LunarGdx/issues/9)
 - Networked entities and other map/world objects.
+- 'Instances' within worlds for interiors, rooms, dungeons, etc. Allows all the features as a normal world.
 - ...
 
 # Known Issues
 - Random ghost player blinks next to networked player
 - Initial position seems to be de-synced some way
 - Worlds will need to be disposed when switching between them
-- probably other stuff I don't know about.
+- ...
 
 # Using Lunar
 You can find releases in the releases section. Both client and server rely on the Protocol dependency.
