@@ -105,6 +105,13 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
     }
 
     /**
+     * @return {@code  true} if the player limit of this world has not been reached
+     */
+    public boolean canEnterWorld() {
+        return !(this.players.size() >= configuration.maxPlayerCapacity);
+    }
+
+    /**
      * Add world systems to the engine.
      */
     public void addWorldSystems() {

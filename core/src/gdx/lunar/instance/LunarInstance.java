@@ -1,70 +1,77 @@
 package gdx.lunar.instance;
 
-import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Disposable;
+import gdx.lunar.instance.config.InstanceConfiguration;
+import gdx.lunar.world.LunarWorld;
+import lunar.shared.entity.player.LunarEntity;
+import lunar.shared.entity.player.LunarEntityPlayer;
+import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 /**
  * Represents a separate instance that could be networked.
  * <p>
- * For instance interiors.
+ * For interiors, dungeons, etc
  */
-public abstract class LunarInstance extends ScreenAdapter {
+public abstract class LunarInstance<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity>
+        extends LunarWorld<P, N, E> implements Disposable {
 
-    // local box2d world for this interior.
-    protected final World world;
+    // the location of this instance within {worldFrom}
+    protected final Vector2 instanceLocation = new Vector2();
 
-    protected float stepTime = 1.0f / 60.0f;
-    protected float maxFrameTime = 0.25f;
-    protected float accumulator;
+    // the parent world
+    protected LunarWorld<P, N, E> worldFrom;
 
-    protected int velocityIterations = 8, positionIterations = 3;
+    public LunarInstance(P player, World world, InstanceConfiguration configuration, PooledEngine engine) {
+        super(player, world, configuration, engine);
+    }
 
-    protected LunarInstance(World world, int velocityIterations, int positionIterations) {
-        this.world = world;
-        this.velocityIterations = velocityIterations;
-        this.positionIterations = positionIterations;
+    public LunarInstance(P player, World world) {
+        super(player, world, new InstanceConfiguration(), new PooledEngine());
+    }
+
+    public void setWorldFrom(LunarWorld<P, N, E> worldFrom) {
+        this.worldFrom = worldFrom;
+    }
+
+    public LunarWorld<P, N, E> getWorldFrom() {
+        return worldFrom;
+    }
+
+    public void setInstanceLocation(float x, float y) {
+        instanceLocation.set(x, y);
+    }
+
+    public void setInstanceLocation(Vector2 position) {
+        instanceLocation.set(position);
     }
 
     /**
-     * Creates a default {@code world}
-     */
-    public LunarInstance() {
-        world = new World(Vector2.Zero, true);
-    }
-
-    public World getWorld() {
-        return world;
-    }
-
-    public void setVelocityIterations(int velocityIterations) {
-        this.velocityIterations = velocityIterations;
-    }
-
-    public void setPositionIterations(int positionIterations) {
-        this.positionIterations = positionIterations;
-    }
-
-    public void setStepTime(float stepTime) {
-        this.stepTime = stepTime;
-    }
-
-    public void setMaxFrameTime(float maxFrameTime) {
-        this.maxFrameTime = maxFrameTime;
-    }
-
-    /**
-     * Step the internal physics world
+     * If this instance should be loaded based on player position
      *
-     * @param delta delta time
+     * @param position position
+     * @return {@code  true}
      */
-    public void stepPhysicsWorld(float delta) {
-        accumulator += delta;
+    public boolean shouldLoadInstance(Vector2 position) {
+        return getConfiguration().preLoadInstance && position.dst2(instanceLocation) <= getConfiguration().preLoadInstanceDistance;
+    }
 
-        while (accumulator >= stepTime) {
-            world.step(stepTime, velocityIterations, positionIterations);
-            accumulator -= stepTime;
-        }
+    /**
+     * If this instance should be loaded based on player position
+     *
+     * @param x x
+     * @param y y
+     * @return {@code  true}
+     */
+    public boolean shouldLoadInstance(float x, float y) {
+        return getConfiguration().preLoadInstance && Vector2.dst2(x, y, instanceLocation.x, instanceLocation.y) <= getConfiguration().preLoadInstanceDistance;
+    }
+
+    @Override
+    public InstanceConfiguration getConfiguration() {
+        return (InstanceConfiguration) super.getConfiguration();
     }
 
 }

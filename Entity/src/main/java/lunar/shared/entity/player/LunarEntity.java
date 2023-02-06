@@ -25,7 +25,7 @@ public abstract class LunarEntity implements Disposable {
 
     // box2d body of this entity
     protected Body body;
-    protected boolean inWorld, hasMoved;
+    protected boolean inWorld, hasMoved, inInstance;
     protected float rotation, moveSpeed = 1.0f;
 
     public LunarEntity(Entity entity, boolean initializeComponents) {
@@ -317,6 +317,18 @@ public abstract class LunarEntity implements Disposable {
 
     public boolean isInWorld() {
         return inWorld;
+    }
+
+    public void setInWorld(boolean inWorld) {
+        this.inWorld = inWorld;
+    }
+
+    public boolean isInInstance() {
+        return inInstance;
+    }
+
+    public void setInInstance(boolean inInstance) {
+        this.inInstance = inInstance;
     }
 
     public <P extends LunarEntityPlayer,
