@@ -1,6 +1,8 @@
 package gdx.lunar.world;
 
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import lunar.shared.entity.player.LunarEntity;
@@ -42,6 +44,18 @@ public abstract class LunarWorldSkeleton<N extends LunarNetworkEntityPlayer, E e
 
     public void setSpawn(float x, float y) {
         this.spawn.set(x, y);
+    }
+
+    public void renderWorld(SpriteBatch batch) {
+
+    }
+
+    public void renderWorld(Batch batch, float delta) {
+
+    }
+
+    public void renderWorld(SpriteBatch batch, float delta) {
+
     }
 
     /**

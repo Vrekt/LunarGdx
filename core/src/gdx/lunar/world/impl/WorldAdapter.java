@@ -26,7 +26,8 @@ public class WorldAdapter extends LunarWorld<LunarPlayer, LunarPlayerMP, LunarEn
         super(player, world);
     }
 
-    public void renderWorld(SpriteBatch batch) {
+    @Override
+    public void renderWorld(SpriteBatch batch, float delta) {
 
     }
 

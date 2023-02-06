@@ -219,6 +219,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         players.clear();
         entities.clear();
         engine.clearPools();
+        engine.removeAllSystems();
         world.dispose();
     }
 }
