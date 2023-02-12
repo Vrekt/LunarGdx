@@ -24,6 +24,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     protected FixtureDef fixture;
     // if user specified custom rotation or density
     protected boolean hasSetFixedRotation, hasSetDensity;
+    protected boolean fixedRotation;
     protected float density;
 
     // connection for this player
@@ -99,6 +100,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
      */
     public void setFixedRotation(boolean fixedRotation) {
         hasSetFixedRotation = true;
+        this.fixedRotation = fixedRotation;
     }
 
     /**
@@ -136,7 +138,10 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
         if (this.fixture == null)
             this.fixture = new FixtureDef();
 
-        if (!hasSetFixedRotation) definition.fixedRotation = true;
+        if(hasSetFixedRotation) {
+            definition.fixedRotation = fixedRotation;
+        }
+
         definition.position.set(x + getWidthScaled() / 2f, y + getHeightScaled() / 2f);
 
         body = world.getWorld().createBody(definition);
