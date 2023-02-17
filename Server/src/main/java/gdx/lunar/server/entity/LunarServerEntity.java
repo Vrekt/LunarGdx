@@ -1,6 +1,7 @@
 package gdx.lunar.server.entity;
 
 import com.badlogic.ashley.core.Entity;
+import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.world.LunarWorld;
 import lunar.shared.entity.player.LunarEntity;
 import lunar.shared.entity.player.LunarEntityPlayer;
@@ -28,6 +29,21 @@ public class LunarServerEntity extends LunarEntity {
 
     @Override
     public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
+
+    }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance, float x, float y) {
+
+    }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance) {
+
+    }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInInstance(LunarInstance<P, N, E> instance) {
 
     }
 }

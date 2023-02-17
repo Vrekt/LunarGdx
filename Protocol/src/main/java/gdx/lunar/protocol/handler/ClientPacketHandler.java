@@ -91,4 +91,11 @@ public interface ClientPacketHandler {
      */
     void handleNetworkTile(CPacketNetworkedTile packet);
 
+    /**
+     * Handle a request to enter an instance
+     *
+     * @param packet the packet
+     */
+    void handleEnterInstance(CPacketEnterInstance packet);
+
 }

@@ -38,7 +38,7 @@ player.spawnEntityInWorld(lunarWorld, 2.0f, 2.0f);
 
 ```java
 // connect to remote server.
-final LunarClientServer server = new LunarClientServer(lunar, "localhost", 6969);
+final LunarClientServer server = new LunarClientServer(lunarProtocolSettings, "localhost", 6969);
 server.connect().join();
 
 // get our connection

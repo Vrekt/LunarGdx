@@ -150,6 +150,7 @@ public class LunarProtocol {
         client.put(889, (buf, handler) -> CPacketSetProperties.handle(handler, buf));
         client.put(8810, (buf, handler) -> CPacketCreateLobby.handle(handler, buf));
         client.put(8811, (buf, handler) -> CPacketJoinLobby.handle(handler, buf));
+        client.put(8812, (buf, handler) -> CPacketEnterInstance.handle(handler, buf));
     }
 
     /**

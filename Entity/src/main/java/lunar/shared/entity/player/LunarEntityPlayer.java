@@ -1,10 +1,8 @@
 package lunar.shared.entity.player;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.Shape;
+import com.badlogic.gdx.physics.box2d.*;
+import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
 import gdx.lunar.world.LunarWorld;
@@ -18,14 +16,6 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
 
     // if other player collisions should be turned off.
     protected boolean ignorePlayerCollision;
-
-    // definition for this player.
-    protected BodyDef definition;
-    protected FixtureDef fixture;
-    // if user specified custom rotation or density
-    protected boolean hasSetFixedRotation, hasSetDensity;
-    protected boolean fixedRotation;
-    protected float density;
 
     // connection for this player
     protected AbstractConnection connection;
@@ -71,96 +61,26 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     }
 
     /**
-     * @return definition for this entity player.
-     */
-    public BodyDef getDefinition() {
-        return definition;
-    }
-
-    /**
-     * @return fixture
-     */
-    public FixtureDef getFixture() {
-        return fixture;
-    }
-
-    /**
-     * Set the body definition type
+     * Define this players box2d entity
      *
-     * @param type type
+     * @param world the box2d world
+     * @param x     spawn x
+     * @param y     spawn y
      */
-    public void setBodyType(BodyDef.BodyType type) {
-        this.definition.type = type;
-    }
+    public void definePlayer(World world, float x, float y) {
+        getPosition().set(x, y);
+        getPrevious().set(x, y);
+        setInterpolated(x, y);
 
-    /**
-     * Set if fixed rotation
-     *
-     * @param fixedRotation state
-     */
-    public void setFixedRotation(boolean fixedRotation) {
-        hasSetFixedRotation = true;
-        this.fixedRotation = fixedRotation;
-    }
-
-    /**
-     * Set density of the players fixture
-     *
-     * @param density density
-     */
-    public void setDensity(float density) {
-        this.density = density;
-        this.hasSetDensity = true;
-    }
-
-    /**
-     * Set the shape of this player
-     *
-     * @param shape the shape
-     */
-    public void setPlayerShape(Shape shape) {
-        this.fixture.shape = shape;
+        this.body = definitionHandler.createBodyInWorld(world, x, y, getConfig());
+        definitionHandler.resetDefinition();
     }
 
     @Override
     public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
             E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
-        getPosition().set(x, y);
-        getPrevious().set(x, y);
-        setInterpolated(x, y);
-
-        if (definition == null) {
-            definition = new BodyDef();
-            definition.type = BodyDef.BodyType.DynamicBody;
-        }
-
-        if (this.fixture == null)
-            this.fixture = new FixtureDef();
-
-        if(hasSetFixedRotation) {
-            definition.fixedRotation = fixedRotation;
-        }
-
-        definition.position.set(x + getWidthScaled() / 2f, y + getHeightScaled() / 2f);
-
-        body = world.getWorld().createBody(definition);
-        PolygonShape shape = null;
-
-        if (fixture.shape == null) {
-            shape = new PolygonShape();
-            shape.setAsBox(getWidthScaled() / 2f, getHeightScaled() / 2f);
-            fixture.shape = shape;
-            if (!hasSetDensity) {
-                fixture.density = 1.0f;
-            } else {
-                fixture.density = density;
-            }
-        }
-
-        body.createFixture(fixture).setUserData(this);
-        if (shape != null) shape.dispose();
-
+        definePlayer(world.getWorld(), x, y);
         world.spawnEntityInWorld(this, x, y);
         this.inWorld = true;
         this.getInstance().setWorldIn(world);
@@ -180,6 +100,40 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
         world.removeEntityInWorld(this);
         this.getInstance().setWorldIn(null);
         this.inWorld = false;
+    }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance, float x, float y) {
+        getPosition().set(x, y);
+        getPrevious().set(x, y);
+        setInterpolated(x, y);
+
+        // destroy previous body from the other world.
+        getWorldIn().getWorld().destroyBody(body);
+        body = null;
+
+        // create a new body for the instance
+        definePlayer(instance.getWorld(), x, y);
+        instance.spawnEntityInWorld(this, x, y);
+
+        this.inInstance = true;
+        this.getInstance().setInstanceIn(instance);
+    }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance) {
+        spawnEntityInInstance(instance, instance.getSpawn().x, instance.getSpawn().y);
+    }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void removeEntityInInstance(LunarInstance<P, N, E> instance) {
+        if (body != null) {
+            instance.getWorld().destroyBody(body);
+            body = null;
+        }
+        instance.removeEntityInWorld(this);
+        this.getInstance().setInstanceIn(null);
+        this.inInstance = false;
     }
 
     @Override

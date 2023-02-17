@@ -1,6 +1,6 @@
 package gdx.lunar.network.adapter;
 
-import gdx.lunar.Lunar;
+import gdx.lunar.LunarProtocolSettings;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.client.CPacketAuthentication;
 import io.netty.channel.ChannelHandlerContext;
@@ -27,7 +27,7 @@ public class InboundNetworkHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelActive(ChannelHandlerContext context) {
-        connection.sendImmediately(new CPacketAuthentication(Lunar.gameVersion, Lunar.protocolVersion));
+        connection.sendImmediately(new CPacketAuthentication(LunarProtocolSettings.gameVersion, LunarProtocolSettings.protocolVersion));
     }
 
     @Override

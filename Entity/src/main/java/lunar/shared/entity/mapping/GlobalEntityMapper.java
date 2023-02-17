@@ -9,7 +9,7 @@ import lunar.shared.entity.components.position.EntityVelocityComponent;
 import lunar.shared.entity.components.prop.EntityPropertiesComponent;
 
 /**
- * Global mappings for all components within Lunar.
+ * Global mappings for all components within LunarProtocolSettings.
  */
 public final class GlobalEntityMapper {
 

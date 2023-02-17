@@ -5,8 +5,11 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
+import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.protocol.packet.client.CPacketApplyEntityBodyForce;
 import gdx.lunar.world.LunarWorld;
+import lunar.shared.entity.EntityBodyCreator;
+import lunar.shared.entity.EntityBodyHandler;
 import lunar.shared.entity.components.config.EntityConfigurationComponent;
 import lunar.shared.entity.components.instance.EntityInstanceComponent;
 import lunar.shared.entity.components.position.EntityPositionComponent;
@@ -16,7 +19,7 @@ import lunar.shared.entity.mapping.GlobalEntityMapper;
 import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 /**
- * A basic entity within the Lunar framework.
+ * A basic entity within the LunarProtocolSettings framework.
  */
 public abstract class LunarEntity implements Disposable {
 
@@ -28,6 +31,9 @@ public abstract class LunarEntity implements Disposable {
     protected boolean inWorld, hasMoved, inInstance;
     protected float rotation, moveSpeed = 1.0f;
 
+    // handles creating new box2d bodies
+    protected EntityBodyHandler definitionHandler = new EntityBodyCreator();
+
     public LunarEntity(Entity entity, boolean initializeComponents) {
         this.entity = entity;
         if (initializeComponents) addComponents();
@@ -36,6 +42,14 @@ public abstract class LunarEntity implements Disposable {
     public LunarEntity(boolean initializeComponents) {
         this.entity = new Entity();
         if (initializeComponents) addComponents();
+    }
+
+    public void setDefinitionHandler(EntityBodyHandler definitionHandler) {
+        this.definitionHandler = definitionHandler;
+    }
+
+    public EntityBodyHandler getDefinitionHandler() {
+        return definitionHandler;
     }
 
     public void setWidth(float width) {
@@ -331,6 +345,20 @@ public abstract class LunarEntity implements Disposable {
         this.inInstance = inInstance;
     }
 
+    /**
+     * Set this players instance they are in
+     *
+     * @param instanceIn instanceIn
+     * @param <P>        P
+     * @param <N>        N
+     * @param <E>        E
+     */
+    public <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void setInInstance(LunarInstance<P, N, E> instanceIn) {
+        getInstance().setInstanceIn(instanceIn);
+    }
+
     public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
             E extends LunarEntity> LunarWorld<P, N, E> getWorldIn() {
@@ -372,6 +400,35 @@ public abstract class LunarEntity implements Disposable {
     public abstract <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
             E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world);
+
+    /**
+     * Spawn this entity in the given world.
+     *
+     * @param instance the instance
+     * @param x        the X location
+     * @param y        the Y location
+     */
+    public abstract <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance, float x, float y);
+
+    /**
+     * Spawn this entity in the given world at the worlds spawn location
+     *
+     * @param instance the instance
+     */
+    public abstract <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance);
+
+    /**
+     * Remove this entity from the world
+     *
+     * @param instance the instance
+     */
+    public abstract <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void removeEntityInInstance(LunarInstance<P, N, E> instance);
 
     /**
      * Apply force to this player

@@ -158,7 +158,15 @@ public class PlayerConnectionHandler extends PlayerConnection {
 
     @Override
     public void handleEnterInstance(SPacketEnterInstance packet) {
-        // TODO
+        //if (shouldHandle(packet, ConnectionOption.HANDLE_JOIN_INSTANCE)) return;
+        if (packet.isAllowed()) {
+            getWorldIn().getInstanceFromId(packet.getInstanceId()).enterInstance(true, local.getWorldIn());
+            Gdx.app.log("PlayerConnectionHandler", "Instance " + packet.getInstanceId() + " joined.");
+        } else if (packet.isFull()) {
+            Gdx.app.log("PlayerConnectionHandler", "Instance " + packet.getInstanceId() + " is full");
+        } else {
+            Gdx.app.log("PlayerConnectionHandler", "Instance " + packet.getInstanceId() + " not-allowed: " + packet.getNotAllowedReason());
+        }
     }
 
     @Override

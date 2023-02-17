@@ -26,7 +26,7 @@ import javax.net.ssl.SSLException;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Lunar accessor for game clients.
+ * LunarProtocolSettings accessor for game clients.
  */
 public final class LunarClientServer implements Disposable {
 
@@ -40,7 +40,6 @@ public final class LunarClientServer implements Disposable {
     private final int port;
 
     private final SslContext ssl;
-    private final Lunar lunar;
 
     private final LunarProtocol protocol;
 
@@ -54,14 +53,12 @@ public final class LunarClientServer implements Disposable {
     /**
      * Initialize a new instance with a pre-built bootstrap.
      *
-     * @param lunar     lunar instance
      * @param protocol  the protocol to use
      * @param bootstrap boostrap.
      * @param ip        the server IP address
      * @param port      the server port
      */
-    public LunarClientServer(Lunar lunar, LunarProtocol protocol, Bootstrap bootstrap, String ip, int port) {
-        this.lunar = lunar;
+    public LunarClientServer(LunarProtocol protocol, Bootstrap bootstrap, String ip, int port) {
         this.protocol = protocol;
         this.bootstrap = bootstrap;
         this.group = bootstrap.config().group();
@@ -79,13 +76,11 @@ public final class LunarClientServer implements Disposable {
     /**
      * Initialize the bootstrap
      *
-     * @param lunar    lunar instance
      * @param protocol the protocol to use
      * @param ip       the server IP address
      * @param port     the server port
      */
-    public LunarClientServer(Lunar lunar, LunarProtocol protocol, String ip, int port) {
-        this.lunar = lunar;
+    public LunarClientServer(LunarProtocol protocol, String ip, int port) {
         this.protocol = protocol;
         this.ip = ip;
         this.port = port;
@@ -114,10 +109,22 @@ public final class LunarClientServer implements Disposable {
         }
     }
 
+    /**
+     * Set the main handler netty will use for all game traffic.
+     * Not required.
+     *
+     * @param adapter the adapter
+     */
     public void setInboundNetworkHandler(ChannelInboundHandlerAdapter adapter) {
         this.adapter = adapter;
     }
 
+    /**
+     * Set the default protocol decoder to use within the network.
+     * Not required.
+     *
+     * @param decoder the decoder
+     */
     public void setProtocolDecoder(LengthFieldBasedFrameDecoder decoder) {
         this.decoder = decoder;
     }
@@ -128,7 +135,7 @@ public final class LunarClientServer implements Disposable {
      *
      * @param provider the provider
      */
-    public void setProvider(ConnectionProvider provider) {
+    public void setConnectionProvider(ConnectionProvider provider) {
         this.provider = provider;
     }
 
@@ -174,7 +181,7 @@ public final class LunarClientServer implements Disposable {
      *
      * @return the result.
      */
-    public CompletableFuture<Void> connect() {
+    public CompletableFuture<Void> connectAsync() {
         return CompletableFuture.runAsync(() -> {
             try {
                 bootstrap.connect(ip, port).sync();
@@ -184,9 +191,31 @@ public final class LunarClientServer implements Disposable {
         });
     }
 
+    /**
+     * Connect.
+     *
+     * @throws Exception any
+     */
+    public void connect() throws Exception {
+        bootstrap.connect(ip, port).sync();
+    }
+
+    /**
+     * Connect, but silence the exception.
+     */
+    public void connectNoExceptions() {
+        try {
+            bootstrap.connect(ip, port).sync();
+        } catch (Exception any) {
+            any.printStackTrace();
+        }
+    }
+
     @Override
     public void dispose() {
         group.shutdownGracefully();
+        connection.dispose();
+        protocol.dispose();
     }
 
 }

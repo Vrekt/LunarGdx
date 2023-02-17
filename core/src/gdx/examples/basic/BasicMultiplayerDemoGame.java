@@ -10,7 +10,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import gdx.lunar.Lunar;
 import gdx.lunar.LunarClientServer;
 import gdx.lunar.network.types.ConnectionOption;
 import gdx.lunar.network.types.PlayerConnectionHandler;
@@ -66,13 +65,15 @@ public final class BasicMultiplayerDemoGame extends Game {
         world.addWorldSystems();
         // ignore player collisions
         world.addDefaultPlayerCollisionListener();
+        // add a default instance
+        world.addInstance(new MultiplayerGameInstance(player, new World(Vector2.Zero, true), 22));
 
         // initialize our default protocol and connect to the remote server,
         final LunarProtocol protocol = new LunarProtocol(true);
-        final LunarClientServer server = new LunarClientServer(new Lunar(), protocol, "localhost", 6969);
+        final LunarClientServer server = new LunarClientServer(protocol, "localhost", 6969);
         // set provider because we want {@link PlayerConnectionHandler}
-        server.setProvider(channel -> new PlayerConnectionHandler(channel, protocol));
-        server.connect().join();
+        server.setConnectionProvider(channel -> new PlayerConnectionHandler(channel, protocol));
+        server.connectNoExceptions();
 
         // failed to connect, so exit() out.
         if (server.getConnection() == null) {
@@ -85,7 +86,7 @@ public final class BasicMultiplayerDemoGame extends Game {
         final PlayerConnectionHandler connection = (PlayerConnectionHandler) server.getConnection();
         player.setConnection(connection);
 
-        // enable options we want Lunar to handle by default.
+        // enable options we want LunarProtocolSettings to handle by default.
         connection.enableOptions(
                 ConnectionOption.HANDLE_PLAYER_POSITION,
                 ConnectionOption.HANDLE_PLAYER_VELOCITY,

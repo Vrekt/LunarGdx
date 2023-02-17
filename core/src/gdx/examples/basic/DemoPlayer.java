@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import gdx.lunar.protocol.packet.client.CPacketEnterInstance;
 import lunar.shared.entity.player.impl.LunarPlayer;
 
 /**
@@ -11,11 +12,13 @@ import lunar.shared.entity.player.impl.LunarPlayer;
  */
 public final class DemoPlayer extends LunarPlayer {
 
+    private boolean instance = false;
+
     public DemoPlayer(boolean initializeComponents, TextureRegion playerTexture) {
         super(initializeComponents);
 
         setMoveSpeed(6.0f);
-        setFixedRotation(false);
+       // setFixedRotation(true);
         setHasMoved(true);
         setNetworkSendRatesInMs(10, 10);
         setIgnorePlayerCollision(true);
@@ -48,6 +51,9 @@ public final class DemoPlayer extends LunarPlayer {
         } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             rotation = 3f;
             setVelocity(moveSpeed, 0.0f, false);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.I) && !instance) {
+            instance = true;
+            getConnection().sendImmediately(new CPacketEnterInstance(22));
         }
 
     }

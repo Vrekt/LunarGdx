@@ -2,12 +2,10 @@ package gdx.lunar.server.network.connection;
 
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.client.*;
-import gdx.lunar.protocol.packet.server.SPacketApplyEntityBodyForce;
-import gdx.lunar.protocol.packet.server.SPacketAuthentication;
-import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
-import gdx.lunar.protocol.packet.server.SPacketWorldInvalid;
+import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import gdx.lunar.server.instance.Instance;
 import gdx.lunar.server.world.ServerWorld;
 import io.netty.channel.Channel;
 
@@ -77,7 +75,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
         }
 
         final ServerWorld world = server.getWorldManager().getWorld(packet.getWorldName());
-        if (world.isWorldFull()) {
+        if (world.isFull()) {
             return;
         }
 
@@ -128,6 +126,28 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
     @Override
     public void handleNetworkTile(CPacketNetworkedTile packet) {
 
+    }
+
+    @Override
+    public void handleEnterInstance(CPacketEnterInstance packet) {
+        System.err.println("requesting enter instance: " + packet.getInstanceId());
+        if (this.player != null) {
+            final Instance instance = player.getWorld().getInstance(packet.getInstanceId());
+            if (instance != null) {
+                if (instance.isFull()) {
+                    sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), false, true, "Instance is full"));
+                } else {
+                    this.player.setInInstance(true);
+                    this.player.setInstanceIn(instance);
+                    sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), true, false, ""));
+                    System.err.println("player has joined instance " + packet.getInstanceId());
+                }
+            } else {
+                sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), false, false, "Invalid instance ID"));
+            }
+        } else {
+            sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), false, false, "Invalid player"));
+        }
     }
 
     @Override

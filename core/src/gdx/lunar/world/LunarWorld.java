@@ -3,6 +3,7 @@ package gdx.lunar.world;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
 import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
@@ -11,6 +12,8 @@ import lunar.shared.entity.player.LunarEntity;
 import lunar.shared.entity.player.LunarEntityPlayer;
 import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 import lunar.shared.entity.systems.moving.EntityMovementSystem;
+
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Represents a networked world players and entities exist in.
@@ -35,6 +38,9 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
     // config
     protected WorldConfiguration configuration;
     protected float accumulator;
+
+    // all the instances within this world
+    protected CopyOnWriteArrayList<LunarInstance<P, N, E>> instancesInWorld = new CopyOnWriteArrayList<>();
 
     /**
      * Initialize a new game world.
@@ -76,13 +82,6 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
     }
 
     /**
-     * Add the default {@link  PlayerCollisionListener} to ignore player collisions
-     */
-    public void addDefaultPlayerCollisionListener() {
-        world.setContactListener(new PlayerCollisionListener());
-    }
-
-    /**
      * An empty default constructor. You should use the setters to define configuration next.
      *
      * @param player the player
@@ -90,6 +89,21 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      */
     public LunarWorld(P player, World world) {
         this(player, world, new WorldConfiguration(), new PooledEngine());
+    }
+
+    public void addInstance(LunarInstance<P, N, E> instance) {
+        this.instancesInWorld.add(instance);
+    }
+
+    public LunarInstance<P, N, E> getInstanceFromId(int instanceId) {
+        return instancesInWorld.stream().filter(instance -> instance.getInstanceId() == instanceId).findFirst().orElse(null);
+    }
+
+    /**
+     * Add the default {@link  PlayerCollisionListener} to ignore player collisions
+     */
+    public void addDefaultPlayerCollisionListener() {
+        world.setContactListener(new PlayerCollisionListener());
     }
 
     public AbstractConnection getLocalConnection() {
@@ -109,6 +123,13 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      */
     public boolean canEnterWorld() {
         return !(this.players.size() >= configuration.maxPlayerCapacity);
+    }
+
+    /**
+     * Load this world or instance
+     */
+    public void load() {
+
     }
 
     /**
@@ -197,24 +218,50 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         }
     }
 
+    /**
+     * Update a players position
+     *
+     * @param id    their entity ID
+     * @param x     their X
+     * @param y     their Y
+     * @param angle their current angle
+     */
     public void updatePlayerPosition(int id, float x, float y, float angle) {
         if (hasNetworkPlayer(id)) {
             getNetworkPlayer(id).updateServerPosition(x, y, angle);
         }
     }
 
+    /**
+     * Update a players velocity
+     *
+     * @param id    their entity ID
+     * @param x     their X
+     * @param y     their Y
+     * @param angle their current angle
+     */
     public void updatePlayerVelocity(int id, float x, float y, float angle) {
         if (hasNetworkPlayer(id)) {
             getNetworkPlayer(id).updateServerVelocity(x, y, angle);
         }
     }
 
+    /**
+     * Update a players position from a raw packet
+     *
+     * @param packet the packet
+     */
     public void updatePlayerPosition(SPacketPlayerPosition packet) {
         if (hasNetworkPlayer(packet.getEntityId())) {
             getNetworkPlayer(packet.getEntityId()).updateServerPosition(packet.getX(), packet.getY(), packet.getRotation());
         }
     }
 
+    /**
+     * Update a players velocity from a raw packet
+     *
+     * @param packet the packet
+     */
     public void updatePlayerVelocity(SPacketPlayerVelocity packet) {
         if (hasNetworkPlayer(packet.getEntityId())) {
             getNetworkPlayer(packet.getEntityId()).updateServerVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());

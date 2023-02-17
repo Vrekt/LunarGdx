@@ -17,7 +17,7 @@ public class EntityInstanceComponent implements Component, Pool.Poolable {
 
     // world or instance, could be both.
     public LunarWorld<?, ?, ?> worldIn;
-    public LunarInstance instanceIn;
+    public LunarInstance<?, ?, ?> instanceIn;
 
     // box2d worlds this entity is in.
     public Array<World> worldsIn = new Array<>();
@@ -32,6 +32,18 @@ public class EntityInstanceComponent implements Component, Pool.Poolable {
             N extends LunarNetworkEntityPlayer,
             E extends LunarEntity> void setWorldIn(LunarWorld<P, N, E> worldIn) {
         this.worldIn = worldIn;
+    }
+
+    public <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> LunarInstance<P, N, E> getInstanceIn() {
+        return (LunarInstance<P, N, E>) instanceIn;
+    }
+
+    public <P extends LunarEntityPlayer,
+            N extends LunarNetworkEntityPlayer,
+            E extends LunarEntity> void setInstanceIn(LunarInstance<P, N, E> instanceIn) {
+        this.instanceIn = instanceIn;
     }
 
     @Override

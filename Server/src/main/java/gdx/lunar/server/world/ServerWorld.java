@@ -6,15 +6,17 @@ import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import gdx.lunar.server.entity.LunarServerEntity;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.game.utilities.Disposable;
+import gdx.lunar.server.instance.Instance;
 import gdx.lunar.server.world.config.ServerWorldConfiguration;
 import gdx.lunar.world.LunarWorldSkeleton;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Represents a separate world or instance with players.
+ * Represents a world that is networked.
  */
 public abstract class ServerWorld extends LunarWorldSkeleton<LunarServerPlayerEntity, LunarServerEntity> implements Disposable {
     protected final ServerWorldConfiguration configuration;
@@ -24,10 +26,20 @@ public abstract class ServerWorld extends LunarWorldSkeleton<LunarServerPlayerEn
      * Queued packet updates
      */
     protected final Queue<QueuedPacket> queuedPackets = new ConcurrentLinkedQueue<>();
+    // all the instances within this world
+    protected final CopyOnWriteArrayList<Instance> instancesInWorld = new CopyOnWriteArrayList<>();
 
     public ServerWorld(ServerWorldConfiguration configuration, String worldName) {
         this.configuration = configuration;
         this.worldName = worldName;
+    }
+
+    public void addInstance(Instance instance) {
+        this.instancesInWorld.add(instance);
+    }
+
+    public Instance getInstance(int instanceId) {
+        return instancesInWorld.stream().filter(instance -> instance.getInstanceId() == instanceId).findFirst().orElse(null);
     }
 
     public boolean doesUsernameExist(String username) {
@@ -73,7 +85,7 @@ public abstract class ServerWorld extends LunarWorldSkeleton<LunarServerPlayerEn
     /**
      * @return {@code true} if this world is full.
      */
-    public boolean isWorldFull() {
+    public boolean isFull() {
         return players.size() >= configuration.getCapacity();
     }
 

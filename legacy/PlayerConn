@@ -1,17 +1,17 @@
-package gdx.lunar.network;
+package gdx.lunarProtocolSettings.network;
 
 import com.badlogic.gdx.Gdx;
-import gdx.lunar.Lunar;
-import gdx.lunar.shared.drawing.Rotation;
-import gdx.lunar.shared.network.NetworkEntity;
-import gdx.lunar.shared.player.LunarNetworkEntityPlayer;
-import gdx.lunar.shared.player.impl.LunarNetworkPlayer;
-import gdx.lunar.shared.player.prop.PlayerProperties;
-import gdx.lunar.shared.player.LunarEntityPlayer;
-import gdx.lunar.protocol.LunarProtocol;
-import gdx.lunar.protocol.packet.client.CPacketSetProperties;
-import gdx.lunar.protocol.packet.server.*;
-import gdx.lunar.world.LunarWorld;
+import gdx.lunar.LunarProtocolSettingsolSettings.Lunar;
+import gdx.lunarProtocolSettings.shared.drawing.Rotation;
+import gdx.lunarProtocolSettings.shared.network.NetworkEntity;
+import gdx.lunarProtocolSettings.shared.player.LunarNetworkEntityPlayer;
+import gdx.lunarProtocolSettings.shared.player.impl.LunarNetworkPlayer;
+import gdx.lunarProtocolSettings.shared.player.prop.PlayerProperties;
+import gdx.lunarProtocolSettings.shared.player.LunarEntityPlayer;
+import gdx.lunarProtocolSettings.protocol.LunarProtocol;
+import gdx.lunarProtocolSettings.protocol.packet.client.CPacketSetProperties;
+import gdx.lunarProtocolSettings.protocol.packet.server.*;
+import gdx.lunarProtocolSettings.world.LunarWorld;
 import io.netty.channel.Channel;
 
 /**
@@ -19,17 +19,17 @@ import io.netty.channel.Channel;
  */
 public class PlayerConnection extends AbstractConnection {
 
-    protected final Lunar lunar;
+    protected final Lunar lunarProtocolSettings;
     protected LunarEntityPlayer player;
 
     // default lobby world this player would want to join
     protected Runnable joinLobbyHandler;
     protected LunarWorld lobbyWorld;
 
-    public PlayerConnection(Lunar lunar, LunarProtocol protocol, Channel channel) {
+    public PlayerConnection(Lunar lunarProtocolSettings, LunarProtocol protocol, Channel channel) {
         super(channel, protocol);
 
-        this.lunar = lunar;
+        this.lunarProtocolSettings = lunarProtocolSettings;
     }
 
     public void setPlayer(LunarEntityPlayer player) {
@@ -80,14 +80,14 @@ public class PlayerConnection extends AbstractConnection {
         }
 
         // TODO: Maybe default global rotation.
-        if (lunar.getPlayerProperties() == null)
-            lunar.setPlayerProperties(new PlayerProperties((1 / 16.0f), 16.0f, 16.0f));
+        if (lunarProtocolSettings.getPlayerProperties() == null)
+            lunarProtocolSettings.setPlayerProperties(new PlayerProperties((1 / 16.0f), 16.0f, 16.0f));
 
         final LunarNetworkPlayer player = new LunarNetworkPlayer(
                 packet.getEntityId(),
-                lunar.getPlayerProperties().scale,
-                lunar.getPlayerProperties().width,
-                lunar.getPlayerProperties().height,
+                lunarProtocolSettings.getPlayerProperties().scale,
+                lunarProtocolSettings.getPlayerProperties().width,
+                lunarProtocolSettings.getPlayerProperties().height,
                 Rotation.FACING_UP);
 
         player.setName(packet.getUsername());

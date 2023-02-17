@@ -5,6 +5,7 @@ import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketDisconnect;
 import gdx.lunar.server.game.LunarServer;
+import gdx.lunar.server.instance.Instance;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
 import gdx.lunar.server.world.ServerWorld;
 import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
@@ -18,6 +19,7 @@ public class LunarServerPlayerEntity extends LunarNetworkEntityPlayer {
     protected LunarServer server;
     protected ServerAbstractConnection connection;
     protected ServerWorld serverWorldIn;
+    protected Instance instanceIn;
 
     // if this player has been loaded client-side into the world.
     protected boolean isLoaded;
@@ -76,6 +78,14 @@ public class LunarServerPlayerEntity extends LunarNetworkEntityPlayer {
      */
     public void setWorldIn(ServerWorld worldIn) {
         this.serverWorldIn = worldIn;
+    }
+
+    public Instance getInstanceIn() {
+        return instanceIn;
+    }
+
+    public void setInstanceIn(Instance instanceIn) {
+        this.instanceIn = instanceIn;
     }
 
     public boolean isLoaded() {

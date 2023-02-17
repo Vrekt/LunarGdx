@@ -13,4 +13,5 @@ dependencies {
     compile group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
     compile project(":Protocol")
     compile project(":Server")
+    compile project(":core")
 }

@@ -2,6 +2,7 @@ package me.vrekt.testiong;
 
 import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.server.game.GameServer;
+import gdx.lunar.server.instance.InstanceAdapter;
 import gdx.lunar.server.netty.NettyServer;
 import gdx.lunar.server.world.config.ServerWorldConfiguration;
 import gdx.lunar.server.world.impl.WorldAdapter;
@@ -17,6 +18,7 @@ public class Main {
         server.bind();
 
         gameServer.getWorldManager().addWorld("TutorialWorld", new WorldAdapter(new ServerWorldConfiguration(), "TutorialWorld"));
+        gameServer.getWorldManager().getWorld("TutorialWorld").addInstance(new InstanceAdapter(new ServerWorldConfiguration(), "Testing123", 22));
         gameServer.start();
 
         System.err.println("Server running.");
