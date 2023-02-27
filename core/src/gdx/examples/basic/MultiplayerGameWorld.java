@@ -7,8 +7,8 @@ import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import gdx.lunar.world.impl.WorldAdapter;
-import lunar.shared.entity.player.impl.LunarPlayer;
-import lunar.shared.entity.player.impl.LunarPlayerMP;
+import lunar.shared.player.impl.LunarPlayer;
+import lunar.shared.player.impl.LunarPlayerMP;
 
 public final class MultiplayerGameWorld extends WorldAdapter {
 
@@ -31,20 +31,16 @@ public final class MultiplayerGameWorld extends WorldAdapter {
      */
     public void handleWorldJoin(SPacketJoinWorld world) {
         Gdx.app.log(BasicMultiplayerDemoGame.TAG, "Joining local-world: " + world.getWorldName() + ", entity ID is " + world.getEntityId());
+        // set our player's entity ID from world packet.
+        player.setEntityId(world.getEntityId());
+        // spawn local player in world
+        player.spawnEntityInWorld(this, 0.0f, 0.0f);
+        // load into the world!
+        // tell the server we are good to go.
+        player.getConnection().updateWorldLoaded();
 
-        // execute network operations back on the main thread.
-        Gdx.app.postRunnable(() -> {
-            // set our player's entity ID from world packet.
-            player.setEntityId(world.getEntityId());
-            // spawn local player in world
-            player.spawnEntityInWorld(this, 0.0f, 0.0f);
-            // load into the world!
-            // tell the server we are good to go.
-            player.getConnection().updateWorldLoaded();
-
-            // etc...
-            game.ready = true;
-        });
+        // etc...
+        game.ready = true;
     }
 
     /**
@@ -58,11 +54,10 @@ public final class MultiplayerGameWorld extends WorldAdapter {
         final LunarPlayerMP player = new LunarPlayerMP(true);
         // load player assets.
         player.putRegion("player", game.getTexture());
-
         player.setIgnorePlayerCollision(true);
-        player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
+        player.setProperties(packet.getUsername(), packet.getEntityId());
         // set your local game properties
-        player.setConfig(16, 16, (1 / 16.0f));
+        player.setSize(16, 16, (1 / 16.0f));
         // spawn player in your local world.
         player.spawnEntityInWorld(this.player.getWorldIn(), packet.getX(), packet.getY());
     }

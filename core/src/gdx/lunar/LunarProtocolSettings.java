@@ -9,7 +9,7 @@ public final class LunarProtocolSettings {
     public static int protocolVersion = 1;
     public static String gameVersion = "1.0";
 
-    public LunarProtocolSettings() {
+    private LunarProtocolSettings() {
         throw new UnsupportedOperationException();
     }
 }

@@ -8,7 +8,7 @@ import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.instance.Instance;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
 import gdx.lunar.server.world.ServerWorld;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
+import lunar.shared.player.mp.LunarNetworkEntityPlayer;
 
 /**
  * Represents a player entity within the server.

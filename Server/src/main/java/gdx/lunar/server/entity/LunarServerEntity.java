@@ -3,9 +3,9 @@ package gdx.lunar.server.entity;
 import com.badlogic.ashley.core.Entity;
 import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.world.LunarWorld;
-import lunar.shared.entity.player.LunarEntity;
-import lunar.shared.entity.player.LunarEntityPlayer;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
+import lunar.shared.entity.LunarEntity;
+import lunar.shared.player.LunarEntityPlayer;
+import lunar.shared.player.mp.LunarNetworkEntityPlayer;
 
 public class LunarServerEntity extends LunarEntity {
     public LunarServerEntity(Entity entity, boolean initializeComponents) {

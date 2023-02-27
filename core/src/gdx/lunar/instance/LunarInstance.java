@@ -6,9 +6,9 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.instance.config.InstanceConfiguration;
 import gdx.lunar.world.LunarWorld;
-import lunar.shared.entity.player.LunarEntity;
-import lunar.shared.entity.player.LunarEntityPlayer;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
+import lunar.shared.entity.LunarEntity;
+import lunar.shared.player.LunarEntityPlayer;
+import lunar.shared.player.mp.LunarNetworkEntityPlayer;
 
 /**
  * Represents a separate instance that could be networked.

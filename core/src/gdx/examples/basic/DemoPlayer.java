@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import gdx.lunar.protocol.packet.client.CPacketEnterInstance;
-import lunar.shared.entity.player.impl.LunarPlayer;
+import lunar.shared.player.impl.LunarPlayer;
 
 /**
  * Represents a basic player.
@@ -18,7 +18,6 @@ public final class DemoPlayer extends LunarPlayer {
         super(initializeComponents);
 
         setMoveSpeed(6.0f);
-       // setFixedRotation(true);
         setHasMoved(true);
         setNetworkSendRatesInMs(10, 10);
         setIgnorePlayerCollision(true);
@@ -27,7 +26,7 @@ public final class DemoPlayer extends LunarPlayer {
         putRegion("player", playerTexture);
 
         // default player configuration
-        setConfig(16, 16, (1 / 16.0f));
+        setSize(16, 16, (1 / 16.0f));
     }
 
     @Override

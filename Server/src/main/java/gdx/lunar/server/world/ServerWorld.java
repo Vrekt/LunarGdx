@@ -8,7 +8,7 @@ import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.game.utilities.Disposable;
 import gdx.lunar.server.instance.Instance;
 import gdx.lunar.server.world.config.ServerWorldConfiguration;
-import gdx.lunar.world.LunarWorldSkeleton;
+import gdx.lunar.world.AbstractWorld;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Represents a world that is networked.
  */
-public abstract class ServerWorld extends LunarWorldSkeleton<LunarServerPlayerEntity, LunarServerEntity> implements Disposable {
+public abstract class ServerWorld extends AbstractWorld<LunarServerPlayerEntity, LunarServerEntity> implements Disposable {
     protected final ServerWorldConfiguration configuration;
     protected final String worldName;
 

@@ -6,8 +6,7 @@ import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
-import lunar.shared.entity.components.config.EntityConfigurationComponent;
-import lunar.shared.entity.player.impl.LunarPlayerMP;
+import lunar.shared.player.impl.LunarPlayerMP;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,14 +17,22 @@ import java.util.Map;
 public class PlayerConnectionHandler extends PlayerConnection {
 
     private final Map<ConnectionOption, Boolean> options = new HashMap<>();
-    private EntityConfigurationComponent config;
+    private float width, height, scaling;
 
     public PlayerConnectionHandler(Channel channel, LunarProtocol protocol) {
         super(channel, protocol);
     }
 
-    public void setDefaultEntityConfiguration(EntityConfigurationComponent config) {
-        this.config = config;
+    public void setDefaultPlayerSize(float width, float height, float scaling) {
+        this.width = width;
+        this.height = height;
+        this.scaling = scaling;
+    }
+
+    public void setDefaultPlayerSize(float width, float height) {
+        this.width = width;
+        this.height = height;
+        this.scaling = 1.0f;
     }
 
     public void enableOptions(ConnectionOption... options) {
@@ -87,9 +94,9 @@ public class PlayerConnectionHandler extends PlayerConnection {
 
         // might be removed later.
         player.setIgnorePlayerCollision(true);
-        player.getProperties().initialize(packet.getEntityId(), packet.getUsername());
+        player.getProperties().setProperties(packet.getEntityId(), packet.getUsername());
         // set your local game properties
-        player.setConfig(config);
+        player.setSize(width, height, scaling);
         // spawn player in your local world.
         player.spawnEntityInWorld(getWorldIn(), packet.getX(), packet.getY());
     }
@@ -107,7 +114,7 @@ public class PlayerConnectionHandler extends PlayerConnection {
         if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_POSITION)) return;
         if (!verifyPlayerExists(packet.getEntityId())) return;
 
-        getWorldIn().getNetworkPlayer(packet.getEntityId()).updateServerPosition(packet.getX(), packet.getY(), packet.getRotation());
+        getWorldIn().getNetworkPlayer(packet.getEntityId()).updatePosition(packet.getX(), packet.getY(), packet.getRotation());
     }
 
     @Override
@@ -115,7 +122,7 @@ public class PlayerConnectionHandler extends PlayerConnection {
         if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_VELOCITY)) return;
         if (!verifyPlayerExists(packet.getEntityId())) return;
 
-        getWorldIn().getNetworkPlayer(packet.getEntityId()).updateServerVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
+        getWorldIn().getNetworkPlayer(packet.getEntityId()).updateVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
     }
 
     @Override
@@ -124,7 +131,7 @@ public class PlayerConnectionHandler extends PlayerConnection {
         if (!verifyPlayerExists(packet.getEntityId())) return;
 
         getWorldIn().getNetworkPlayer(packet.getEntityId())
-                .updateServerForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
+                .updateBodyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
     }
 
     @Override

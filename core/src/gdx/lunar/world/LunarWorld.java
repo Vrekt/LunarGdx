@@ -7,11 +7,11 @@ import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
 import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
-import lunar.shared.entity.contact.PlayerCollisionListener;
-import lunar.shared.entity.player.LunarEntity;
-import lunar.shared.entity.player.LunarEntityPlayer;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
-import lunar.shared.entity.systems.moving.EntityMovementSystem;
+import lunar.shared.contact.PlayerCollisionListener;
+import lunar.shared.entity.LunarEntity;
+import lunar.shared.player.LunarEntityPlayer;
+import lunar.shared.player.mp.LunarNetworkEntityPlayer;
+import lunar.shared.systems.moving.EntityMovementSystem;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @param <E> any local entity instance type you wish
  */
 public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity>
-        extends LunarWorldSkeleton<N, E> implements Disposable {
+        extends AbstractWorld<N, E> implements Disposable {
 
     // engine for this world.
     protected PooledEngine engine;
@@ -136,8 +136,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      * Add world systems to the engine.
      */
     public void addWorldSystems() {
-        movementSystem = new EntityMovementSystem();
-        engine.addSystem(movementSystem);
+        engine.addSystem(movementSystem = new EntityMovementSystem());
     }
 
     /**
@@ -170,18 +169,18 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
 
         // update all types of entities
         if (configuration.updateEntities)
-            for (E value : entities.values()) value.update(delta);
+            for (E entity : entities.values()) entity.update(delta);
 
         // update local
         if (configuration.updatePlayer) {
-            player.interpolatePosition(1.0f);
+            player.interpolatePosition(player.getInterpolationAmount());
             player.update(delta);
         }
 
         // update network
         if (configuration.updateNetworkPlayers) {
             for (LunarNetworkEntityPlayer player : players.values()) {
-                player.interpolatePosition(1.0f);
+                player.interpolatePosition(player.getInterpolationAmount());
                 player.update(delta);
             }
         }
@@ -228,7 +227,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      */
     public void updatePlayerPosition(int id, float x, float y, float angle) {
         if (hasNetworkPlayer(id)) {
-            getNetworkPlayer(id).updateServerPosition(x, y, angle);
+            getNetworkPlayer(id).updatePosition(x, y, angle);
         }
     }
 
@@ -242,7 +241,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      */
     public void updatePlayerVelocity(int id, float x, float y, float angle) {
         if (hasNetworkPlayer(id)) {
-            getNetworkPlayer(id).updateServerVelocity(x, y, angle);
+            getNetworkPlayer(id).updateVelocity(x, y, angle);
         }
     }
 
@@ -253,7 +252,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      */
     public void updatePlayerPosition(SPacketPlayerPosition packet) {
         if (hasNetworkPlayer(packet.getEntityId())) {
-            getNetworkPlayer(packet.getEntityId()).updateServerPosition(packet.getX(), packet.getY(), packet.getRotation());
+            getNetworkPlayer(packet.getEntityId()).updatePosition(packet.getX(), packet.getY(), packet.getRotation());
         }
     }
 
@@ -264,7 +263,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      */
     public void updatePlayerVelocity(SPacketPlayerVelocity packet) {
         if (hasNetworkPlayer(packet.getEntityId())) {
-            getNetworkPlayer(packet.getEntityId()).updateServerVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
+            getNetworkPlayer(packet.getEntityId()).updateVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
         }
     }
 

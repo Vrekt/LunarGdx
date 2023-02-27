@@ -10,7 +10,7 @@ import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.client.*;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
-import lunar.shared.entity.player.LunarEntityPlayer;
+import lunar.shared.player.LunarEntityPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +81,7 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
      * @param c       the consumer
      */
     public void registerHandlerAsync(ConnectionOption handler, Consumer<Packet> c) {
-        handlers.put(handler, new Handler(c, true));
+        handlers.put(handler, new Handler(c, false));
     }
 
     /**

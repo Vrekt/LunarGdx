@@ -5,9 +5,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.World;
 import gdx.lunar.world.LunarWorld;
 import gdx.lunar.world.WorldConfiguration;
-import lunar.shared.entity.player.LunarEntity;
-import lunar.shared.entity.player.impl.LunarPlayer;
-import lunar.shared.entity.player.impl.LunarPlayerMP;
+import lunar.shared.entity.LunarEntity;
+import lunar.shared.player.impl.LunarPlayer;
+import lunar.shared.player.impl.LunarPlayerMP;
 
 /**
  * Represents a basic (default) world.

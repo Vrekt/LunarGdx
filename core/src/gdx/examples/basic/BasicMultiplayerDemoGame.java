@@ -17,7 +17,7 @@ import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
-import lunar.shared.entity.player.impl.LunarPlayerMP;
+import lunar.shared.player.impl.LunarPlayerMP;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -94,9 +94,9 @@ public final class BasicMultiplayerDemoGame extends Game {
                 ConnectionOption.HANDLE_PLAYER_FORCE);
 
         // register handlers in the world, this could also be in the player class if you choose.
-        connection.registerHandlerAsync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
-        connection.registerHandlerAsync(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
-        connection.registerHandlerAsync(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
+        connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
+        connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
+        connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
         // TODO: Implement a join world timeout if you desire.
 
         player.getConnection().joinWorld("TutorialWorld", player.getName());
@@ -126,7 +126,11 @@ public final class BasicMultiplayerDemoGame extends Game {
 
         if (ready) {
             final float delta = Gdx.graphics.getDeltaTime();
-            world.update(delta);
+            if (player.isInInstance()) {
+                player.getWorlds().instanceIn.update(delta);
+            } else {
+                world.update(delta);
+            }
 
             // update our camera
             camera.position.set(player.getInterpolated().x, player.getInterpolated().y, 0f);
@@ -141,11 +145,11 @@ public final class BasicMultiplayerDemoGame extends Game {
             // render our player
             player.render(batch, delta);
 
-            // render other entities, with default player textures
             for (LunarPlayerMP player : world.getPlayers().values()) {
                 batch.draw(player.getRegion("player"), player.getX(), player.getY(),
                         player.getWidthScaled(), player.getHeightScaled());
             }
+
 
             batch.end();
         }
