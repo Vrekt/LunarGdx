@@ -8,7 +8,7 @@ public class CPacketEnterInstance extends Packet {
 
     public static final int PID = 8812;
 
-    private int instanceId;
+    protected int instanceId;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleEnterInstance(new CPacketEnterInstance(buf));

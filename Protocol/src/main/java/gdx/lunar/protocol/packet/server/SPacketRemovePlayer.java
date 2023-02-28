@@ -14,7 +14,7 @@ public class SPacketRemovePlayer extends Packet {
     /**
      * entity ID
      */
-    private int entityId;
+    protected int entityId;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleRemovePlayer(new SPacketRemovePlayer(buf));

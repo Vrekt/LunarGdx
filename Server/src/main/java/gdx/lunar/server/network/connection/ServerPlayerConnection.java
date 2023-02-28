@@ -17,8 +17,8 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
     /**
      * The player who owns this connection.
      */
-    private LunarServerPlayerEntity player;
-    private boolean disconnected;
+    protected LunarServerPlayerEntity player;
+    protected boolean disconnected;
 
     public ServerPlayerConnection(Channel channel, LunarServer server) {
         super(channel, server);
@@ -83,7 +83,6 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
         this.player.setEntityName(packet.getUsername());
         this.player.setWorldIn(world);
         this.player.setEntityId(world.assignEntityId());
-
         sendImmediately(new SPacketJoinWorld(packet.getWorldName(), player.getEntityId()));
     }
 

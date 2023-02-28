@@ -113,25 +113,21 @@ public class PlayerConnectionHandler extends PlayerConnection {
     public void handlePlayerPosition(SPacketPlayerPosition packet) {
         if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_POSITION)) return;
         if (!verifyPlayerExists(packet.getEntityId())) return;
-
-        getWorldIn().getNetworkPlayer(packet.getEntityId()).updatePosition(packet.getX(), packet.getY(), packet.getRotation());
+        getWorldIn().updatePlayerPosition(packet);
     }
 
     @Override
     public void handlePlayerVelocity(SPacketPlayerVelocity packet) {
         if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_VELOCITY)) return;
         if (!verifyPlayerExists(packet.getEntityId())) return;
-
-        getWorldIn().getNetworkPlayer(packet.getEntityId()).updateVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
+        getWorldIn().updatePlayerVelocity(packet);
     }
 
     @Override
     public void handleEntityBodyForce(SPacketApplyEntityBodyForce packet) {
         if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_FORCE)) return;
         if (!verifyPlayerExists(packet.getEntityId())) return;
-
-        getWorldIn().getNetworkPlayer(packet.getEntityId())
-                .updateBodyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
+        getWorldIn().updateEntityForce(packet);
     }
 
     @Override

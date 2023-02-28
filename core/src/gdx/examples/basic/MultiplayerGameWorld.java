@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.World;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
-import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
 import gdx.lunar.world.impl.WorldAdapter;
 import lunar.shared.player.impl.LunarPlayer;
@@ -29,8 +28,9 @@ public final class MultiplayerGameWorld extends WorldAdapter {
      *
      * @param world the new world packet
      */
-    public void handleWorldJoin(SPacketJoinWorld world) {
+    public void handleWorldJoin(TestCustomJoinWorldPacketServer world) {
         Gdx.app.log(BasicMultiplayerDemoGame.TAG, "Joining local-world: " + world.getWorldName() + ", entity ID is " + world.getEntityId());
+        Gdx.app.log(BasicMultiplayerDemoGame.TAG, "Test " + world.testField);
         // set our player's entity ID from world packet.
         player.setEntityId(world.getEntityId());
         // spawn local player in world
@@ -38,6 +38,7 @@ public final class MultiplayerGameWorld extends WorldAdapter {
         // load into the world!
         // tell the server we are good to go.
         player.getConnection().updateWorldLoaded();
+
 
         // etc...
         game.ready = true;

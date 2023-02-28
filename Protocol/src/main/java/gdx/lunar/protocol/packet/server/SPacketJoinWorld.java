@@ -12,9 +12,9 @@ public class SPacketJoinWorld extends Packet {
     public static final int PID = 997;
 
     // name of the world player should join
-    private String worldName;
+    protected String worldName;
     // players new entity ID.
-    private int entityId;
+    protected int entityId;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleJoinWorld(new SPacketJoinWorld(buf));

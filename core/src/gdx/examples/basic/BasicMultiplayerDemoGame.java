@@ -86,7 +86,12 @@ public final class BasicMultiplayerDemoGame extends Game {
         final PlayerConnectionHandler connection = (PlayerConnectionHandler) server.getConnection();
         player.setConnection(connection);
 
-        // enable options we want LunarProtocolSettings to handle by default.
+        protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> {
+            System.err.println("hello");
+            handler.handleJoinWorld(new TestCustomJoinWorldPacketServer(buf));
+        });
+
+        // enable options we want Lunar to handle by default.
         connection.enableOptions(
                 ConnectionOption.HANDLE_PLAYER_POSITION,
                 ConnectionOption.HANDLE_PLAYER_VELOCITY,
@@ -94,12 +99,14 @@ public final class BasicMultiplayerDemoGame extends Game {
                 ConnectionOption.HANDLE_PLAYER_FORCE);
 
         // register handlers in the world, this could also be in the player class if you choose.
-        connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
+        connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((TestCustomJoinWorldPacketServer) packet));
         connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
         connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
         // TODO: Implement a join world timeout if you desire.
 
-        player.getConnection().joinWorld("TutorialWorld", player.getName());
+        final TestCustomJoinWorldPacket packet = new TestCustomJoinWorldPacket("TutorialWorld", player.getName());
+        packet.setTestField(true);
+        player.getConnection().sendImmediately(packet);
     }
 
     public TextureRegion getTexture() {

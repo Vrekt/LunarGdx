@@ -11,9 +11,9 @@ public class SPacketEnterInstance extends Packet {
 
     public static final int PID = 9915;
 
-    private int instanceId;
-    private boolean isAllowed, isFull;
-    private String notAllowedReason;
+    protected int instanceId;
+    protected boolean isAllowed, isFull;
+    protected String notAllowedReason;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleEnterInstance(new SPacketEnterInstance(buf));

@@ -10,9 +10,9 @@ import io.netty.buffer.ByteBuf;
 public class SPacketCreateLobby extends Packet {
     public static final int PID = 9912;
 
-    private boolean isAllowed;
-    private String notAllowedReason;
-    private int entityId, lobbyId;
+    protected boolean isAllowed;
+    protected String notAllowedReason;
+    protected int entityId, lobbyId;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleCreateLobby(new SPacketCreateLobby(buf));

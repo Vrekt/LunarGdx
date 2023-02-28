@@ -11,8 +11,8 @@ public class SPacketPlayerPosition extends Packet {
 
     public static final int PID = 995;
 
-    private int entityId;
-    private float x, y, rotation;
+    protected int entityId;
+    protected float x, y, rotation;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handlePlayerPosition(new SPacketPlayerPosition(buf));

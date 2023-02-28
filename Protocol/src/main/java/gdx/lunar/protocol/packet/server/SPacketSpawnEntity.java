@@ -10,9 +10,9 @@ import io.netty.buffer.ByteBuf;
 public class SPacketSpawnEntity extends Packet {
     public static final int PID = 999;
 
-    private String entityName;
-    private float x, y;
-    private int temporaryEntityId, entityId;
+    protected String entityName;
+    protected float x, y;
+    protected int temporaryEntityId, entityId;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleSpawnEntity(new SPacketSpawnEntity(buf));

@@ -11,7 +11,7 @@ public class CPacketVelocity extends Packet {
 
     public static final int PID = 884;
 
-    private float velocityX, velocityY, rotation;
+    protected float velocityX, velocityY, rotation;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handlePlayerVelocity(new CPacketVelocity(buf));

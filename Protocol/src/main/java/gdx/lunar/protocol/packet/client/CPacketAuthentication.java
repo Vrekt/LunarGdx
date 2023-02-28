@@ -11,8 +11,8 @@ public class CPacketAuthentication extends Packet {
 
     public static final int PID = 881;
 
-    private String gameVersion;
-    private int protocolVersion;
+    protected String gameVersion;
+    protected int protocolVersion;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleAuthentication(new CPacketAuthentication(buf));

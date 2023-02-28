@@ -11,8 +11,8 @@ public class SPacketJoinLobby extends Packet {
 
     public static final int PID = 9914;
 
-    private String lobbyName;
-    private int lobbyId, entityId;
+    protected String lobbyName;
+    protected int lobbyId, entityId;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleJoinLobby(new SPacketJoinLobby(buf));

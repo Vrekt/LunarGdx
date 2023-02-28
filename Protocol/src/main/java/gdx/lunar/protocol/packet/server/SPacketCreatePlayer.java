@@ -11,21 +11,9 @@ public class SPacketCreatePlayer extends Packet {
 
     public static final int PID = 993;
 
-    /**
-     * Username
-     */
-    private String username;
-
-    /**
-     * Entity ID
-     * Character
-     */
-    private int entityId;
-
-    /**
-     * Spawning location
-     */
-    private float x, y;
+    protected String username;
+    protected int entityId;
+    protected float x, y;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleCreatePlayer(new SPacketCreatePlayer(buf));

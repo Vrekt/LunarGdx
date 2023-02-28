@@ -11,8 +11,8 @@ public class CPacketJoinLobby extends Packet {
 
     public static final int PID = 8811;
 
-    private String lobbyName;
-    private int lobbyId;
+    protected String lobbyName;
+    protected int lobbyId;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleJoinLobby(new CPacketJoinLobby(buf));

@@ -11,8 +11,8 @@ public class SPacketPlayerVelocity extends Packet {
 
     public static final int PID = 996;
 
-    private int entityId;
-    private float velocityX, velocityY, rotation;
+    protected int entityId;
+    protected float velocityX, velocityY, rotation;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handlePlayerVelocity(new SPacketPlayerVelocity(buf));

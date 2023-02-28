@@ -11,8 +11,8 @@ public class SPacketSetEntityProperties extends Packet {
 
     public static final int PID = 9911;
 
-    private int entityId;
-    private String entityName;
+    protected int entityId;
+    protected String entityName;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleSetEntityProperties(new SPacketSetEntityProperties(buf));

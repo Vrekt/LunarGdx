@@ -11,7 +11,7 @@ public class SPacketWorldInvalid extends Packet {
 
     public static final int PID = 9917;
 
-    private String worldName, reason;
+    protected String worldName, reason;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleWorldInvalid(new SPacketWorldInvalid(buf));

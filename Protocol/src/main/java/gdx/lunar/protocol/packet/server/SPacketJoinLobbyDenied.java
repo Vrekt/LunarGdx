@@ -11,7 +11,7 @@ public class SPacketJoinLobbyDenied extends Packet {
 
     public static final int PID = 9913;
 
-    private String reason;
+    protected String reason;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleJoinLobbyDenied(new SPacketJoinLobbyDenied(buf));

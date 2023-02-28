@@ -14,7 +14,7 @@ public class SPacketDisconnect extends Packet {
     /**
      * The reason for the disconnect
      */
-    private String reason;
+    protected String reason;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleDisconnect(new SPacketDisconnect(buf));

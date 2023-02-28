@@ -12,8 +12,8 @@ public class SPacketApplyEntityBodyForce extends Packet {
 
     public static final int PID = 998;
 
-    private int entityId;
-    private float forceX, forceY, pointX, pointY;
+    protected int entityId;
+    protected float forceX, forceY, pointX, pointY;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleEntityBodyForce(new SPacketApplyEntityBodyForce(buf));

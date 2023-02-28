@@ -8,7 +8,7 @@ public class SPacketPlayerEnterInstance extends Packet {
 
     public static final int PID = 9916;
 
-    private int entityId;
+    protected int entityId;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handlePlayerEnterInstance(new SPacketPlayerEnterInstance(buf));

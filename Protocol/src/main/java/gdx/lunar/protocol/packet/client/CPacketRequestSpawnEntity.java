@@ -11,9 +11,9 @@ public class CPacketRequestSpawnEntity extends Packet {
 
     public static final int PID = 888;
 
-    private String entityName;
-    private float x, y;
-    private int temporaryEntityId;
+    protected String entityName;
+    protected float x, y;
+    protected int temporaryEntityId;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleRequestSpawnEntity(new CPacketRequestSpawnEntity(buf));

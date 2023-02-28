@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.instance.LunarInstance;
 import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.protocol.packet.server.SPacketApplyEntityBodyForce;
 import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
 import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
 import lunar.shared.contact.PlayerCollisionListener;
@@ -63,7 +64,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         this.configuration = new WorldConfiguration();
         configuration.worldScale = worldScale;
         configuration.handlePhysics = handlePhysics;
-        configuration.updatePlayer = updatePlayer;
+        configuration.updateLocalPlayer = updatePlayer;
         configuration.updateNetworkPlayers = updateNetworkPlayers;
         configuration.updateEntities = updateEntities;
     }
@@ -172,7 +173,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
             for (E entity : entities.values()) entity.update(delta);
 
         // update local
-        if (configuration.updatePlayer) {
+        if (configuration.updateLocalPlayer) {
             player.interpolatePosition(player.getInterpolationAmount());
             player.update(delta);
         }
@@ -185,7 +186,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
             }
         }
 
-        if (configuration.updateEngine) {
+        if (configuration.updateEntityEngine) {
             engine.update(delta);
         }
 
@@ -207,7 +208,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
                 }
             }
 
-            if (configuration.updatePlayer) {
+            if (configuration.updateLocalPlayer) {
                 player.getPrevious().set(player.getPosition());
                 player.setPosition(player.getBody().getPosition(), false);
             }
@@ -219,6 +220,7 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
 
     /**
      * Update a players position
+     * This method assumes the {@code id} exists.
      *
      * @param id    their entity ID
      * @param x     their X
@@ -226,13 +228,12 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      * @param angle their current angle
      */
     public void updatePlayerPosition(int id, float x, float y, float angle) {
-        if (hasNetworkPlayer(id)) {
-            getNetworkPlayer(id).updatePosition(x, y, angle);
-        }
+        getNetworkPlayer(id).updatePosition(x, y, angle);
     }
 
     /**
      * Update a players velocity
+     * This method assumes the {@code id} exists.
      *
      * @param id    their entity ID
      * @param x     their X
@@ -240,31 +241,37 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
      * @param angle their current angle
      */
     public void updatePlayerVelocity(int id, float x, float y, float angle) {
-        if (hasNetworkPlayer(id)) {
-            getNetworkPlayer(id).updateVelocity(x, y, angle);
-        }
+        getNetworkPlayer(id).updateVelocity(x, y, angle);
     }
 
     /**
      * Update a players position from a raw packet
+     * This method assumes the {@code packet.getId()} exists.
      *
      * @param packet the packet
      */
     public void updatePlayerPosition(SPacketPlayerPosition packet) {
-        if (hasNetworkPlayer(packet.getEntityId())) {
-            getNetworkPlayer(packet.getEntityId()).updatePosition(packet.getX(), packet.getY(), packet.getRotation());
-        }
+        updatePlayerPosition(packet.getEntityId(), packet.getX(), packet.getY(), packet.getRotation());
     }
 
     /**
      * Update a players velocity from a raw packet
+     * This method assumes the {@code packet.getId()} exists.
      *
      * @param packet the packet
      */
     public void updatePlayerVelocity(SPacketPlayerVelocity packet) {
-        if (hasNetworkPlayer(packet.getEntityId())) {
-            getNetworkPlayer(packet.getEntityId()).updateVelocity(packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
-        }
+        updatePlayerVelocity(packet.getEntityId(), packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
+    }
+
+    /**
+     * Update a players body forcec from a raw packet
+     * This method assumes the {@code packet.getId()} exists.
+     *
+     * @param packet the packet
+     */
+    public void updateEntityForce(SPacketApplyEntityBodyForce packet) {
+        getNetworkPlayer(packet.getEntityId()).updateBodyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
     }
 
     @Override

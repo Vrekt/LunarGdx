@@ -11,7 +11,7 @@ public class CPacketPosition extends Packet {
 
     public static final int PID = 883;
 
-    private float rotation, x, y;
+    protected float rotation, x, y;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handlePlayerPosition(new CPacketPosition(buf));

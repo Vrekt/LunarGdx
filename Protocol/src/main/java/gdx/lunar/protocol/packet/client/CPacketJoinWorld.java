@@ -11,12 +11,10 @@ public class CPacketJoinWorld extends Packet {
 
     public static final int PID = 885;
 
-    /**
-     * The name of the world to join
-     */
-    private String worldName;
+    //The name of the world to join
+    protected String worldName;
     // username of the player trying to join
-    private String username;
+    protected String username;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleJoinWorld(new CPacketJoinWorld(buf));
@@ -27,7 +25,7 @@ public class CPacketJoinWorld extends Packet {
         this.username = username;
     }
 
-    private CPacketJoinWorld(ByteBuf buffer) {
+    public CPacketJoinWorld(ByteBuf buffer) {
         super(buffer);
     }
 

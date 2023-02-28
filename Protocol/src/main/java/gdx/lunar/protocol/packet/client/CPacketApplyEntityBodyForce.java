@@ -11,8 +11,8 @@ public class CPacketApplyEntityBodyForce extends Packet {
 
     public static final int PID = 887;
 
-    private int entityId;
-    private float forceX, forceY, pointX, pointY;
+    protected int entityId;
+    protected float forceX, forceY, pointX, pointY;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleBodyForce(new CPacketApplyEntityBodyForce(buf));

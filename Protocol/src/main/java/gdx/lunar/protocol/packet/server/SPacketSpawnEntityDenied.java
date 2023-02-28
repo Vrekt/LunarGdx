@@ -11,8 +11,8 @@ public class SPacketSpawnEntityDenied extends Packet {
 
     public static final int PID = 9910;
 
-    private int temporaryEntityId;
-    private String reason;
+    protected int temporaryEntityId;
+    protected String reason;
 
     public static void handle(ServerPacketHandler handler, ByteBuf buf) {
         handler.handleSpawnEntityDenied(new SPacketSpawnEntityDenied(buf));

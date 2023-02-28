@@ -12,7 +12,7 @@ public class SPacketAuthentication extends Packet {
         handler.handleAuthentication(new SPacketAuthentication(buf));
     }
 
-    private boolean isAllowed;
+    protected boolean isAllowed;
 
     public SPacketAuthentication(boolean isAllowed) {
         this.isAllowed = isAllowed;

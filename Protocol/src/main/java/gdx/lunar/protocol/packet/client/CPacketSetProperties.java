@@ -11,7 +11,7 @@ public class CPacketSetProperties extends Packet {
 
     public static final int PID = 889;
 
-    private String username;
+    protected String username;
 
     public static void handle(ClientPacketHandler handler, ByteBuf buf) {
         handler.handleSetProperties(new CPacketSetProperties(buf));

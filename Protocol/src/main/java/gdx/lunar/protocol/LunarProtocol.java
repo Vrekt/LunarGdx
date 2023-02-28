@@ -44,10 +44,7 @@ public class LunarProtocol {
      * @param initialize if {@code true} server and client (default) packets will be automatically added
      */
     public LunarProtocol(boolean initialize) {
-        if (initialize) {
-            initializeServer();
-            initializeClient();
-        }
+        if (initialize) initialize();
     }
 
     public void initialize() {
