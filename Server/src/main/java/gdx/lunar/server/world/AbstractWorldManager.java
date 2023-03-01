@@ -9,14 +9,14 @@ import java.util.Map;
 /**
  * Manages all the worlds within this server.
  */
-public abstract class WorldManager implements Disposable {
+public abstract class AbstractWorldManager implements Disposable {
 
     /**
      * Map of all worlds
      */
     protected final Map<String, ServerWorld> worlds = new HashMap<>();
 
-    public WorldManager() {
+    public AbstractWorldManager() {
 
     }
 

@@ -5,7 +5,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import gdx.lunar.protocol.packet.client.CPacketEnterInstance;
+import gdx.lunar.world.LunarWorld;
+import lunar.shared.entity.LunarEntity;
+import lunar.shared.player.LunarEntityPlayer;
 import lunar.shared.player.impl.LunarPlayer;
+import lunar.shared.player.mp.LunarNetworkEntityPlayer;
 
 /**
  * Represents a basic player.
@@ -60,5 +64,11 @@ public final class DemoPlayer extends LunarPlayer {
     @Override
     public void render(SpriteBatch batch, float delta) {
         batch.draw(getRegion("player"), getInterpolated().x, getInterpolated().y, getWidthScaled(), getHeightScaled());
+    }
+
+    @Override
+    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
+        super.spawnEntityInWorld(world, x, y);
+        body.setFixedRotation(true);
     }
 }

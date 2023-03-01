@@ -1,7 +1,6 @@
 package gdx.lunar.server.entity;
 
 import com.badlogic.ashley.core.Entity;
-import gdx.lunar.network.AbstractConnection;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketDisconnect;
 import gdx.lunar.server.game.LunarServer;
@@ -14,7 +13,7 @@ import lunar.shared.player.mp.LunarNetworkEntityPlayer;
  * Represents a player entity within the server.
  * extends network entity {@link  LunarNetworkEntityPlayer}
  */
-public class LunarServerPlayerEntity extends LunarNetworkEntityPlayer {
+public class LunarServerPlayerEntity extends LunarServerEntity {
 
     protected LunarServer server;
     protected ServerAbstractConnection connection;
@@ -45,11 +44,6 @@ public class LunarServerPlayerEntity extends LunarNetworkEntityPlayer {
      */
     public LunarServer getServer() {
         return server;
-    }
-
-    @Override
-    public AbstractConnection getConnection() {
-        throw new UnsupportedOperationException("Must use server connection");
     }
 
     /**
@@ -112,6 +106,7 @@ public class LunarServerPlayerEntity extends LunarNetworkEntityPlayer {
 
     @Override
     public void dispose() {
+        super.dispose();
         isLoaded = false;
     }
 }

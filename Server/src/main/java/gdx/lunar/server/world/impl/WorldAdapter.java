@@ -24,8 +24,9 @@ public class WorldAdapter extends ServerWorld {
         for (LunarServerPlayerEntity player : players.values()) {
             // flush anything that was sent to the player
             player.getServerConnection().flush();
+            final long now = System.currentTimeMillis();
 
-            if (!isTimedOut(player)) {
+            if (!isTimedOut(player, now)) {
                 queuePlayerPosition(player);
                 queuePlayerVelocity(player);
                 queuePlayerForce(player);
@@ -47,7 +48,7 @@ public class WorldAdapter extends ServerWorld {
     }
 
     private void queuePlayerForce(LunarServerPlayerEntity player) {
-        // TODO:
+        // TODO?
     }
 
 }

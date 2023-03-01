@@ -8,7 +8,6 @@ import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.game.utilities.Disposable;
 import gdx.lunar.server.instance.Instance;
 import gdx.lunar.server.world.config.ServerWorldConfiguration;
-import gdx.lunar.world.AbstractWorld;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -18,7 +17,8 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Represents a world that is networked.
  */
-public abstract class ServerWorld extends AbstractWorld<LunarServerPlayerEntity, LunarServerEntity> implements Disposable {
+public abstract class ServerWorld extends AbstractServerWorld<LunarServerPlayerEntity, LunarServerEntity> implements Disposable {
+
     protected final ServerWorldConfiguration configuration;
     protected final String worldName;
 
@@ -59,6 +59,15 @@ public abstract class ServerWorld extends AbstractWorld<LunarServerPlayerEntity,
      */
     protected boolean isTimedOut(LunarServerPlayerEntity player) {
         return System.currentTimeMillis() - player.getServerConnection().getLastPacketReceived() >= configuration.getPlayerTimeoutMs();
+    }
+
+    /**
+     * @param player the player
+     * @param time the current time ms
+     * @return {@code true} if this player is timed out based on {@code playerTimeoutMs}
+     */
+    protected boolean isTimedOut(LunarServerPlayerEntity player, long time) {
+        return time - player.getServerConnection().getLastPacketReceived() >= configuration.getPlayerTimeoutMs();
     }
 
     /**
@@ -104,8 +113,7 @@ public abstract class ServerWorld extends AbstractWorld<LunarServerPlayerEntity,
         for (LunarServerPlayerEntity other : players.values()) other.sendPlayerToPlayer(player);
 
         // broadcast the joining of this player to others.
-        broadcastPacketImmediately(player.getEntityId(),
-                new SPacketCreatePlayer(player.getName(), player.getEntityId(), x, y));
+        broadcastPacketImmediately(player.getEntityId(), new SPacketCreatePlayer(player.getName(), player.getEntityId(), x, y));
 
         // add this new player to the list
         players.put(player.getEntityId(), player);
@@ -168,7 +176,7 @@ public abstract class ServerWorld extends AbstractWorld<LunarServerPlayerEntity,
      *
      * @param packet the packet
      */
-    public void broadcastPacketInWorld(Packet packet) {
+    public void broadcast(Packet packet) {
         for (LunarServerPlayerEntity player : players.values()) player.getServerConnection().queue(packet);
     }
 

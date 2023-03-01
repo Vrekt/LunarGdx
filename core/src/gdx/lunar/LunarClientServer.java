@@ -203,12 +203,14 @@ public final class LunarClientServer implements Disposable {
     /**
      * Connect, but silence the exception.
      */
-    public void connectNoExceptions() {
+    public boolean connectNoExceptions() {
         try {
             bootstrap.connect(ip, port).sync();
+            return true;
         } catch (Exception any) {
             any.printStackTrace();
         }
+        return false;
     }
 
     @Override

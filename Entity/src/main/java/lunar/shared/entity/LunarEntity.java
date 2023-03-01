@@ -373,27 +373,33 @@ public abstract class LunarEntity implements Disposable {
      * @param x     the X location
      * @param y     the Y location
      */
-    public abstract <P extends LunarEntityPlayer,
+    public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
-            E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y);
+            E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
+
+    }
 
     /**
      * Spawn this entity in the given world at the worlds spawn location
      *
      * @param world the world
      */
-    public abstract <P extends LunarEntityPlayer,
+    public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
-            E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world);
+            E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world) {
+
+    }
 
     /**
      * Remove this entity from the world
      *
      * @param world world
      */
-    public abstract <P extends LunarEntityPlayer,
+    public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
-            E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world);
+            E extends LunarEntity> void removeEntityInWorld(LunarWorld<P, N, E> world) {
+
+    }
 
     /**
      * Spawn this entity in the given world.
@@ -402,27 +408,33 @@ public abstract class LunarEntity implements Disposable {
      * @param x        the X location
      * @param y        the Y location
      */
-    public abstract <P extends LunarEntityPlayer,
+    public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
-            E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance, float x, float y);
+            E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance, float x, float y) {
+
+    }
 
     /**
      * Spawn this entity in the given world at the worlds spawn location
      *
      * @param instance the instance
      */
-    public abstract <P extends LunarEntityPlayer,
+    public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
-            E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance);
+            E extends LunarEntity> void spawnEntityInInstance(LunarInstance<P, N, E> instance) {
+
+    }
 
     /**
      * Remove this entity from the world
      *
      * @param instance the instance
      */
-    public abstract <P extends LunarEntityPlayer,
+    public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
-            E extends LunarEntity> void removeEntityInInstance(LunarInstance<P, N, E> instance);
+            E extends LunarEntity> void removeEntityInInstance(LunarInstance<P, N, E> instance) {
+
+    }
 
     /**
      * Apply force to this player

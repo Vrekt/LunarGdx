@@ -3,6 +3,7 @@ package gdx.examples.basic;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -38,16 +39,21 @@ public final class BasicMultiplayerDemoGame extends Game {
 
     // our local player
     private DemoPlayer player;
-
     private TextureAtlas assets;
 
     // a basic world.
     private MultiplayerGameWorld world;
     public boolean ready;
 
+    BitmapFont font;
+
     @Override
     public void create() {
         Gdx.app.log(TAG, "Initializing multiplayer demo.");
+
+        font = new BitmapFont();
+        font.getData().setScale(0.09f);
+
 
         // default assets in this project
         assets = new TextureAtlas(Gdx.files.internal("character.atlas"));
@@ -73,23 +79,21 @@ public final class BasicMultiplayerDemoGame extends Game {
         final LunarClientServer server = new LunarClientServer(protocol, "localhost", 6969);
         // set provider because we want {@link PlayerConnectionHandler}
         server.setConnectionProvider(channel -> new PlayerConnectionHandler(channel, protocol));
-        server.connectNoExceptions();
+        final boolean result = server.connectNoExceptions();
 
         // failed to connect, so exit() out.
-        if (server.getConnection() == null) {
-            throw new UnsupportedOperationException("No server.");
+        if (server.getConnection() == null || !result) {
+            Gdx.app.exit();
+            return;
         }
 
         // retrieve our players connection and create a new world and local player.
         Gdx.app.log(TAG, "Connected to the server successfully.");
-
         final PlayerConnectionHandler connection = (PlayerConnectionHandler) server.getConnection();
         player.setConnection(connection);
 
-        protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> {
-            System.err.println("hello");
-            handler.handleJoinWorld(new TestCustomJoinWorldPacketServer(buf));
-        });
+        // override a default handler in favor of our own
+        protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> handler.handleJoinWorld(new TestCustomJoinWorldPacketServer(buf)));
 
         // enable options we want Lunar to handle by default.
         connection.enableOptions(
@@ -98,7 +102,7 @@ public final class BasicMultiplayerDemoGame extends Game {
                 ConnectionOption.HANDLE_AUTHENTICATION,
                 ConnectionOption.HANDLE_PLAYER_FORCE);
 
-        // register handlers in the world, this could also be in the player class if you choose.
+        // register handlers we want to process ourselves instead of the default player connection
         connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((TestCustomJoinWorldPacketServer) packet));
         connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
         connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
@@ -159,6 +163,15 @@ public final class BasicMultiplayerDemoGame extends Game {
 
 
             batch.end();
+            batch.begin();
+
+            font.draw(batch, "L", player.getX() + 0.2f, player.getY() - 0.5f);
+
+            for (LunarPlayerMP player : world.getPlayers().values()) {
+                font.draw(batch, player.getEntityId() + "", player.getX() - 0.5f, player.getY() - 0.5f);
+            }
+            batch.end();
+
         }
     }
 

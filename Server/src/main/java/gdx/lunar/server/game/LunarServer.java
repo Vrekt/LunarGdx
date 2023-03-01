@@ -5,8 +5,8 @@ import gdx.lunar.server.configuration.ServerConfiguration;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.game.utilities.Disposable;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
-import gdx.lunar.server.world.WorldManager;
-import gdx.lunar.server.world.impl.WorldManagerAdapter;
+import gdx.lunar.server.world.AbstractWorldManager;
+import gdx.lunar.server.world.impl.WorldManager;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -34,12 +34,12 @@ public abstract class LunarServer implements Disposable {
     protected String gameVersion = "1.0";
 
     protected LunarProtocol protocol;
-    protected WorldManager worldManager;
+    protected AbstractWorldManager worldManager;
 
     public LunarServer(LunarProtocol protocol) {
         instance = this;
         this.service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        this.worldManager = new WorldManagerAdapter();
+        this.worldManager = new WorldManager();
         this.protocol = protocol;
     }
 
@@ -52,7 +52,7 @@ public abstract class LunarServer implements Disposable {
     public LunarServer(int threads, LunarProtocol protocol) {
         instance = this;
         this.service = Executors.newFixedThreadPool(threads);
-        this.worldManager = new WorldManagerAdapter();
+        this.worldManager = new WorldManager();
         this.protocol = protocol;
     }
 
@@ -94,14 +94,14 @@ public abstract class LunarServer implements Disposable {
      *
      * @param worldManager world manager.
      */
-    public void setWorldManager(WorldManager worldManager) {
+    public void setWorldManager(AbstractWorldManager worldManager) {
         this.worldManager = worldManager;
     }
 
     /**
      * @return the world manager
      */
-    public WorldManager getWorldManager() {
+    public AbstractWorldManager getWorldManager() {
         return worldManager;
     }
 

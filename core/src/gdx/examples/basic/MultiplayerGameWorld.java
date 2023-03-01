@@ -38,8 +38,6 @@ public final class MultiplayerGameWorld extends WorldAdapter {
         // load into the world!
         // tell the server we are good to go.
         player.getConnection().updateWorldLoaded();
-
-
         // etc...
         game.ready = true;
     }
@@ -60,7 +58,7 @@ public final class MultiplayerGameWorld extends WorldAdapter {
         // set your local game properties
         player.setSize(16, 16, (1 / 16.0f));
         // spawn player in your local world.
-        player.spawnEntityInWorld(this.player.getWorldIn(), packet.getX(), packet.getY());
+        player.spawnEntityInWorld(this, packet.getX(), packet.getY());
     }
 
     /**
