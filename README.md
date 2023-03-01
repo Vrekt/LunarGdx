@@ -21,6 +21,11 @@ player.applyForce(x, y, 1.0f, 1.0f, true);
 ```
 
 ```java
+// spawn a new entity in the world
+world.spawnEntityInWorld(new MyEntity(), x, y);
+```
+
+```java
 // register a unique custom packet.
 connection.registerPacket(99, MyCustomPacket::new, packet -> handleEntityPropertiesPacket(packet));
 // Override default handlers
@@ -29,7 +34,7 @@ connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> han
 
 ```java
 // Create a networked world for others to join us.
-// We tell the world to handle physics updates and local player updates for us.
+// By default the world will handle physics, player updates and network updates!
 world = new MultiplayerGameWorld(player, new World(Vector2.Zero, true), myGameInstance);
 // add default world systems
 world.addWorldSystems();
@@ -58,7 +63,7 @@ server.setConnectionProvider(channel -> new PlayerConnectionHandler(channel, pro
 protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> doSomething(buf, handler));
 ```
 
-Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt/LunarGdx/wiki/Building-a-simple-multiplayer-game)
+Want to jump in? Check out the [Quick Start Guide](https://github.com/Vrekt/LunarGdx/wiki/Quick-Start-Guide)
 
 ## Documentation and Examples
 
@@ -68,16 +73,9 @@ Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt
 
 # Planned Features
 - Networked collision
-- Better movement sync.
+- Networked textures, tiles, maps
 - Better protocol security [#9](https://github.com/Vrekt/LunarGdx/issues/9)
-- Networked entities and other map/world objects.
 - 'Instances' within worlds for interiors, rooms, dungeons, etc. Allows all the features as a normal world.
-- ...
-
-# Known Issues
-- Random ghost player blinks next to networked player
-- Initial position seems to be de-synced some way
-- Worlds will need to be disposed when switching between them
 - ...
 
 # Using Lunar
