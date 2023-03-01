@@ -147,6 +147,10 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
         return configuration;
     }
 
+    public void setConfiguration(WorldConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
     /**
      * @return Box2d world
      */
