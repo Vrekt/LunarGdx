@@ -16,33 +16,46 @@ Lunar is a networking library for LibGDX. With Lunar you can quickly create mult
 
 ### Get A Taste
 ```java
-// apply force to another player and send it to others since they were attacked.
-this.player.getWorldIn().applyForceToOtherPlayerNetwork(somePlayer, player.getConnection(), fx, fy, px, py, true);
-
-// apply a knock-back force to ourselves.
-this.player.getWorldIn().applyForceToPlayerNetwork(player.getConnection(), fx, fy, point.x, point.y, true);
+// apply a knock-back force to ourselves or another network player
+player.applyForce(x, y, 1.0f, 1.0f, true);
 ```
 
 ```java
 // register a unique custom packet.
-this.connection.registerPacket(99, MyCustomPacket::new, packet -> handleEntityPropertiesPacket(packet));
+connection.registerPacket(99, MyCustomPacket::new, packet -> handleEntityPropertiesPacket(packet));
+// Override default handlers
+connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> handle(packet));
 ```
 
 ```java
 // Create a networked world for others to join us.
 // We tell the world to handle physics updates and local player updates for us.
-lunarWorld = new BasicLunarWorld(player, world, scaling, true, true, true);
+world = new MultiplayerGameWorld(player, new World(Vector2.Zero, true), myGameInstance);
+// add default world systems
+world.addWorldSystems();
+// ignore player collisions
+world.addDefaultPlayerCollisionListener();
 // Spawn our player in the world.
-player.spawnEntityInWorld(lunarWorld, 2.0f, 2.0f);
+player.spawnEntityInWorld(world, mySpawnX, mySpawnY);
 ```
 
 ```java
 // connect to remote server.
-final LunarClientServer server = new LunarClientServer(lunarProtocolSettings, "localhost", 6969);
-server.connect().join();
+final LunarClientServer server = new LunarClientServer(myProtocol, "localhost", 6969);
+server.connect();
 
 // get our connection
 final PlayerConnection connection = (PlayerConnection) server.getConnection();
+// join a remote server world
+connection.joinWorld("MyWorld", player.getName());
+```
+
+```java
+// provide our own implementation for player connections
+server.setConnectionProvider(channel -> new PlayerConnectionHandler(channel, protocol));
+
+// override default server packet handlers
+protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> doSomething(buf, handler));
 ```
 
 Want to jump in? Check out the [Building A Simple Game](https://github.com/Vrekt/LunarGdx/wiki/Building-a-simple-multiplayer-game)
