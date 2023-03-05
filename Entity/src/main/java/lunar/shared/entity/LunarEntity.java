@@ -227,7 +227,7 @@ public abstract class LunarEntity implements Disposable {
      */
     public void setPosition(float x, float y, boolean transform) {
         getPosition().set(x, y);
-        if (transform && body != null && body.getWorld() != null)
+        if (transform && body != null)
             body.setTransform(x, y, body.getTransform().getRotation());
     }
 
@@ -239,7 +239,7 @@ public abstract class LunarEntity implements Disposable {
      */
     public void setPosition(Vector2 position, boolean transform) {
         getPosition().set(position);
-        if (transform && body != null && body.getWorld() != null)
+        if (transform && body != null)
             body.setTransform(position.x, position.y, body.getTransform().getRotation());
     }
 

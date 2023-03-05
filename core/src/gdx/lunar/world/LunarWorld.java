@@ -85,6 +85,20 @@ public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNet
     /**
      * An empty default constructor. You should use the setters to define configuration next.
      *
+     * @param player        the player
+     * @param world         the world
+     * @param configuration default configuration
+     */
+    public LunarWorld(P player, World world, WorldConfiguration configuration) {
+        this.player = player;
+        this.world = world;
+        this.configuration = configuration;
+        this.engine = new PooledEngine();
+    }
+
+    /**
+     * An empty default constructor. You should use the setters to define configuration next.
+     *
      * @param player the player
      * @param world  the world
      */

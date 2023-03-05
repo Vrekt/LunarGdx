@@ -38,8 +38,8 @@ public class EntityBodyCreator implements EntityBodyHandler {
 
     @Override
     public void resetDefinition() {
-        definition = new BodyDef();
-        fixture = new FixtureDef();
+        definition = null;
+        fixture = null;
     }
 
     @Override
