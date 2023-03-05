@@ -56,7 +56,9 @@ public class EntityBodyCreator implements EntityBodyHandler {
             definition.fixedRotation = fixedRotation;
         }
 
-        definition.position.set(x + configuration.getScaledWidth() / 2f, y + configuration.getScaledHeight() / 2f);
+        definition.position.set(x, y);
+        // TODO: This might not be necessary
+        //definition.position.set(x + configuration.getScaledWidth() / 2f, y + configuration.getScaledHeight() / 2f);
 
         final Body body = world.createBody(definition);
         PolygonShape shape = null;

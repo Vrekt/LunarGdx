@@ -197,6 +197,10 @@ public abstract class LunarEntity implements Disposable {
         this.hasMoved = hasMoved;
     }
 
+    public void setFixedRotation(boolean rotation) {
+        definitionHandler.setHasFixedRotation(rotation);
+    }
+
     /**
      * @return velocity of this entity.
      */
