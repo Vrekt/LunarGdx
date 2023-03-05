@@ -252,7 +252,7 @@ public abstract class LunarEntity implements Disposable {
      */
     public void setVelocity(float x, float y, boolean transform) {
         getVelocity().set(x, y);
-        if (transform && body != null && body.getWorld() != null)
+        if (transform && body != null)
             body.setTransform(x, y, body.getTransform().getRotation());
     }
 
