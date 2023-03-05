@@ -31,7 +31,7 @@ public class LunarPlayer extends LunarEntityPlayer {
         pollInput();
 
         // update body vel
-        if (body != null && inWorld)
+        if (body != null)
             body.setLinearVelocity(getVelocity());
     }
 
