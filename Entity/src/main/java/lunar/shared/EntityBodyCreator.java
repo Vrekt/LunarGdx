@@ -74,7 +74,7 @@ public class EntityBodyCreator implements EntityBodyHandler {
             }
         }
 
-        body.createFixture(fixture).setUserData(this);
+        body.createFixture(fixture);
         if (shape != null) shape.dispose();
         return body;
     }

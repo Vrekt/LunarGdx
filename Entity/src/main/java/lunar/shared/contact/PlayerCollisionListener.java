@@ -23,11 +23,12 @@ public final class PlayerCollisionListener implements ContactListener {
         final Fixture fixtureA = contact.getFixtureA();
         final Fixture fixtureB = contact.getFixtureB();
 
-        // disable collisions between players
+        // disable collisions between players\
         if (fixtureA.getUserData() instanceof LunarEntityPlayer
                 && fixtureB.getUserData() instanceof LunarEntityPlayer) {
             final LunarEntityPlayer a = (LunarEntityPlayer) fixtureA.getUserData();
-            if (a.doIgnorePlayerCollision()) contact.setEnabled(false);
+            final LunarEntityPlayer b = (LunarEntityPlayer) fixtureB.getUserData();
+            if (a.doIgnorePlayerCollision() || b.doIgnorePlayerCollision()) contact.setEnabled(false);
         }
     }
 

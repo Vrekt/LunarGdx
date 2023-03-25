@@ -3,7 +3,6 @@ package lunar.shared.player.mp;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import lunar.shared.player.LunarEntityPlayer;
 
 /**
