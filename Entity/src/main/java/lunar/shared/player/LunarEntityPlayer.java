@@ -73,7 +73,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
         setInterpolated(x, y);
 
         this.body = definitionHandler.createBodyInWorld(world, x, y, getProperties());
-        //this.body.setUserData(this);
+        this.body.setUserData(this);
         definitionHandler.resetDefinition();
     }
 
