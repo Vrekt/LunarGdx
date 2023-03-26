@@ -67,13 +67,13 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
      * @param x     spawn x
      * @param y     spawn y
      */
-    public void definePlayer(World world, float x, float y) {
+    public void defineEntity(World world, float x, float y) {
         getPosition().set(x, y);
         getPrevious().set(x, y);
         setInterpolated(x, y);
 
         this.body = definitionHandler.createBodyInWorld(world, x, y, getProperties());
-        this.body.setUserData(this);
+        //this.body.setUserData(this);
         definitionHandler.resetDefinition();
     }
 
@@ -81,7 +81,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
     public <P extends LunarEntityPlayer,
             N extends LunarNetworkEntityPlayer,
             E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
-        definePlayer(world.getWorld(), x, y);
+        defineEntity(world.getWorld(), x, y);
         world.spawnEntityInWorld(this, x, y);
         this.inWorld = true;
         this.getWorlds().setWorldIn(world);
@@ -114,7 +114,7 @@ public abstract class LunarEntityPlayer extends LunarAnimatedEntity {
         body = null;
 
         // create a new body for the instance
-        definePlayer(instance.getWorld(), x, y);
+        defineEntity(instance.getWorld(), x, y);
         instance.spawnEntityInWorld(this, x, y);
 
         this.inInstance = true;

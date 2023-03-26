@@ -98,4 +98,11 @@ public interface ClientPacketHandler {
      */
     void handleEnterInstance(CPacketEnterInstance packet);
 
+    /**
+     * Handle ping time packet
+     *
+     * @param packet the packet
+     */
+    void handlePing(CPacketPing packet);
+
 }

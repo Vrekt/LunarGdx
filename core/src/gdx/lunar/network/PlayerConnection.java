@@ -145,4 +145,9 @@ public class PlayerConnection extends AbstractConnection {
     public void handlePlayerEnterInstance(SPacketPlayerEnterInstance packet) {
 
     }
+
+    @Override
+    public void handlePing(SPacketPing packet) {
+        handle(ConnectionOption.PING, packet);
+    }
 }

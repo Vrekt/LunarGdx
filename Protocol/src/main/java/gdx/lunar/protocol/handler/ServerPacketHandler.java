@@ -126,4 +126,11 @@ public interface ServerPacketHandler {
      */
     void handleWorldInvalid(SPacketWorldInvalid packet);
 
+    /**
+     * Handle pings
+     *
+     * @param packet the packet
+     */
+    void handlePing(SPacketPing packet);
+
 }

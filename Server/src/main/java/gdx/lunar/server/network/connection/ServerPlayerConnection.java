@@ -150,6 +150,11 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
     }
 
     @Override
+    public void handlePing(CPacketPing packet) {
+        sendImmediately(new SPacketPing(packet.getTime(), System.currentTimeMillis()));
+    }
+
+    @Override
     public void connectionClosed() {
         disconnect();
     }

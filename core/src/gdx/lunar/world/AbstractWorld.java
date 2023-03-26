@@ -61,6 +61,8 @@ public abstract class AbstractWorld<N extends LunarNetworkEntityPlayer, E extend
 
     /**
      * Spawn the entity in this world
+     * This method is to be called AFTER {@code LunarEntity#spawnEntityInWorld} (usually by default)
+     * This method does not handle actually creating the new box2d entity
      *
      * @param entity the entity
      * @param x      location X
