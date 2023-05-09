@@ -10,7 +10,7 @@ import lunar.shared.player.LunarEntityPlayer;
  */
 public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
 
-    protected boolean doPositionInterpolation;
+    protected boolean interpolatePosition, doPositionInterpolation;
     protected float interpolateToX, interpolateToY;
 
     // snap player to the correct position if distance >= interpolateDesyncDistance
@@ -41,8 +41,8 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
      *
      * @param doPositionInterpolation state
      */
-    public void setDoPositionInterpolation(boolean doPositionInterpolation) {
-        this.doPositionInterpolation = doPositionInterpolation;
+    public void setInterpolatePosition(boolean doPositionInterpolation) {
+        this.interpolatePosition = doPositionInterpolation;
     }
 
     /**
@@ -113,8 +113,8 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
 
     @Override
     public void update(float delta) {
-        if (doPositionInterpolation) {
-            final Vector2 interpolated = getInterpolated();
+        if (interpolatePosition && doPositionInterpolation) {
+            final Vector2 interpolated = getInterpolated();;
 
             interpolated.x = Interpolation.linear.apply(body.getPosition().x, interpolateToX, interpolateAlpha);
             interpolated.y = Interpolation.linear.apply(body.getPosition().y, interpolateToY, interpolateAlpha);
