@@ -43,6 +43,10 @@ public abstract class LunarServer implements Disposable {
         this.protocol = protocol;
     }
 
+    public LunarProtocol getProtocol() {
+        return protocol;
+    }
+
     /**
      * Initialize
      *

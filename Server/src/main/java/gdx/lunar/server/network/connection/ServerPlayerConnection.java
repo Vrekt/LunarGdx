@@ -3,8 +3,8 @@ package gdx.lunar.server.network.connection;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.client.*;
 import gdx.lunar.protocol.packet.server.*;
-import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.instance.Instance;
 import gdx.lunar.server.world.ServerWorld;
 import io.netty.channel.Channel;
@@ -26,6 +26,13 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
 
     public void setPlayer(LunarServerPlayerEntity player) {
         this.player = player;
+    }
+
+    /**
+     * @return {@code  true} if this {connection} is disconnected
+     */
+    public boolean isDisconnected() {
+        return disconnected;
     }
 
     @Override
@@ -155,11 +162,6 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
     }
 
     @Override
-    public void connectionClosed() {
-        disconnect();
-    }
-
-    @Override
     public void disconnect() {
         if (disconnected) return;
         this.disconnected = true;
@@ -169,5 +171,10 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
 
         channel.pipeline().remove(this);
         channel.close();
+    }
+
+    @Override
+    public void connectionClosed(Throwable exception) {
+        disconnect();
     }
 }

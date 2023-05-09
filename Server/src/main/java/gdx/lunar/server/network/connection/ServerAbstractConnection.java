@@ -1,5 +1,6 @@
 package gdx.lunar.server.network.connection;
 
+import gdx.lunar.protocol.PacketFactory;
 import gdx.lunar.protocol.handler.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.server.game.LunarServer;
@@ -8,6 +9,8 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+
+import java.util.function.Consumer;
 
 /**
  * Represents a basic connection.
@@ -32,6 +35,16 @@ public abstract class ServerAbstractConnection extends ChannelInboundHandlerAdap
         this.server = server;
     }
 
+    /**
+     * Register a custom packet handler.
+     *
+     * @param pid     the pid
+     * @param handler the handler
+     */
+    public <T> void registerPacket(int pid, PacketFactory<T> factory, Consumer<T> handler) {
+        server.getProtocol().registerCustomPacket(pid, in -> handler.accept(factory.create(in)));
+    }
+
     public long getLastPacketReceived() {
         return lastPacketReceived;
     }
@@ -45,14 +58,24 @@ public abstract class ServerAbstractConnection extends ChannelInboundHandlerAdap
     }
 
     /**
+     * Update this connection.
+     */
+    public void update() {
+
+    }
+
+
+    /**
      * Disconnect
      */
     public abstract void disconnect();
 
     /**
      * Connection closed error
+     *
+     * @param exception the possible exception or {@code  null} if none
      */
-    public abstract void connectionClosed();
+    public abstract void connectionClosed(Throwable exception);
 
     /**
      * @return if this connection is connected in any way.
@@ -99,11 +122,11 @@ public abstract class ServerAbstractConnection extends ChannelInboundHandlerAdap
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) {
-        connectionClosed();
+        connectionClosed(null);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        connectionClosed();
+        connectionClosed(cause);
     }
 }

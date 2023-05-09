@@ -4,7 +4,6 @@ import gdx.lunar.protocol.LunarProtocol;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
@@ -39,17 +38,26 @@ public class ServerProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        final ByteBuf buf = (ByteBuf) super.decode(ctx, in);
-        if (buf != null) {
-            // ignore the length of the packet.
-            buf.readInt();
-            // retrieve packet from PID
-            final int pid = buf.readInt();
-            protocol.handleServerPacket(pid, buf, handler, ctx);
-
-            buf.release();
-        } else {
-            throw new DecoderException("ByteBuf from server is null.");
+        ByteBuf buf = null;
+        try {
+            buf = (ByteBuf) super.decode(ctx, in);
+            if (buf != null) {
+                // ignore the length of the packet.
+                buf.readInt();
+                // retrieve packet from PID
+                final int pid = buf.readInt();
+                if (protocol.isCustomPacket(pid)) {
+                    protocol.handleCustomPacket(pid, buf, ctx);
+                } else if (protocol.isServerPacket(pid)) {
+                    protocol.handleServerPacket(pid, buf, handler, ctx);
+                }
+            }
+        } catch (Exception any) {
+            ctx.fireExceptionCaught(any);
+        } finally {
+            if (buf != null) {
+                buf.release();
+            }
         }
         return null;
     }

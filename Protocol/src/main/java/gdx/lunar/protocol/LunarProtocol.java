@@ -183,23 +183,34 @@ public class LunarProtocol {
     }
 
     /**
+     * Handle a custom packet
+     *
+     * @param pid     the PID
+     * @param in      the in buffer
+     * @param context the context (allowed to be null)
+     */
+    public void handleCustomPacket(int pid, ByteBuf in, ChannelHandlerContext context) {
+        try {
+            custom.get(pid).accept(in);
+        } catch (Exception exception) {
+            if (context != null) context.fireExceptionCaught(exception);
+        }
+    }
+
+    /**
      * Handle a server packet
      * The provided {@code in} buffer should be released by decoder.
      *
      * @param pid     the packet ID
      * @param in      the ByteBuf in
      * @param handler the handler
-     * @param context local context
+     * @param context the context (allowed to be null)
      */
     public void handleServerPacket(int pid, ByteBuf in, ServerPacketHandler handler, ChannelHandlerContext context) {
         try {
-            if (isCustomPacket(pid)) {
-                custom.get(pid).accept(in);
-            } else if (isServerPacket(pid)) {
-                server.get(pid).accept(in, handler);
-            }
+            server.get(pid).accept(in, handler);
         } catch (Exception exception) {
-            context.fireExceptionCaught(exception);
+            if (context != null) context.fireExceptionCaught(exception);
         }
     }
 
@@ -210,17 +221,13 @@ public class LunarProtocol {
      * @param pid     the packet ID
      * @param in      the ByteBuf in
      * @param handler the handler
-     * @param context local context
+     * @param context the context (allowed to be null)
      */
     public void handleClientPacket(int pid, ByteBuf in, ClientPacketHandler handler, ChannelHandlerContext context) {
         try {
-            if (isCustomPacket(pid)) {
-                custom.get(pid).accept(in);
-            } else if (isClientPacket(pid)) {
-                client.get(pid).accept(in, handler);
-            }
+            client.get(pid).accept(in, handler);
         } catch (Exception exception) {
-            context.fireExceptionCaught(exception);
+            if (context != null) context.fireExceptionCaught(exception);
         }
     }
 

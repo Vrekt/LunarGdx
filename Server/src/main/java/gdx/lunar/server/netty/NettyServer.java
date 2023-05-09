@@ -15,11 +15,13 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 
+import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -41,6 +43,8 @@ public class NettyServer {
 
     private final LunarProtocol protocol;
     private LunarServer server;
+
+    private final LinkedList<ByteToMessageDecoder> decoders = new LinkedList<>();
 
     /**
      * Initialize the bootstrap and server.
@@ -118,6 +122,10 @@ public class NettyServer {
         this.encoder = encoder;
     }
 
+    public void addDecoder(ByteToMessageDecoder decoder) {
+        this.decoders.add(decoder);
+    }
+
     /**
      * Handle a new socket channel
      *
@@ -130,6 +138,9 @@ public class NettyServer {
 
         channel.pipeline().addLast(sslContext.newHandler(channel.alloc()));
         channel.pipeline().addLast(decoder);
+        for (ByteToMessageDecoder byteToMessageDecoder : this.decoders) {
+            channel.pipeline().addLast(byteToMessageDecoder);
+        }
         channel.pipeline().addLast(encoder);
         channel.pipeline().addLast(connection);
     }

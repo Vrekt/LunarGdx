@@ -41,16 +41,19 @@ public class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
                 buf.readInt();
                 // retrieve packet from PID
                 final int pid = buf.readInt();
-                if (protocol.isClientPacket(pid)) {
+                if (protocol.isCustomPacket(pid)) {
+                    protocol.handleCustomPacket(pid, buf, ctx);
+                } else if (protocol.isClientPacket(pid)) {
                     handler.setLastPacketReceived(System.currentTimeMillis());
                     protocol.handleClientPacket(pid, buf, handler, ctx);
                 }
             }
         } catch (Exception any) {
-            any.printStackTrace();
             ctx.fireExceptionCaught(any);
         } finally {
-            if (buf != null) buf.release();
+            if (buf != null) {
+                buf.release();
+            }
         }
         return null;
     }
