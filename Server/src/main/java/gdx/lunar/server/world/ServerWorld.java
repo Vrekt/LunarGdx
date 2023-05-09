@@ -83,12 +83,19 @@ public abstract class ServerWorld extends AbstractServerWorld<LunarServerPlayerE
     }
 
     /**
-     * Assign an entity ID within this world.
+     * Assign a (player) an entity ID within this world.
      *
      * @return the new entity ID.
      */
-    public int assignEntityId() {
+    public int assignPlayerEntityId() {
         return players.size() + 1 + ThreadLocalRandom.current().nextInt(111, 999);
+    }
+
+    /**
+     * @return Assign a (entity) an entity ID within this world
+     */
+    public int assignEntityId() {
+        return entities.size() + 1 + ThreadLocalRandom.current().nextInt(111, 999);
     }
 
     /**

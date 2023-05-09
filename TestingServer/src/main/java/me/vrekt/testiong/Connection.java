@@ -39,7 +39,7 @@ public class Connection extends ServerPlayerConnection {
         this.player = new LunarServerPlayerEntity(true, server, this);
         this.player.setEntityName(packet.getUsername());
         this.player.setWorldIn(world);
-        this.player.setEntityId(world.assignEntityId());
+        this.player.setEntityId(world.assignPlayerEntityId());
 
         final TestCustomJoinWorldPacketServer server1 = new TestCustomJoinWorldPacketServer(packet.getWorldName(), player.getEntityId());
         server1.setTestField(packet.isTestField());

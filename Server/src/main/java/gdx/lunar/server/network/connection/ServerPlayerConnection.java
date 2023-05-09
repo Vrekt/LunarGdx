@@ -89,7 +89,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
         this.player = new LunarServerPlayerEntity(true, server, this);
         this.player.setEntityName(packet.getUsername());
         this.player.setWorldIn(world);
-        this.player.setEntityId(world.assignEntityId());
+        this.player.setEntityId(world.assignPlayerEntityId());
         sendImmediately(new SPacketJoinWorld(packet.getWorldName(), player.getEntityId()));
     }
 
