@@ -52,4 +52,5 @@ public abstract class ServerConfiguration {
         this.allowChangeUsername = allowChangeUsername;
     }
 
+
 }

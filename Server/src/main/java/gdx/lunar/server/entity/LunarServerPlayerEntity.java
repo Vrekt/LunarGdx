@@ -4,9 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketDisconnect;
 import gdx.lunar.server.game.LunarServer;
-import gdx.lunar.server.instance.Instance;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
-import gdx.lunar.server.world.ServerWorld;
+import gdx.lunar.server.world.testing.World;
 import lunar.shared.player.mp.LunarNetworkEntityPlayer;
 
 /**
@@ -17,8 +16,7 @@ public class LunarServerPlayerEntity extends LunarServerEntity {
 
     protected LunarServer server;
     protected ServerAbstractConnection connection;
-    protected ServerWorld serverWorldIn;
-    protected Instance instanceIn;
+    protected World serverWorldIn;
 
     // if this player has been loaded client-side into the world.
     protected boolean isLoaded;
@@ -56,7 +54,7 @@ public class LunarServerPlayerEntity extends LunarServerEntity {
     /**
      * @return the world the player is in.
      */
-    public ServerWorld getWorld() {
+    public World getWorld() {
         return serverWorldIn;
     }
 
@@ -70,16 +68,8 @@ public class LunarServerPlayerEntity extends LunarServerEntity {
     /**
      * @param worldIn world in
      */
-    public void setWorldIn(ServerWorld worldIn) {
+    public void setWorldIn(World worldIn) {
         this.serverWorldIn = worldIn;
-    }
-
-    public Instance getInstanceIn() {
-        return instanceIn;
-    }
-
-    public void setInstanceIn(Instance instanceIn) {
-        this.instanceIn = instanceIn;
     }
 
     public boolean isLoaded() {

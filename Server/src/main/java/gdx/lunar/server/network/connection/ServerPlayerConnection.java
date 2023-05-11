@@ -5,8 +5,7 @@ import gdx.lunar.protocol.packet.client.*;
 import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.game.LunarServer;
-import gdx.lunar.server.instance.Instance;
-import gdx.lunar.server.world.ServerWorld;
+import gdx.lunar.server.world.testing.World;
 import io.netty.channel.Channel;
 
 /**
@@ -81,7 +80,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
             return;
         }
 
-        final ServerWorld world = server.getWorldManager().getWorld(packet.getWorldName());
+        final World world = server.getWorldManager().getWorld(packet.getWorldName());
         if (world.isFull()) {
             return;
         }
@@ -89,7 +88,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
         this.player = new LunarServerPlayerEntity(true, server, this);
         this.player.setEntityName(packet.getUsername());
         this.player.setWorldIn(world);
-        this.player.setEntityId(world.assignPlayerEntityId());
+        this.player.setEntityId(world.assignEntityIdFor(true));
         sendImmediately(new SPacketJoinWorld(packet.getWorldName(), player.getEntityId()));
     }
 
@@ -103,9 +102,13 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
 
     @Override
     public void handleBodyForce(CPacketApplyEntityBodyForce packet) {
-        if (player != null && player.getWorld().hasNetworkPlayer(packet.getEntityId())) {
-            player.getWorld().getNetworkPlayer(packet.getEntityId()).getVelocityComponent().setForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
-            player.getWorld().broadcast(packet.getEntityId(), new SPacketApplyEntityBodyForce(packet.getEntityId(), packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY()));
+        final int entityId = packet.getEntityId();
+        if (player != null && player.getWorld().hasPlayer(entityId)) {
+            player.getWorld()
+                    .getPlayer(entityId)
+                    .getVelocityComponent()
+                    .setForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
+            player.getWorld().broadcastWithExclusion(entityId, new SPacketApplyEntityBodyForce(entityId, packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY()));
         }
     }
 
@@ -137,7 +140,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
     @Override
     public void handleEnterInstance(CPacketEnterInstance packet) {
         System.err.println("requesting enter instance: " + packet.getInstanceId());
-        if (this.player != null) {
+      /*  if (this.player != null) {
             final Instance instance = player.getWorld().getInstance(packet.getInstanceId());
             if (instance != null) {
                 if (instance.isFull()) {
@@ -153,7 +156,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
             }
         } else {
             sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), false, false, "Invalid player"));
-        }
+        }*/
     }
 
     @Override

@@ -1,6 +1,7 @@
 package gdx.lunar.server.world;
 
 import gdx.lunar.server.game.utilities.Disposable;
+import gdx.lunar.server.world.testing.World;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,7 +15,7 @@ public abstract class AbstractWorldManager implements Disposable {
     /**
      * Map of all worlds
      */
-    protected final Map<String, ServerWorld> worlds = new HashMap<>();
+    protected final Map<String, World> worlds = new HashMap<>();
 
     public AbstractWorldManager() {
 
@@ -26,7 +27,7 @@ public abstract class AbstractWorldManager implements Disposable {
      * @param name  the name
      * @param world the world
      */
-    public void addWorld(String name, ServerWorld world) {
+    public void addWorld(String name, World world) {
         this.worlds.put(name, world);
     }
 
@@ -36,7 +37,7 @@ public abstract class AbstractWorldManager implements Disposable {
      * @param name the name
      * @return the world
      */
-    public ServerWorld getWorld(String name) {
+    public World getWorld(String name) {
         return worlds.get(name);
     }
 
@@ -47,7 +48,7 @@ public abstract class AbstractWorldManager implements Disposable {
     /**
      * @return all worlds
      */
-    public Collection<ServerWorld> getWorlds() {
+    public Collection<World> getWorlds() {
         return worlds.values();
     }
 
@@ -55,14 +56,14 @@ public abstract class AbstractWorldManager implements Disposable {
      * Update all worlds.
      */
     public void update(float delta) {
-        for (ServerWorld value : worlds.values()) {
-            value.tick();
+        for (World value : worlds.values()) {
+            value.tick(delta);
         }
     }
 
     @Override
     public void dispose() {
-        getWorlds().forEach(ServerWorld::dispose);
+        getWorlds().forEach(World::dispose);
         worlds.clear();
     }
 }

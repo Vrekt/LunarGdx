@@ -15,6 +15,9 @@ public class ServerWorldConfiguration {
     // how long a player can go until timing out (no packet sends)
     protected long playerTimeoutMs = 3000;
 
+    // world will handle ticking itself and update all players each tick
+    public boolean doDefaultTicking = true;
+
     public ServerWorldConfiguration(int maxPacketsPerTick, int capacity, int maxEntities, long playerTimeoutMs) {
         this.maxPacketsPerTick = maxPacketsPerTick;
         this.capacity = capacity;
