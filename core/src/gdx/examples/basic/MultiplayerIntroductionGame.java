@@ -1,5 +1,6 @@
 package gdx.examples.basic;
 
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -15,10 +16,12 @@ import gdx.lunar.LunarClientServer;
 import gdx.lunar.network.types.ConnectionOption;
 import gdx.lunar.network.types.PlayerConnectionHandler;
 import gdx.lunar.protocol.LunarProtocol;
+import gdx.lunar.protocol.packet.client.CPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
-import lunar.shared.player.impl.LunarPlayerMP;
+import gdx.lunar.world.WorldConfiguration;
+import lunar.shared.entity.player.impl.NetworkPlayer;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -27,7 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * <p>
  * Connect unlimited clients within a world with movement systems.
  */
-public final class BasicMultiplayerDemoGame extends Game {
+public final class MultiplayerIntroductionGame extends Game {
 
     public static final String TAG = "LunarGDX";
 
@@ -43,6 +46,8 @@ public final class BasicMultiplayerDemoGame extends Game {
 
     // a basic world.
     private MultiplayerGameWorld world;
+    private WorldConfiguration configuration;
+    private PooledEngine engine;
     public boolean ready;
 
     BitmapFont font;
@@ -54,7 +59,6 @@ public final class BasicMultiplayerDemoGame extends Game {
         font = new BitmapFont();
         font.getData().setScale(0.09f);
 
-
         // default assets in this project
         assets = new TextureAtlas(Gdx.files.internal("character.atlas"));
 
@@ -65,14 +69,16 @@ public final class BasicMultiplayerDemoGame extends Game {
         player = new DemoPlayer(true, assets.findRegion("display"));
         player.setEntityName("Player" + ThreadLocalRandom.current().nextInt(0, 999));
 
+        // initialize our entity engine and world config
+        configuration = new WorldConfiguration();
+        engine = new PooledEngine();
+
         // initialize the world with 0 gravity
-        world = new MultiplayerGameWorld(player, new World(Vector2.Zero, true), this);
+        world = new MultiplayerGameWorld(player, player, new World(Vector2.Zero, false), configuration, engine, this);
         // add default world systems
-        world.addWorldSystems();
+        // world.addWorldSystems();
         // ignore player collisions
-        world.addDefaultPlayerCollisionListener();
-        // add a default instance
-        world.addInstance(new MultiplayerGameInstance(player, new World(Vector2.Zero, true), 22));
+        //   world.addDefaultPlayerCollisionListener();
 
         // initialize our default protocol and connect to the remote server,
         final LunarProtocol protocol = new LunarProtocol(true);
@@ -93,7 +99,7 @@ public final class BasicMultiplayerDemoGame extends Game {
         player.setConnection(connection);
 
         // override a default handler in favor of our own
-        protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> handler.handleJoinWorld(new TestCustomJoinWorldPacketServer(buf)));
+        // protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> handler.handleJoinWorld(new TestCustomJoinWorldPacketServer(buf)));
 
         // enable options we want Lunar to handle by default.
         connection.enableOptions(
@@ -103,13 +109,13 @@ public final class BasicMultiplayerDemoGame extends Game {
                 ConnectionOption.HANDLE_PLAYER_FORCE);
 
         // register handlers we want to process ourselves instead of the default player connection
-        connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((TestCustomJoinWorldPacketServer) packet));
+        connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
         connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
         connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
         // TODO: Implement a join world timeout if you desire.
 
-        final TestCustomJoinWorldPacket packet = new TestCustomJoinWorldPacket("TutorialWorld", player.getName());
-        packet.setTestField(true);
+        // finally, request to join the world
+        final CPacketJoinWorld packet = new CPacketJoinWorld("TutorialWorld", player.getName());
         player.getConnection().sendImmediately(packet);
     }
 
@@ -137,17 +143,12 @@ public final class BasicMultiplayerDemoGame extends Game {
 
         if (ready) {
             final float delta = Gdx.graphics.getDeltaTime();
-            if (player.isInInstance()) {
-                player.getWorlds().instanceIn.update(delta);
-            } else {
-                world.update(delta);
-            }
+            // update the world.
+            world.update(delta);
 
             // update our camera
             camera.position.set(player.getInterpolated().x, player.getInterpolated().y, 0f);
             camera.update();
-
-            // update the world.
 
             // begin batch
             batch.setProjectionMatrix(camera.combined);
@@ -156,22 +157,13 @@ public final class BasicMultiplayerDemoGame extends Game {
             // render our player
             player.render(batch, delta);
 
-            for (LunarPlayerMP player : world.getPlayers().values()) {
+            for (NetworkPlayer player : world.getPlayers().values()) {
                 batch.draw(player.getRegion("player"), player.getX(), player.getY(),
                         player.getWidthScaled(), player.getHeightScaled());
             }
 
 
             batch.end();
-            batch.begin();
-
-            font.draw(batch, "L", player.getX() + 0.2f, player.getY() - 0.5f);
-
-            for (LunarPlayerMP player : world.getPlayers().values()) {
-                font.draw(batch, player.getEntityId() + "", player.getX() - 0.5f, player.getY() - 0.5f);
-            }
-            batch.end();
-
         }
     }
 
@@ -194,6 +186,7 @@ public final class BasicMultiplayerDemoGame extends Game {
     @Override
     public void dispose() {
         player.getConnection().dispose();
+        world.dispose();
         batch.dispose();
         player.dispose();
     }

@@ -8,9 +8,9 @@ import gdx.lunar.protocol.PacketFactory;
 import gdx.lunar.protocol.handler.ServerPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.client.*;
+import gdx.lunar.utilities.PlayerSupplier;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
-import lunar.shared.player.LunarEntityPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  */
 public abstract class AbstractConnection implements ServerPacketHandler, Disposable {
 
-    protected LunarEntityPlayer local;
+    protected PlayerSupplier playerSupplier;
 
     protected final Channel channel;
     protected LunarProtocol protocol;
@@ -32,12 +32,13 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
 
     // packet flush interval.
     // default is 50 ms
-    protected float updateInterval = 50f;
+    protected float updateInterval = 50.0f;
     protected long lastUpdate = System.currentTimeMillis();
     protected long lastPacketReceived;
 
     // queue of packets
     protected final ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<>();
+    // TODO: Um no
     protected final ExecutorService single = Executors.newCachedThreadPool();
 
     protected final Map<ConnectionOption, Handler> handlers = new HashMap<>();
@@ -55,13 +56,12 @@ public abstract class AbstractConnection implements ServerPacketHandler, Disposa
         this.lastPacketReceived = lastPacketReceived;
     }
 
-    public void setLocalPlayer(LunarEntityPlayer local) {
-        this.local = local;
+    public void setPlayerSupplier(PlayerSupplier playerSupplier) {
+        this.playerSupplier = playerSupplier;
     }
 
     /**
      * Set the protocol to use
-     * 10-12-2021: Allow use of diff protocols
      *
      * @param protocol protocol
      */

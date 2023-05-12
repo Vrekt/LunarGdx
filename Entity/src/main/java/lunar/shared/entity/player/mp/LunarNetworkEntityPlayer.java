@@ -1,9 +1,9 @@
-package lunar.shared.player.mp;
+package lunar.shared.entity.player.mp;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import lunar.shared.player.LunarEntityPlayer;
+import lunar.shared.entity.player.LunarEntityPlayer;
 
 /**
  * Represents a player that is playing over the network.
@@ -114,7 +114,8 @@ public abstract class LunarNetworkEntityPlayer extends LunarEntityPlayer {
     @Override
     public void update(float delta) {
         if (interpolatePosition && doPositionInterpolation) {
-            final Vector2 interpolated = getInterpolated();;
+            final Vector2 interpolated = getInterpolated();
+            ;
 
             interpolated.x = Interpolation.linear.apply(body.getPosition().x, interpolateToX, interpolateAlpha);
             interpolated.y = Interpolation.linear.apply(body.getPosition().y, interpolateToY, interpolateAlpha);

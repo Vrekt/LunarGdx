@@ -1,4 +1,4 @@
-package lunar.shared;
+package lunar.shared.utility;
 
 import com.badlogic.gdx.physics.box2d.*;
 import lunar.shared.components.prop.EntityPropertiesComponent;

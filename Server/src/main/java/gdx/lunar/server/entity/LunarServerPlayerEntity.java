@@ -5,8 +5,8 @@ import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.SPacketDisconnect;
 import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
-import gdx.lunar.server.world.testing.World;
-import lunar.shared.player.mp.LunarNetworkEntityPlayer;
+import gdx.lunar.server.world.World;
+import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 /**
  * Represents a player entity within the server.
@@ -58,18 +58,15 @@ public class LunarServerPlayerEntity extends LunarServerEntity {
         return serverWorldIn;
     }
 
+    public void setServerWorldIn(World serverWorldIn) {
+        this.serverWorldIn = serverWorldIn;
+    }
+
     /**
      * @return {@code true} if this player is in a world.
      */
     public boolean inWorld() {
         return serverWorldIn != null;
-    }
-
-    /**
-     * @param worldIn world in
-     */
-    public void setWorldIn(World worldIn) {
-        this.serverWorldIn = worldIn;
     }
 
     public boolean isLoaded() {

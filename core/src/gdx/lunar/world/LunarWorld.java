@@ -1,303 +1,172 @@
 package gdx.lunar.world;
 
-import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.core.Engine;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
-import gdx.lunar.instance.LunarInstance;
-import gdx.lunar.network.AbstractConnection;
-import gdx.lunar.protocol.packet.server.SPacketApplyEntityBodyForce;
-import gdx.lunar.protocol.packet.server.SPacketPlayerPosition;
-import gdx.lunar.protocol.packet.server.SPacketPlayerVelocity;
-import lunar.shared.contact.PlayerCollisionListener;
 import lunar.shared.entity.LunarEntity;
-import lunar.shared.player.LunarEntityPlayer;
-import lunar.shared.player.mp.LunarNetworkEntityPlayer;
-import lunar.shared.systems.moving.EntityMovementSystem;
-
-import java.util.concurrent.CopyOnWriteArrayList;
+import lunar.shared.entity.player.LunarEntityPlayer;
 
 /**
- * Represents a networked world players and entities exist in.
- *
- * @param <P> any local entity player instance type you wish.
- * @param <N> any local network entity instance type you wish
- * @param <E> any local entity instance type you wish
+ * Represents a single game world
  */
-public abstract class LunarWorld<P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity>
-        extends AbstractWorld<N, E> implements Disposable {
-
-    // engine for this world.
-    protected PooledEngine engine;
-
-    // system
-    protected EntityMovementSystem movementSystem;
-
-    // local player
-    protected final P player;
-    protected final World world;
-
-    // config
-    protected WorldConfiguration configuration;
-    protected float accumulator;
-
-    // all the instances within this world
-    protected CopyOnWriteArrayList<LunarInstance<P, N, E>> instancesInWorld = new CopyOnWriteArrayList<>();
+public interface LunarWorld extends Disposable {
 
     /**
-     * Initialize a new game world.
-     *
-     * @param player               the player
-     * @param world                the box2d world
-     * @param worldScale           the scaling of the world.
-     * @param handlePhysics        if true, this world will manage updating the Box2d world.
-     * @param updatePlayer         if the local player should be updated.
-     * @param updateNetworkPlayers if network players should be updated.
-     * @param updateEntities       if entities should be updated.
+     * @return the name of this world
      */
-    public LunarWorld(P player, World world, float worldScale,
-                      boolean handlePhysics, boolean updatePlayer, boolean updateNetworkPlayers,
-                      boolean updateEntities, PooledEngine engine) {
-        this.player = player;
-        this.world = world;
-        this.engine = engine;
-
-        this.configuration = new WorldConfiguration();
-        configuration.worldScale = worldScale;
-        configuration.handlePhysics = handlePhysics;
-        configuration.updateLocalPlayer = updatePlayer;
-        configuration.updateNetworkPlayers = updateNetworkPlayers;
-        configuration.updateEntities = updateEntities;
-    }
+    String getWorldName();
 
     /**
-     * An empty default constructor. You should use the setters to define configuration next.
+     * Set the name of this world
+     *
+     * @param worldName the world name
+     */
+    void setWorldName(String worldName);
+
+    /**
+     * @return the world's entity engine
+     */
+    Engine getEntityEngine();
+
+    /**
+     * Set the entity engine of this world
+     *
+     * @param engine the engine
+     */
+    void setEntityEngine(Engine engine);
+
+    /**
+     * @return the box2d {@link World} of this world
+     */
+    World getEntityWorld();
+
+    /**
+     * @return {@code  true} if this world is full
+     */
+    boolean isFull();
+
+    /**
+     * Set the spawn of this world
+     *
+     * @param position the position
+     */
+    void setWorldSpawn(Vector2 position);
+
+    /**
+     * @return the world spawn point or {@code  null} if none.
+     */
+    Vector2 getWorldSpawn();
+
+    /**
+     * @return the world configuration
+     */
+    WorldConfiguration getConfiguration();
+
+    /**
+     * Spawn an entity in this world
+     *
+     * @param entity   the entity
+     * @param position the position to spawn them at
+     * @param <T>      type
+     */
+    <T extends LunarEntity> void spawnEntityInWorld(T entity, Vector2 position);
+
+    /**
+     * Spawn an entity in this world
+     * This method will spawn the provided entity at {@code getWorldSpawn}
+     *
+     * @param entity the entity
+     * @param <T>    type
+     */
+    <T extends LunarEntity> void spawnEntityInWorld(T entity);
+
+    /**
+     * Spawn a player in this world
+     *
+     * @param player   the player
+     * @param position the position to spawn them at
+     * @param <T>      type
+     */
+    <T extends LunarEntityPlayer> void spawnPlayerInWorld(T player, Vector2 position);
+
+    /**
+     * Spawn a player in this world
+     * This method will spawn the provided player at {@code getWorldSpawn}
      *
      * @param player the player
-     * @param world  the world
+     * @param <T>    type
      */
-    public LunarWorld(P player, World world, WorldConfiguration configuration, PooledEngine engine) {
-        this.player = player;
-        this.world = world;
-        this.configuration = configuration;
-        this.engine = engine;
-    }
+    <T extends LunarEntityPlayer> void spawnPlayerInWorld(T player);
 
     /**
-     * An empty default constructor. You should use the setters to define configuration next.
+     * Remove an entity from this world
      *
-     * @param player        the player
-     * @param world         the world
-     * @param configuration default configuration
+     * @param entityId the ID
      */
-    public LunarWorld(P player, World world, WorldConfiguration configuration) {
-        this.player = player;
-        this.world = world;
-        this.configuration = configuration;
-        this.engine = new PooledEngine();
-    }
+    void removeEntityInWorld(int entityId);
 
     /**
-     * An empty default constructor. You should use the setters to define configuration next.
+     * Remove a player from this world
      *
-     * @param player the player
-     * @param world  the world
+     * @param entityId the ID
      */
-    public LunarWorld(P player, World world) {
-        this(player, world, new WorldConfiguration(), new PooledEngine());
-    }
-
-    public void addInstance(LunarInstance<P, N, E> instance) {
-        this.instancesInWorld.add(instance);
-    }
-
-    public LunarInstance<P, N, E> getInstanceFromId(int instanceId) {
-        return instancesInWorld.stream().filter(instance -> instance.getInstanceId() == instanceId).findFirst().orElse(null);
-    }
+    void removePlayerInWorld(int entityId);
 
     /**
-     * Add the default {@link  PlayerCollisionListener} to ignore player collisions
+     * @param entityId the player's entity ID
+     * @return {@code  true} if the provided entity ID exists within the players list.
      */
-    public void addDefaultPlayerCollisionListener() {
-        world.setContactListener(new PlayerCollisionListener());
-    }
-
-    public AbstractConnection getLocalConnection() {
-        return player.getConnection();
-    }
-
-    public void setEngine(PooledEngine engine) {
-        this.engine = engine;
-    }
-
-    public PooledEngine getEngine() {
-        return engine;
-    }
+    boolean hasPlayer(int entityId);
 
     /**
-     * @return {@code  true} if the player limit of this world has not been reached
+     * @param entityId the (entities) entity ID
+     * @return {@code  true} if the provided entity ID exists within the entities list.
      */
-    public boolean canEnterWorld() {
-        return !(this.players.size() >= configuration.maxPlayerCapacity);
-    }
+    boolean hasEntity(int entityId);
 
     /**
-     * Load this world or instance
+     * Update a players position within this world
+     *
+     * @param entityId the entity ID
+     * @param x        their X
+     * @param y        their Y
+     * @param angle    angle
      */
-    public void load() {
-
-    }
+    void updatePlayerPositionInWorld(int entityId, float x, float y, float angle);
 
     /**
-     * Add world systems to the engine.
+     * Update a players velocity within this world
+     *
+     * @param entityId the entity ID
+     * @param x        their vel X
+     * @param y        their vel Y
+     * @param angle    angle
      */
-    public void addWorldSystems() {
-        engine.addSystem(movementSystem = new EntityMovementSystem());
-    }
+    void updatePlayerVelocityInWorld(int entityId, float x, float y, float angle);
 
     /**
-     * @return configuration for this world
+     * Update player properties
+     *
+     * @param id       the player ID
+     * @param name     the name
+     * @param entityId the entity ID
      */
-    public WorldConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(WorldConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
-    /**
-     * @return Box2d world
-     */
-    public World getWorld() {
-        return world;
-    }
+    void updatePlayerProperties(int id, String name, int entityId);
 
     /**
      * Update this world
      *
-     * @param d delta time.
-     * @return capped frame time
+     * @param delta the delta
+     * @return the capped delta time
      */
-    public float update(float d) {
-        final float delta = Math.min(d, configuration.maxFrameTime);
-
-        // step world
-        if (configuration.handlePhysics) {
-            stepPhysicsSimulation(delta);
-        }
-
-        // update all types of entities
-        if (configuration.updateEntities)
-            for (E entity : entities.values()) entity.update(delta);
-
-        // update local
-        if (configuration.updateLocalPlayer) {
-            player.interpolatePosition(player.getInterpolationAmount());
-            player.update(delta);
-        }
-
-        // update network
-        if (configuration.updateNetworkPlayers) {
-            for (LunarNetworkEntityPlayer player : players.values()) {
-                player.interpolatePosition(player.getInterpolationAmount());
-                player.update(delta);
-            }
-        }
-
-        if (configuration.updateEntityEngine) {
-            engine.update(delta);
-        }
-
-        return delta;
-    }
+    float update(float delta);
 
     /**
-     * Step physics simulation using the {@code configuration}
+     * Step the physics simulation of this world
      *
-     * @param delta delta time
+     * @param delta the delta time
      */
-    public void stepPhysicsSimulation(float delta) {
-        accumulator += delta;
+    void stepPhysicsSimulation(float delta);
 
-        while (accumulator >= configuration.stepTime) {
-            if (configuration.updateNetworkPlayers) {
-                for (N player : players.values()) {
-                    player.getPrevious().set(player.getPosition());
-                }
-            }
-
-            if (configuration.updateLocalPlayer) {
-                player.getPrevious().set(player.getPosition());
-                player.setPosition(player.getBody().getPosition(), false);
-            }
-
-            world.step(configuration.stepTime, configuration.velocityIterations, configuration.positionIterations);
-            accumulator -= configuration.stepTime;
-        }
-    }
-
-    /**
-     * Update a players position
-     * This method assumes the {@code id} exists.
-     *
-     * @param id    their entity ID
-     * @param x     their X
-     * @param y     their Y
-     * @param angle their current angle
-     */
-    public void updatePlayerPosition(int id, float x, float y, float angle) {
-        getNetworkPlayer(id).updatePosition(x, y, angle);
-    }
-
-    /**
-     * Update a players velocity
-     * This method assumes the {@code id} exists.
-     *
-     * @param id    their entity ID
-     * @param x     their X
-     * @param y     their Y
-     * @param angle their current angle
-     */
-    public void updatePlayerVelocity(int id, float x, float y, float angle) {
-        getNetworkPlayer(id).updateVelocity(x, y, angle);
-    }
-
-    /**
-     * Update a players position from a raw packet
-     * This method assumes the {@code packet.getId()} exists.
-     *
-     * @param packet the packet
-     */
-    public void updatePlayerPosition(SPacketPlayerPosition packet) {
-        updatePlayerPosition(packet.getEntityId(), packet.getX(), packet.getY(), packet.getRotation());
-    }
-
-    /**
-     * Update a players velocity from a raw packet
-     * This method assumes the {@code packet.getId()} exists.
-     *
-     * @param packet the packet
-     */
-    public void updatePlayerVelocity(SPacketPlayerVelocity packet) {
-        updatePlayerVelocity(packet.getEntityId(), packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
-    }
-
-    /**
-     * Update a players body forcec from a raw packet
-     * This method assumes the {@code packet.getId()} exists.
-     *
-     * @param packet the packet
-     */
-    public void updateEntityForce(SPacketApplyEntityBodyForce packet) {
-        getNetworkPlayer(packet.getEntityId()).updateBodyForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
-    }
-
-    @Override
-    public void dispose() {
-        players.clear();
-        entities.clear();
-        engine.clearPools();
-        engine.removeAllSystems();
-        world.dispose();
-    }
 }

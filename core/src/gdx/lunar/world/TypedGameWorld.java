@@ -1,17 +1,17 @@
-package gdx.lunar.server.world.testing;
+package gdx.lunar.world;
 
-import gdx.lunar.server.entity.LunarServerEntity;
-import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import lunar.shared.entity.LunarEntity;
+import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Represents a server world that handles the list of players and entities
+ * Represents a game world that is typed for custom entities
  *
- * @param <P> a player type
- * @param <E> an entity type
+ * @param <P> player type
+ * @param <E> entity type
  */
-public interface ServerWorld<P extends LunarServerPlayerEntity, E extends LunarServerEntity> extends World {
+public interface TypedGameWorld<P extends LunarNetworkEntityPlayer, E extends LunarEntity> extends LunarWorld {
 
     /**
      * Add a player to the players list

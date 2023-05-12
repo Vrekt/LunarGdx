@@ -5,7 +5,7 @@ import gdx.lunar.protocol.packet.client.*;
 import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
 import gdx.lunar.server.game.LunarServer;
-import gdx.lunar.server.world.testing.World;
+import gdx.lunar.server.world.World;
 import io.netty.channel.Channel;
 
 /**
@@ -87,7 +87,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
 
         this.player = new LunarServerPlayerEntity(true, server, this);
         this.player.setEntityName(packet.getUsername());
-        this.player.setWorldIn(world);
+        this.player.setServerWorldIn(world);
         this.player.setEntityId(world.assignEntityIdFor(true));
         sendImmediately(new SPacketJoinWorld(packet.getWorldName(), player.getEntityId()));
     }

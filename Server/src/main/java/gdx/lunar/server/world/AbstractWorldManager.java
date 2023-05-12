@@ -1,7 +1,6 @@
 package gdx.lunar.server.world;
 
 import gdx.lunar.server.game.utilities.Disposable;
-import gdx.lunar.server.world.testing.World;
 
 import java.util.Collection;
 import java.util.HashMap;

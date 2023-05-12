@@ -1,4 +1,4 @@
-package lunar.shared.drawing;
+package lunar.shared.entity.texture;
 
 /**
  * The rotation of an entity or object

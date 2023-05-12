@@ -22,12 +22,11 @@ public class PlayerConnection extends AbstractConnection {
         return authenticationFailed;
     }
 
-    protected boolean inWorld() {
-        return local.getWorldIn() != null;
-    }
-
-    protected LunarWorld<?, ?, ?> getWorldIn() {
-        return local.getWorldIn();
+    /**
+     * @return the world this connection is in
+     */
+    protected LunarWorld getWorldIn() {
+        return playerSupplier.getPlayer().getWorldIn();
     }
 
     /**
@@ -36,8 +35,8 @@ public class PlayerConnection extends AbstractConnection {
      * @param id network player ID
      * @return {@code true} if so
      */
-    protected boolean verifyPlayerExists(int id) {
-        return inWorld() && getWorldIn().hasNetworkPlayer(id);
+    protected boolean doesPlayerExistInWorld(int id) {
+        return playerSupplier.getPlayer().isInWorld() && playerSupplier.getPlayer().getWorldIn().hasPlayer(id);
     }
 
     /**

@@ -1,4 +1,4 @@
-package gdx.lunar.server.world.testing;
+package gdx.lunar.server.world;
 
 import com.badlogic.gdx.math.Vector2;
 import gdx.lunar.protocol.packet.Packet;
@@ -115,7 +115,7 @@ public abstract class AbstractServerWorld<P extends LunarServerPlayerEntity, E e
 
     @Override
     public <T extends LunarServerPlayerEntity> void spawnPlayerInWorld(T player) {
-        player.setWorldIn(this);
+        player.setServerWorldIn(this);
         player.setPosition(0.0f, 0.0f, true);
 
         // send all current players in this world to the connecting player.

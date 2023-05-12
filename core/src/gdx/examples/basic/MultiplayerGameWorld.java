@@ -1,26 +1,30 @@
 package gdx.examples.basic;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.World;
 import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
+import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
+import gdx.lunar.utilities.PlayerSupplier;
+import gdx.lunar.world.WorldConfiguration;
 import gdx.lunar.world.impl.WorldAdapter;
-import lunar.shared.player.impl.LunarPlayer;
-import lunar.shared.player.impl.LunarPlayerMP;
+import lunar.shared.entity.player.impl.NetworkPlayer;
 
 public final class MultiplayerGameWorld extends WorldAdapter {
 
-    BasicMultiplayerDemoGame game;
+    private final MultiplayerIntroductionGame game;
+    private final DemoPlayer player;
 
-    public MultiplayerGameWorld(LunarPlayer player, World world, BasicMultiplayerDemoGame game) {
-        super(player, world);
+    public MultiplayerGameWorld(PlayerSupplier playerSupplier, DemoPlayer player, World world, WorldConfiguration configuration, Engine engine, MultiplayerIntroductionGame game) {
+        super(playerSupplier, world, configuration, engine);
+        this.player = player;
         this.game = game;
     }
 
     @Override
-    public void renderWorld(SpriteBatch batch) {
-        // This is not used here, but you could. Regardless we handle all rendering in main game loop.
+    public void updatePlayerPositionInWorld(int entityId, float x, float y, float angle) {
+        super.updatePlayerPositionInWorld(entityId, x, y, angle);
     }
 
     /**
@@ -28,17 +32,16 @@ public final class MultiplayerGameWorld extends WorldAdapter {
      *
      * @param world the new world packet
      */
-    public void handleWorldJoin(TestCustomJoinWorldPacketServer world) {
-        Gdx.app.log(BasicMultiplayerDemoGame.TAG, "Joining local-world: " + world.getWorldName() + ", entity ID is " + world.getEntityId());
-        Gdx.app.log(BasicMultiplayerDemoGame.TAG, "Test " + world.testField);
+    public void handleWorldJoin(SPacketJoinWorld world) {
+        Gdx.app.log(MultiplayerIntroductionGame.TAG, "Joining local-world: " + world.getWorldName() + ", entity ID is " + world.getEntityId());
+
         // set our player's entity ID from world packet.
         player.setEntityId(world.getEntityId());
         // spawn local player in world
-        player.spawnEntityInWorld(this, 0.0f, 0.0f);
-        // load into the world!
+        player.defineEntity(this.getEntityWorld(), 0.0f, 0.0f);
         // tell the server we are good to go.
         player.getConnection().updateWorldLoaded();
-        // etc...
+        player.setWorldIn(this);
         game.ready = true;
     }
 
@@ -48,17 +51,17 @@ public final class MultiplayerGameWorld extends WorldAdapter {
      * @param packet the join packet
      */
     public void handlePlayerJoin(SPacketCreatePlayer packet) {
-        Gdx.app.log(BasicMultiplayerDemoGame.TAG, "Spawning new player " + packet.getUsername() + ":" + packet.getEntityId());
+        Gdx.app.log(MultiplayerIntroductionGame.TAG, "Spawning new player " + packet.getUsername() + ":" + packet.getEntityId());
 
-        final LunarPlayerMP player = new LunarPlayerMP(true);
+        final NetworkPlayer player = new NetworkPlayer(true);
         // load player assets.
         player.putRegion("player", game.getTexture());
-        player.setIgnorePlayerCollision(true);
+        player.setIgnoreOtherPlayerCollision(true);
         player.setProperties(packet.getUsername(), packet.getEntityId());
         // set your local game properties
         player.setSize(16, 16, (1 / 16.0f));
         // spawn player in your local world.
-        player.spawnEntityInWorld(this, packet.getX(), packet.getY());
+        player.spawnInWorld(this);
     }
 
     /**
@@ -67,10 +70,8 @@ public final class MultiplayerGameWorld extends WorldAdapter {
      * @param packet the packet
      */
     public void handlePlayerLeave(SPacketRemovePlayer packet) {
-        Gdx.app.log(BasicMultiplayerDemoGame.TAG, "Player " + packet.getEntityId() + " left.");
-        if (hasNetworkPlayer(packet.getEntityId())) {
-            removeEntityInWorld(packet.getEntityId(), true);
-        }
+        Gdx.app.log(MultiplayerIntroductionGame.TAG, "Player " + packet.getEntityId() + " left.");
+        removePlayerInWorld(packet.getEntityId());
     }
 
 }

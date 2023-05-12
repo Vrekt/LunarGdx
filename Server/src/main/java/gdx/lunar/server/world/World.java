@@ -1,4 +1,4 @@
-package gdx.lunar.server.world.testing;
+package gdx.lunar.server.world;
 
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.server.entity.LunarServerPlayerEntity;
@@ -9,6 +9,9 @@ import gdx.lunar.server.game.utilities.Disposable;
  */
 public interface World extends Disposable {
 
+    /**
+     * @return the name of this world
+     */
     String getName();
 
     /**

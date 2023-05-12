@@ -1,7 +1,7 @@
 package lunar.shared.contact;
 
 import com.badlogic.gdx.physics.box2d.*;
-import lunar.shared.player.LunarEntityPlayer;
+import lunar.shared.entity.player.LunarEntityPlayer;
 
 /**
  * A basic collision listener for {@link LunarEntityPlayer}

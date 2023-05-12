@@ -5,7 +5,6 @@ import lunar.shared.components.drawing.EntityTextureComponent;
 import lunar.shared.components.position.EntityPositionComponent;
 import lunar.shared.components.position.EntityVelocityComponent;
 import lunar.shared.components.prop.EntityPropertiesComponent;
-import lunar.shared.components.world.EntityWorldComponent;
 
 /**
  * Global mappings for all components within LunarProtocolSettings.
@@ -13,7 +12,6 @@ import lunar.shared.components.world.EntityWorldComponent;
 public final class GlobalEntityMapper {
 
     public static final ComponentMapper<EntityTextureComponent> texture = ComponentMapper.getFor(EntityTextureComponent.class);
-    public static final ComponentMapper<EntityWorldComponent> instance = ComponentMapper.getFor(EntityWorldComponent.class);
     public static final ComponentMapper<EntityPositionComponent> position = ComponentMapper.getFor(EntityPositionComponent.class);
     public static final ComponentMapper<EntityVelocityComponent> velocity = ComponentMapper.getFor(EntityVelocityComponent.class);
     public static final ComponentMapper<EntityPropertiesComponent> properties = ComponentMapper.getFor(EntityPropertiesComponent.class);

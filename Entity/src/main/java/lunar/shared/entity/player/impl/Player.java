@@ -1,25 +1,25 @@
-package lunar.shared.player.impl;
+package lunar.shared.entity.player.impl;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import gdx.lunar.network.AbstractConnection;
-import lunar.shared.player.LunarEntityPlayer;
+import lunar.shared.entity.player.LunarEntityPlayer;
 
 /**
- * A default player with basic input and movement handling.
+ * Represents a default player state
  */
-public class LunarPlayer extends LunarEntityPlayer {
+public class Player extends LunarEntityPlayer {
 
-    public LunarPlayer(boolean initializeComponents) {
+    public Player(boolean initializeComponents) {
         super(initializeComponents);
     }
 
-    public LunarPlayer(boolean initializeComponents, String name, AbstractConnection connection) {
+    public Player(boolean initializeComponents, String name, AbstractConnection connection) {
         super(initializeComponents);
         setEntityName(name);
         setConnection(connection);
     }
 
-    public LunarPlayer(boolean initializeComponents, String name, AbstractConnection connection, float width, float height) {
+    public Player(boolean initializeComponents, String name, AbstractConnection connection, float width, float height) {
         super(initializeComponents);
         setEntityName(name);
         setConnection(connection);

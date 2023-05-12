@@ -4,19 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import gdx.lunar.protocol.packet.client.CPacketEnterInstance;
+import com.badlogic.gdx.math.Vector2;
 import gdx.lunar.world.LunarWorld;
-import lunar.shared.entity.LunarEntity;
-import lunar.shared.player.LunarEntityPlayer;
-import lunar.shared.player.impl.LunarPlayer;
-import lunar.shared.player.mp.LunarNetworkEntityPlayer;
+import lunar.shared.entity.player.impl.Player;
 
 /**
  * Represents a basic player.
  */
-public final class DemoPlayer extends LunarPlayer {
-
-    private boolean instance = false;
+public final class DemoPlayer extends Player {
 
     public DemoPlayer(boolean initializeComponents, TextureRegion playerTexture) {
         super(initializeComponents);
@@ -24,7 +19,7 @@ public final class DemoPlayer extends LunarPlayer {
         setMoveSpeed(6.0f);
         setHasMoved(true);
         setNetworkSendRatesInMs(10, 10);
-        setIgnorePlayerCollision(true);
+        setIgnoreOtherPlayerCollision(true);
 
         // default player texture
         putRegion("player", playerTexture);
@@ -54,11 +49,7 @@ public final class DemoPlayer extends LunarPlayer {
         } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             rotation = 3f;
             setVelocity(moveSpeed, 0.0f, false);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.I) && !instance) {
-            instance = true;
-            getConnection().sendImmediately(new CPacketEnterInstance(22));
         }
-
     }
 
     @Override
@@ -67,8 +58,8 @@ public final class DemoPlayer extends LunarPlayer {
     }
 
     @Override
-    public <P extends LunarEntityPlayer, N extends LunarNetworkEntityPlayer, E extends LunarEntity> void spawnEntityInWorld(LunarWorld<P, N, E> world, float x, float y) {
-        super.spawnEntityInWorld(world, x, y);
+    public void spawnInWorld(LunarWorld world, Vector2 position) {
+        super.spawnInWorld(world, position);
         body.setFixedRotation(true);
     }
 }

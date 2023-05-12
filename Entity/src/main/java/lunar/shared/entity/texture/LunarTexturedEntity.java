@@ -1,4 +1,4 @@
-package lunar.shared.drawing;
+package lunar.shared.entity.texture;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,18 +10,19 @@ import lunar.shared.entity.LunarEntity;
 /**
  * Represents an entity that could be drawn or animated.
  */
-public abstract class LunarTextureEntity extends LunarEntity {
+public abstract class LunarTexturedEntity extends LunarEntity {
 
-    public LunarTextureEntity(Entity entity, boolean initializeComponents) {
+    public LunarTexturedEntity(Entity entity, boolean initializeComponents) {
         super(entity, initializeComponents);
     }
 
-    public LunarTextureEntity(boolean initializeComponents) {
+    public LunarTexturedEntity(boolean initializeComponents) {
         super(initializeComponents);
     }
 
-    public TextureRegion currentRegionState;
-    public Texture currentTextureState;
+    // current texture state of this entity
+    protected TextureRegion textureRegion;
+    protected Texture texture;
 
     public TextureRegion putRegion(String name, TextureRegion texture) {
         return GlobalEntityMapper.texture.get(entity).textureRegions.put(name, texture);

@@ -53,24 +53,18 @@ public class EntityMovementSystem extends IteratingSystem {
     @Override
     public void processEntity(Entity entity, float deltaTime) {
         final EntityPropertiesComponent prop = this.prop.get(entity);
-        if (prop.isMoving) {
-            handleEntityMovement(entity, p.get(entity), v.get(entity), prop, deltaTime);
-        }
+        if (prop.isMoving) handleEntityMovement(p.get(entity), v.get(entity));
     }
 
     /**
      * Handle entity movement
      *
-     * @param entity the entity
-     * @param pm     position
-     * @param pv     vel
-     * @param prop   prop
+     * @param pm position
+     * @param pv vel
      */
-    public void handleEntityMovement(Entity entity,
-                                     EntityPositionComponent pm,
-                                     EntityVelocityComponent pv,
-                                     EntityPropertiesComponent prop,
-                                     float delta) {
+    protected void handleEntityMovement(
+            EntityPositionComponent pm,
+            EntityVelocityComponent pv) {
         pm.position.x += pv.velocity.x * velocityFactor;
         pm.position.y += pv.velocity.y * velocityFactor;
     }
