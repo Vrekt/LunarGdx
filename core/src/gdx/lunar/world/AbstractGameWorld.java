@@ -4,9 +4,10 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import gdx.lunar.utilities.PlayerSupplier;
+import lunar.shared.contact.PlayerCollisionListener;
 import lunar.shared.entity.LunarEntity;
+import lunar.shared.entity.player.mp.LunarEntityNetworkPlayer;
 import lunar.shared.entity.player.LunarEntityPlayer;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Represents a single game world that should be expanded upon
  */
-public abstract class AbstractGameWorld<P extends LunarNetworkEntityPlayer, E extends LunarEntity> implements TypedGameWorld<P, E> {
+public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E extends LunarEntity> implements TypedGameWorld<P, E> {
 
     // network players and entities
     protected ConcurrentMap<Integer, P> players = new ConcurrentHashMap<>();
@@ -78,6 +79,11 @@ public abstract class AbstractGameWorld<P extends LunarNetworkEntityPlayer, E ex
     @Override
     public WorldConfiguration getConfiguration() {
         return configuration;
+    }
+
+    @Override
+    public void addDefaultPlayerCollisionListener() {
+        if (world != null) world.setContactListener(new PlayerCollisionListener());
     }
 
     @Override
@@ -235,13 +241,13 @@ public abstract class AbstractGameWorld<P extends LunarNetworkEntityPlayer, E ex
             // for interpolation later, if enabled.
             if (configuration.updateNetworkPlayers) {
                 for (P player : getPlayers().values()) {
-                    player.getPrevious().set(player.getPosition());
+                    player.getPreviousPosition().set(player.getPosition());
                 }
             }
 
             // update our local player
             if (configuration.updateLocalPlayer) {
-                getPlayer().getPrevious().set(getPlayer().getPosition());
+                getPlayer().getPreviousPosition().set(getPlayer().getPosition());
                 getPlayer().setPosition(getPlayer().getBody().getPosition(), false);
             }
 

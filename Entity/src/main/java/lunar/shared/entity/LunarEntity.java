@@ -6,368 +6,373 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.world.LunarWorld;
-import lunar.shared.utility.EntityBodyCreator;
-import lunar.shared.utility.EntityBodyHandler;
-import lunar.shared.components.position.EntityPositionComponent;
-import lunar.shared.components.position.EntityVelocityComponent;
 import lunar.shared.components.prop.EntityPropertiesComponent;
-import lunar.shared.mapping.GlobalEntityMapper;
+import lunar.shared.utility.BasicDirection;
+import lunar.shared.utility.EntityBodyHandler;
 
 /**
- * A basic entity within the LunarProtocolSettings framework.
+ * Represents a base entity that all other entities are expanded from
  */
-public abstract class LunarEntity implements Disposable, Spawnable {
-
-    // local game world in
-    protected LunarWorld worldIn;
-
-    // this entity
-    protected Entity entity;
-
-    // box2d body of this entity
-    protected Body body;
-    protected boolean inWorld, hasMoved;
-    protected float rotation, moveSpeed = 1.0f, interpolationAmount = 1.0f;
-
-    // handles creating new box2d bodies
-    protected EntityBodyHandler definitionHandler = new EntityBodyCreator();
-
-    public LunarEntity(Entity entity, boolean initializeComponents) {
-        this.entity = entity;
-        if (initializeComponents) addComponents();
-    }
-
-    public LunarEntity(boolean initializeComponents) {
-        this.entity = new Entity();
-        if (initializeComponents) addComponents();
-    }
-
-    public void setDefinitionHandler(EntityBodyHandler definitionHandler) {
-        this.definitionHandler = definitionHandler;
-    }
-
-    public LunarWorld getWorldIn() {
-        return worldIn;
-    }
-
-    public void setWorldIn(LunarWorld worldIn) {
-        if (worldIn != null) this.inWorld = true;
-        this.worldIn = worldIn;
-    }
-
-    public EntityBodyHandler getDefinitionHandler() {
-        return definitionHandler;
-    }
-
-    public void setWidth(float width) {
-        GlobalEntityMapper.properties.get(entity).size.x = width;
-    }
-
-    public void setHeight(float height) {
-        GlobalEntityMapper.properties.get(entity).size.y = height;
-    }
-
-    public float getWidth() {
-        return GlobalEntityMapper.properties.get(entity).size.x;
-    }
-
-    public float getHeight() {
-        return GlobalEntityMapper.properties.get(entity).size.y;
-    }
-
-    public float getWidthScaled() {
-        return GlobalEntityMapper.properties.get(entity).getScaledWidth();
-    }
-
-    public float getHeightScaled() {
-        return GlobalEntityMapper.properties.get(entity).getScaledHeight();
-    }
-
-    public void setMoveSpeed(float moveSpeed) {
-        this.moveSpeed = moveSpeed;
-    }
-
-    public float getMoveSpeed() {
-        return moveSpeed;
-    }
-
-    public void setMoving(boolean moving) {
-        getProperties().isMoving = moving;
-    }
-
-    public void setProperties(String name, int id) {
-        setEntityName(name);
-        setEntityId(id);
-    }
-
-    public void setInterpolationAmount(float interpolationAmount) {
-        this.interpolationAmount = interpolationAmount;
-    }
-
-    public float getInterpolationAmount() {
-        return interpolationAmount;
-    }
+public interface LunarEntity extends Disposable, Spawnable {
 
     /**
-     * Load any assets with this entity.
-     */
-    public void load() {
-
-    }
-
-    /**
-     * Set the size of this entity
+     * Get the current {@link  LunarWorld} this entity is in
      *
-     * @param width  w
-     * @param height h
+     * @return the world or {@code null} if none
      */
-    public void setSize(float width, float height) {
-        setWidth(width);
-        setHeight(height);
-    }
+    LunarWorld getWorldIn();
 
     /**
-     * Set world scaling of this entity
+     * Set the current world in
      *
-     * @param scaling scaling
+     * @param worldIn the world or {@code  null}
      */
-    public void setScaling(float scaling) {
-        GlobalEntityMapper.properties.get(entity).size.z = scaling;
-    }
-
-    public float getScaling() {
-        return GlobalEntityMapper.properties.get(entity).size.z;
-    }
+    void setWorldIn(LunarWorld worldIn);
 
     /**
-     * Set general configuration
+     * @return {@code true} if the world in is not null.
+     */
+    boolean isInWorld();
+
+    /**
+     * Set if this entity is in a world
+     * if the provided world passed through in {@code setWorldIn} is NOT {@code  null} then this field
+     * will be automatically set to {@code  true}
      *
-     * @param width   width
-     * @param height  height
-     * @param scaling (world) scaling
+     * @param inWorld in world
      */
-    public void setSize(float width, float height, float scaling) {
-        GlobalEntityMapper.properties.get(entity).setConfig(width, height, scaling);
-    }
-
-    public EntityPropertiesComponent getProperties() {
-        return GlobalEntityMapper.properties.get(entity);
-    }
-
-    public void setEntityId(int entityId) {
-        getProperties().entityId = entityId;
-    }
-
-    public int getEntityId() {
-        return getProperties().entityId;
-    }
-
-    public void setEntityName(String name) {
-        getProperties().entityName = name;
-    }
-
-    public String getName() {
-        return getProperties().entityName;
-    }
+    void setInWorld(boolean inWorld);
 
     /**
-     * Add components to the internal entity.
+     * @return the entities unique ID
      */
-    protected void addComponents() {
-        if (entity == null) entity = new Entity();
-        entity.add(new EntityPropertiesComponent());
-        entity.add(new EntityPositionComponent());
-        entity.add(new EntityVelocityComponent());
-    }
+    int getEntityId();
 
     /**
-     * @return position of this entity.
+     * @param entityId the entities unique ID
      */
-    public Vector2 getPosition() {
-        return GlobalEntityMapper.position.get(entity).position;
-    }
-
-    public float getX() {
-        return getPosition().x;
-    }
-
-    public float getY() {
-        return getPosition().y;
-    }
-
-    public boolean hasMoved() {
-        return hasMoved;
-    }
-
-    public void setHasMoved(boolean hasMoved) {
-        this.hasMoved = hasMoved;
-    }
-
-    public void setFixedRotation(boolean rotation) {
-        definitionHandler.setHasFixedRotation(rotation);
-    }
+    void setEntityId(int entityId);
 
     /**
-     * @return velocity of this entity.
+     * @return the name of this entity
      */
-    public Vector2 getVelocity() {
-        return GlobalEntityMapper.velocity.get(entity).velocity;
-    }
+    String getName();
 
     /**
-     * @return previous position of this entity.
+     * @param name the name of this entity
      */
-    public Vector2 getPrevious() {
-        return GlobalEntityMapper.position.get(entity).previous;
-    }
+    void setName(String name);
 
     /**
-     * @return interpolated position of this entity.
-     */
-    public Vector2 getInterpolated() {
-        return GlobalEntityMapper.position.get(entity).interpolated;
-    }
-
-    /**
-     * Set the position
+     * }
+     * Set properties within {@link EntityPropertiesComponent}
      *
-     * @param x         X
-     * @param y         Y
-     * @param transform if body transform should be used
+     * @param name the entity name
+     * @param id   the entity unique ID
      */
-    public void setPosition(float x, float y, boolean transform) {
-        getPosition().set(x, y);
-        if (transform && body != null)
-            body.setTransform(x, y, body.getTransform().getRotation());
-    }
+    void setProperties(String name, int id);
 
     /**
-     * Set the position
+     * The body handler used to create {@link Body}s
      *
-     * @param position  new pos
-     * @param transform if body transform should be used
+     * @return the handler or {@code  null} if none
      */
-    public void setPosition(Vector2 position, boolean transform) {
-        getPosition().set(position);
-        if (transform && body != null)
-            body.setTransform(position.x, position.y, body.getTransform().getRotation());
-    }
+    EntityBodyHandler getBodyHandler();
 
     /**
-     * Set the velocity
+     * Set the body handler to use to create a {@link Body}
      *
-     * @param x         X
-     * @param y         Y
-     * @param transform if body transform should be used
+     * @param handler the handler
      */
-    public void setVelocity(float x, float y, boolean transform) {
-        getVelocity().set(x, y);
-        if (transform && body != null)
-            body.setTransform(x, y, body.getTransform().getRotation());
-    }
-
-    public void setInterpolated(float x, float y) {
-        getInterpolated().set(x, y);
-    }
-
-    public float getRotation() {
-        return rotation;
-    }
-
-    public void setRotation(float rotation) {
-        this.rotation = rotation;
-    }
-
-    public Body getBody() {
-        return body;
-    }
+    void setBodyHandler(EntityBodyHandler handler);
 
     /**
-     * @return the internal Ashley entity.
-     */
-    public Entity getEntity() {
-        return entity;
-    }
-
-    /**
-     * Set this entities Ashley entity
+     * Set if this entity has fixed rotation
+     * This will only apply if the {@code getBodyHandler} is not {@code null}
      *
-     * @param entity     the entity
-     * @param disposeOld if {@code true} the internal entity will be removed of,
-     *                   you should handle removing this entity from the system.
+     * @param rotation state
      */
-    public void setEntity(Entity entity, boolean disposeOld) {
-        if (disposeOld) this.entity.removeAll();
-        this.entity = entity;
-    }
+    void setHasFixedRotation(boolean rotation);
 
     /**
-     * Interpolate the players position.
+     * @return the width of this entity
      */
-    public void interpolatePosition() {
-        interpolatePosition(Interpolation.linear, getInterpolationAmount());
-    }
+    float getWidth();
 
     /**
-     * Interpolate the players position.
+     * @return the height of this entity
+     */
+    float getHeight();
+
+    /**
+     * The world or entity scale for this entity
+     * Typically this is the game/world scale that is used globally.
      *
-     * @param alpha linear alpha
+     * @return the world or entity scale
      */
-    public void interpolatePosition(float alpha) {
-        interpolatePosition(Interpolation.linear, alpha);
-    }
+    float getWorldScale();
 
     /**
-     * Interpolate the players position.
-     *
-     * @param interpolation the interpolation to use
-     * @param alpha         linear alpha
+     * @return {@code  getWidth} * {@code getWorldScale}
      */
-    public void interpolatePosition(Interpolation interpolation, float alpha) {
-        if (hasMoved) {
-            final Vector2 previous = getPrevious();
-            final Vector2 current = body.getPosition();
-            setInterpolated(interpolation.apply(previous.x, current.x, alpha), interpolation.apply(previous.y, current.y, alpha));
-        }
-    }
+    float getScaledWidth();
 
-    public EntityVelocityComponent getVelocityComponent() {
-        return GlobalEntityMapper.velocity.get(entity);
-    }
+    /**
+     * @return {@code  getHeight} * {@code getWorldScale}
+     */
+    float getScaledHeight();
 
-    public boolean isInWorld() {
-        return inWorld;
-    }
+    /**
+     * @param width the width of this entity
+     */
+    void setWidth(float width);
 
-    public void setInWorld(boolean inWorld) {
-        this.inWorld = inWorld;
-    }
+    /**
+     * @param height the height of this entity
+     */
+    void setHeight(float height);
+
+    /**
+     * Set the world or entity scale
+     *
+     * @param scale the scale
+     */
+    void setWorldScale(float scale);
+
+    /**
+     * Set size and world/entity scaling
+     *
+     * @param width  width
+     * @param height height
+     * @param scale  scale
+     */
+    void setSize(float width, float height, float scale);
+
+    /**
+     * @return the movement speed of this entity
+     */
+    float getMoveSpeed();
+
+    /**
+     * @param speed the movement speed of this entity
+     */
+    void setMoveSpeed(float speed);
+
+    /**
+     * @return health of this entity defaulted to {@code  100.0f}
+     */
+    float getHealth();
+
+    /**
+     * @param health health of this entity
+     */
+    void setHealth(float health);
+
+    /**
+     * @return position of this entity, defaulted to {@code 0.0f,0.0f}
+     */
+    Vector2 getPosition();
+
+    /**
+     * @return x position
+     */
+    float getX();
+
+    /**
+     * @return y position
+     */
+    float getY();
+
+    /**
+     * Set the position of this entity
+     * If {@code  transform} is {@code  true} then if the entity has a {@link Body}
+     * That bodies position will be set to that position using {@code setTransform}
+     * Otherwise if {@code false} only the {@link Vector2} position will be changed
+     *
+     * @param position  the position
+     * @param transform if transforming
+     */
+    void setPosition(Vector2 position, boolean transform);
+
+    /**
+     * Set the position of this entity
+     * If {@code  transform} is {@code  true} then if the entity has a {@link Body}
+     * That bodies position will be set to that position using {@code setTransform}
+     * Otherwise if {@code false} only the {@link Vector2} position will be changed
+     *
+     * @param x         x position
+     * @param y         y position
+     * @param transform if transforming
+     */
+    void setPosition(float x, float y, boolean transform);
+
+    /**
+     * This is defined by a variable and not by their velocity
+     *
+     * @return {@code true} if moving
+     */
+    boolean isMoving();
+
+    /**
+     * @param moving state
+     */
+    void setMoving(boolean moving);
+
+    /**
+     * @return previous position of this entity used for interpolation
+     */
+    Vector2 getPreviousPosition();
+
+    /**
+     * Usually set right before updating an entities current position
+     *
+     * @param position set previous position
+     */
+    void setPreviousPosition(Vector2 position);
+
+    /**
+     * Usually set right before updating an entities current position
+     *
+     * @param x position
+     * @param y y position
+     */
+    void setPreviousPosition(float x, float y);
+
+    /**
+     * @return interpolated position for drawing or anything else that requires smoothing
+     */
+    Vector2 getInterpolatedPosition();
+
+    /**
+     * @param position position
+     */
+    void setInterpolatedPosition(Vector2 position);
+
+    /**
+     * @param x x position
+     * @param y y position
+     */
+    void setInterpolatedPosition(float x, float y);
+
+    /**
+     * @return current linear velocity of this entity
+     */
+    Vector2 getVelocity();
+
+    /**
+     * @param velocity the linear velocity
+     */
+    void setVelocity(Vector2 velocity);
+
+    /**
+     * @param x linear X velocity
+     * @param y linear Y velocity
+     */
+    void setVelocity(float x, float y);
+
+    /**
+     * Set amount of alpha or 'smoothing' to use when interpolating
+     * Usually between 0.5f - 1.0f
+     *
+     * @param alpha alpha
+     */
+    void setInterpolationAlpha(float alpha);
+
+    /**
+     * Interpolate the position of this entity
+     */
+    void interpolatePosition();
+
+    /**
+     * Interpolate the position of this entity
+     *
+     * @param alpha alpha to use for 'smoothing'
+     */
+    void interpolatePosition(float alpha);
+
+    /**
+     * Interpolate the position of this entity
+     *
+     * @param interpolation interpolation method to use
+     * @param alpha         alpha to use for 'smoothing'
+     */
+    void interpolatePosition(Interpolation interpolation, float alpha);
+
+    /**
+     * @return the angle or rotation of this entity
+     */
+    float getAngle();
+
+    /**
+     * @param angle angle or rotation
+     */
+    void setAngle(float angle);
+
+    /**
+     * Return a basic direction only supporting LEFT, RIGHT, UP, DOWN
+     *
+     * @return direction
+     */
+    BasicDirection getDirection();
+
+    /**
+     * Set direction
+     *
+     * @param direction the direction
+     */
+    void setDirection(BasicDirection direction);
+
+    /**
+     * @return the box2d {@link Body} or {@code  null} if none yet
+     */
+    Body getBody();
+
+    /**
+     * Set the body
+     *
+     * @param body the body
+     */
+    void setBody(Body body);
+
+    /**
+     * The ashley {@link Entity} of this entity
+     *
+     * @return the entity
+     */
+    Entity getEntity();
+
+    /**
+     * Set a new entity and dispose the old current entity if needed.
+     * It is up to you to remove the entity from any systems you have using it.
+     *
+     * @param entity           the entity
+     * @param disposeOldEntity if {@code true} the old {@link Entity} will be disposed of and removed.
+     */
+    void setEntity(Entity entity, boolean disposeOldEntity);
+
+    /**
+     * Add default components
+     * {@link EntityPropertiesComponent}
+     * {@link lunar.shared.components.position.EntityPositionComponent}
+     * {@link lunar.shared.components.position.EntityVelocityComponent}
+     */
+    void addComponents();
+
+    /**
+     * @return the properties of this entity
+     */
+    EntityPropertiesComponent getProperties();
 
     /**
      * Update this entity
      *
      * @param delta the delta time
      */
-    public abstract void update(float delta);
+    void update(float delta);
 
     /**
-     * Apply force to this player
-     *
-     * @param fx   force x
-     * @param fy   force y
-     * @param px   point x
-     * @param py   point y
-     * @param wake wake
+     * Load any required assets or data for this entity
      */
-    public void applyForce(float fx, float fy, float px, float py, boolean wake) {
-        getBody().applyForce(fx, fy, px, py, wake);
+    void loadEntity();
 
-        // TODO
-        //getWorldIn().getLocalConnection().sendImmediately(new CPacketApplyEntityBodyForce(getEntityId(), fx, fy, px, py));
-    }
-
-    @Override
-    public void dispose() {
-        entity.removeAll();
-    }
 }

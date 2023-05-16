@@ -86,7 +86,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
         }
 
         this.player = new LunarServerPlayerEntity(true, server, this);
-        this.player.setEntityName(packet.getUsername());
+        this.player.setName(packet.getUsername());
         this.player.setServerWorldIn(world);
         this.player.setEntityId(world.assignEntityIdFor(true));
         sendImmediately(new SPacketJoinWorld(packet.getWorldName(), player.getEntityId()));
@@ -104,11 +104,11 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
     public void handleBodyForce(CPacketApplyEntityBodyForce packet) {
         final int entityId = packet.getEntityId();
         if (player != null && player.getWorld().hasPlayer(entityId)) {
-            player.getWorld()
-                    .getPlayer(entityId)
-                    .getVelocityComponent()
-                    .setForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
-            player.getWorld().broadcastWithExclusion(entityId, new SPacketApplyEntityBodyForce(entityId, packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY()));
+            //   player.getWorld()
+            //             .getPlayer(entityId)
+            //              .getVelocityComponent()
+            //              .setForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
+            //      player.getWorld().broadcastWithExclusion(entityId, new SPacketApplyEntityBodyForce(entityId, packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY()));
         }
     }
 
@@ -119,7 +119,7 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
 
     @Override
     public void handleSetProperties(CPacketSetProperties packet) {
-        player.setEntityName(packet.getUsername());
+        player.setName(packet.getUsername());
     }
 
     @Override

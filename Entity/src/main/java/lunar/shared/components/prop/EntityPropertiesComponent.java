@@ -1,29 +1,25 @@
 package lunar.shared.components.prop;
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pool;
+import lunar.shared.utility.BasicDirection;
 
 /**
- * Manages data about an entities ID and name.
+ * Manages properties about an entity
  */
 public class EntityPropertiesComponent implements Component, Pool.Poolable {
 
     public int entityId;
     public String entityName;
 
-    // width, height, scaling
-    public Vector3 size = new Vector3();
+    public float width, height, scaling;
 
-    // if offset should be used with Box2d.
-    // This will put players inside the Box2d bounding box.
-    public boolean offset = true;
-
-    // health and speed effects
     public float speed;
     public float health;
 
-    // if the entity is moving.
+    public float angle;
+    public BasicDirection direction;
+
     public boolean isMoving;
 
     public void setProperties(int entityId, String entityName) {
@@ -31,28 +27,69 @@ public class EntityPropertiesComponent implements Component, Pool.Poolable {
         this.entityName = entityName;
     }
 
-    public void setConfig(float width, float height, float scaling) {
-        size.set(width, height, scaling);
+    /**
+     * Set the size of this entity
+     *
+     * @param width      the width
+     * @param height     the height
+     * @param worldScale a world scale.
+     */
+    public void setEntitySize(float width, float height, float worldScale) {
+        this.width = width;
+        this.height = height;
+        this.scaling = worldScale;
     }
 
     public float getWidth() {
-        return size.x;
+        return width;
     }
 
     public float getHeight() {
-        return size.y;
+        return height;
     }
 
     public float getScaling() {
-        return size.z;
+        return scaling;
     }
 
     public float getScaledWidth() {
-        return size.x * size.z;
+        return width * scaling;
     }
 
     public float getScaledHeight() {
-        return size.y * size.z;
+        return height * scaling;
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public void setHealth(float health) {
+        this.health = health;
+    }
+
+    public float getAngle() {
+        return angle;
+    }
+
+    public void setAngle(float angle) {
+        this.angle = angle;
+    }
+
+    public BasicDirection getDirection() {
+        return direction;
+    }
+
+    public void setDirection(BasicDirection direction) {
+        this.direction = direction;
     }
 
     @Override

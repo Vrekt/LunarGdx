@@ -104,13 +104,13 @@ public abstract class AbstractServerWorld<P extends LunarServerPlayerEntity, E e
     @Override
     public <T extends LunarServerPlayerEntity> void handlePlayerPosition(T player, float x, float y, float angle) {
         player.setPosition(x, y, true);
-        player.setRotation(angle);
+        player.setAngle(angle);
     }
 
     @Override
     public <T extends LunarServerPlayerEntity> void handlePlayerVelocity(T player, float x, float y, float angle) {
         player.getVelocity().set(x, y);
-        player.setRotation(angle);
+        player.setAngle(angle);
     }
 
     @Override
@@ -194,7 +194,7 @@ public abstract class AbstractServerWorld<P extends LunarServerPlayerEntity, E e
      */
     protected void queuePlayerPosition(LunarServerPlayerEntity player) {
         broadcastWithExclusion(player.getEntityId(),
-                new SPacketPlayerPosition(player.getEntityId(), player.getRotation(), player.getPosition().x, player.getPosition().y));
+                new SPacketPlayerPosition(player.getEntityId(), player.getAngle(), player.getPosition().x, player.getPosition().y));
     }
 
     /**
@@ -204,7 +204,7 @@ public abstract class AbstractServerWorld<P extends LunarServerPlayerEntity, E e
      */
     private void queuePlayerVelocity(LunarServerPlayerEntity player) {
         broadcastWithExclusion(player.getEntityId(),
-                new SPacketPlayerVelocity(player.getEntityId(), player.getRotation(), player.getVelocity().x, player.getVelocity().y));
+                new SPacketPlayerVelocity(player.getEntityId(), player.getAngle(), player.getVelocity().x, player.getVelocity().y));
     }
 
     @Override

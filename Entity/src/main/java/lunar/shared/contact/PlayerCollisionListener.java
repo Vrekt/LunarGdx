@@ -4,7 +4,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import lunar.shared.entity.player.LunarEntityPlayer;
 
 /**
- * A basic collision listener for {@link LunarEntityPlayer}
+ * A basic collision listener for {@link lunar.shared.entity.player.LunarEntityPlayer}
  */
 public final class PlayerCollisionListener implements ContactListener {
 
@@ -20,15 +20,16 @@ public final class PlayerCollisionListener implements ContactListener {
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
-        final Fixture fixtureA = contact.getFixtureA();
-        final Fixture fixtureB = contact.getFixtureB();
+        final Fixture a = contact.getFixtureA();
+        final Fixture b = contact.getFixtureB();
 
-        // disable collisions between players\
-        if (fixtureA.getUserData() instanceof LunarEntityPlayer
-                && fixtureB.getUserData() instanceof LunarEntityPlayer) {
-            final LunarEntityPlayer a = (LunarEntityPlayer) fixtureA.getUserData();
-            final LunarEntityPlayer b = (LunarEntityPlayer) fixtureB.getUserData();
-            if (a.doIgnorePlayerCollision() || b.doIgnorePlayerCollision()) contact.setEnabled(false);
+        if (a.getUserData() instanceof LunarEntityPlayer
+                && b.getUserData() instanceof LunarEntityPlayer) {
+            final LunarEntityPlayer playerA = (LunarEntityPlayer) a.getUserData();
+            // TODO: Possibly check for playerB as-well
+            if (playerA.isPlayerCollisionDisabled()) {
+                contact.setEnabled(false);
+            }
         }
     }
 

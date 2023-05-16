@@ -110,8 +110,8 @@ public class PlayerConnectionHandler extends PlayerConnection {
         if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_JOIN)) return;
 
         final NetworkPlayer player = new NetworkPlayer(true);
-        player.load();
-        player.setIgnoreOtherPlayerCollision(true);
+        player.loadEntity();
+        player.disablePlayerCollision(true);
         player.getProperties().setProperties(packet.getEntityId(), packet.getUsername());
         player.spawnInWorld(getWorldIn(), new Vector2(packet.getX(), packet.getY()));
     }

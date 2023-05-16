@@ -6,11 +6,9 @@ import gdx.lunar.protocol.packet.server.SPacketDisconnect;
 import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
 import gdx.lunar.server.world.World;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
 
 /**
  * Represents a player entity within the server.
- * extends network entity {@link  LunarNetworkEntityPlayer}
  */
 public class LunarServerPlayerEntity extends LunarServerEntity {
 

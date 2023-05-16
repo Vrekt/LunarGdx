@@ -1,7 +1,7 @@
 package gdx.lunar.world;
 
 import lunar.shared.entity.LunarEntity;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
+import lunar.shared.entity.player.mp.LunarEntityNetworkPlayer;
 
 import java.util.concurrent.ConcurrentMap;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentMap;
  * @param <P> player type
  * @param <E> entity type
  */
-public interface TypedGameWorld<P extends LunarNetworkEntityPlayer, E extends LunarEntity> extends LunarWorld {
+public interface TypedGameWorld<P extends LunarEntityNetworkPlayer, E extends LunarEntity> extends LunarWorld {
 
     /**
      * Add a player to the players list

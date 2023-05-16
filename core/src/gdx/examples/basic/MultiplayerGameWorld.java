@@ -41,6 +41,7 @@ public final class MultiplayerGameWorld extends WorldAdapter {
         player.defineEntity(this.getEntityWorld(), 0.0f, 0.0f);
         // tell the server we are good to go.
         player.getConnection().updateWorldLoaded();
+        player.setInWorld(true);
         player.setWorldIn(this);
         game.ready = true;
     }
@@ -55,8 +56,8 @@ public final class MultiplayerGameWorld extends WorldAdapter {
 
         final NetworkPlayer player = new NetworkPlayer(true);
         // load player assets.
-        player.putRegion("player", game.getTexture());
-        player.setIgnoreOtherPlayerCollision(true);
+        player.addRegion("player", game.getTexture());
+        player.disablePlayerCollision(true);
         player.setProperties(packet.getUsername(), packet.getEntityId());
         // set your local game properties
         player.setSize(16, 16, (1 / 16.0f));
@@ -71,6 +72,7 @@ public final class MultiplayerGameWorld extends WorldAdapter {
      */
     public void handlePlayerLeave(SPacketRemovePlayer packet) {
         Gdx.app.log(MultiplayerIntroductionGame.TAG, "Player " + packet.getEntityId() + " left.");
+        getPlayer(packet.getEntityId()).dispose();
         removePlayerInWorld(packet.getEntityId());
     }
 

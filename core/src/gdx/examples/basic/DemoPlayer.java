@@ -17,12 +17,14 @@ public final class DemoPlayer extends Player {
         super(initializeComponents);
 
         setMoveSpeed(6.0f);
-        setHasMoved(true);
-        setNetworkSendRatesInMs(10, 10);
-        setIgnoreOtherPlayerCollision(true);
+        setNetworkSendRateInMs(10, 10);
+        disablePlayerCollision(true);
+        setMoving(true);
+        setNetworkSendRateInMs(10, 10);
+        disablePlayerCollision(true);
 
         // default player texture
-        putRegion("player", playerTexture);
+        addRegion("player", playerTexture);
 
         // default player configuration
         setSize(16, 16, (1 / 16.0f));
@@ -35,26 +37,26 @@ public final class DemoPlayer extends Player {
 
     @Override
     public void pollInput() {
-        setVelocity(0.0f, 0.0f, false);
+        setVelocity(0.0f, 0.0f);
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            rotation = 0f;
-            setVelocity(0.0f, moveSpeed, false);
+            setAngle(0f);
+            setVelocity(0.0f, getMoveSpeed());
         } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            rotation = 1f;
-            setVelocity(0.0f, -moveSpeed, false);
+            setAngle(1f);
+            setVelocity(0.0f, -getMoveSpeed());
         } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            rotation = 2f;
-            setVelocity(-moveSpeed, 0.0f, false);
+            setAngle(2f);
+            setVelocity(-getMoveSpeed(), 0.0f);
         } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            rotation = 3f;
-            setVelocity(moveSpeed, 0.0f, false);
+            setAngle(3f);
+            setVelocity(getMoveSpeed(), 0.0f);
         }
     }
 
     @Override
     public void render(SpriteBatch batch, float delta) {
-        batch.draw(getRegion("player"), getInterpolated().x, getInterpolated().y, getWidthScaled(), getHeightScaled());
+        batch.draw(getRegion("player"), getInterpolatedPosition().x, getInterpolatedPosition().y, getScaledWidth(), getScaledHeight());
     }
 
     @Override

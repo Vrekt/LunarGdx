@@ -64,6 +64,14 @@ public interface LunarWorld extends Disposable {
     WorldConfiguration getConfiguration();
 
     /**
+     * Adds a default player collision listener to the {@link World}
+     * With this, if any player comes in contact with another player
+     * and that player has disabled collision on then it will be ignored
+     * and no collision will be processed.
+     */
+    void addDefaultPlayerCollisionListener();
+
+    /**
      * Spawn an entity in this world
      *
      * @param entity   the entity

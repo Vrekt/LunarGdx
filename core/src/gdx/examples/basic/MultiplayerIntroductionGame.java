@@ -67,7 +67,7 @@ public final class MultiplayerIntroductionGame extends Game {
 
         // initialize our player with default components.
         player = new DemoPlayer(true, assets.findRegion("display"));
-        player.setEntityName("Player" + ThreadLocalRandom.current().nextInt(0, 999));
+        player.setName("Player" + ThreadLocalRandom.current().nextInt(0, 999));
 
         // initialize our entity engine and world config
         configuration = new WorldConfiguration();
@@ -147,7 +147,7 @@ public final class MultiplayerIntroductionGame extends Game {
             world.update(delta);
 
             // update our camera
-            camera.position.set(player.getInterpolated().x, player.getInterpolated().y, 0f);
+            camera.position.set(player.getInterpolatedPosition().x, player.getInterpolatedPosition().y, 0f);
             camera.update();
 
             // begin batch
@@ -159,7 +159,7 @@ public final class MultiplayerIntroductionGame extends Game {
 
             for (NetworkPlayer player : world.getPlayers().values()) {
                 batch.draw(player.getRegion("player"), player.getX(), player.getY(),
-                        player.getWidthScaled(), player.getHeightScaled());
+                        player.getScaledWidth(), player.getScaledHeight());
             }
 
 

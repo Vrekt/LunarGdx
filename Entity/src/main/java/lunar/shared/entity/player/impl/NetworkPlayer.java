@@ -1,16 +1,11 @@
 package lunar.shared.entity.player.impl;
 
-import com.badlogic.ashley.core.Entity;
-import lunar.shared.entity.player.mp.LunarNetworkEntityPlayer;
+import lunar.shared.entity.player.mp.AbstractLunarEntityNetworkPlayer;
 
 /**
  * Represents a default multiplayer (player) state
  */
-public class NetworkPlayer extends LunarNetworkEntityPlayer {
-
-    public NetworkPlayer(Entity entity, boolean initializeComponents) {
-        super(entity, initializeComponents);
-    }
+public class NetworkPlayer extends AbstractLunarEntityNetworkPlayer {
 
     public NetworkPlayer(boolean initializeComponents) {
         super(initializeComponents);

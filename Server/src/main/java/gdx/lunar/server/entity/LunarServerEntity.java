@@ -1,12 +1,12 @@
 package gdx.lunar.server.entity;
 
 import com.badlogic.ashley.core.Entity;
-import lunar.shared.entity.LunarEntity;
+import lunar.shared.entity.AbstractLunarEntity;
 
 /**
  * Represents a server entity
  */
-public class LunarServerEntity extends LunarEntity {
+public class LunarServerEntity extends AbstractLunarEntity {
     public LunarServerEntity(Entity entity, boolean initializeComponents) {
         super(entity, initializeComponents);
     }
