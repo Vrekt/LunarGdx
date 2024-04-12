@@ -1,58 +1,34 @@
 package gdx.lunar.network.types;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
-import gdx.lunar.network.PlayerConnection;
-import gdx.lunar.protocol.LunarProtocol;
+import gdx.lunar.network.AbstractConnectionHandler;
+import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
-import lunar.shared.entity.player.impl.NetworkPlayer;
-
-import java.util.HashMap;
-import java.util.Map;
+import lunar.shared.entity.player.impl.LunarNetworkPlayer;
 
 /**
  * A default handler for quick use.
  */
-public class PlayerConnectionHandler extends PlayerConnection {
+public class PlayerConnectionHandler extends AbstractConnectionHandler {
 
-    private final Map<ConnectionOption, Boolean> options = new HashMap<>();
-
-    public PlayerConnectionHandler(Channel channel, LunarProtocol protocol) {
+    public PlayerConnectionHandler(Channel channel, GdxProtocol protocol) {
         super(channel, protocol);
     }
 
     /**
-     * Enable option(s) to be handled yourself
+     * Handle a packet if it's registered in the handlers list
      *
-     * @param options the options
+     * @param packet the packet
+     * @return {@code true} if this packet was handled.
      */
-    public void enableOptions(ConnectionOption... options) {
-        for (ConnectionOption option : options) {
-            this.options.put(option, true);
+    protected boolean checkRegisteredHandlers(Packet packet) {
+        if (handlers.containsKey(packet.getId())) {
+            handlers.get(packet.getId()).handle(packet);
+            return true;
         }
-    }
-
-    /**
-     * Disable option(s) to be handled yourself
-     *
-     * @param options the options
-     */
-    public void disableOptions(ConnectionOption... options) {
-        for (ConnectionOption option : options) {
-            this.options.put(option, true);
-        }
-    }
-
-    /**
-     * Check if an option is enabled
-     *
-     * @param option the option
-     * @return {@code  true} if so
-     */
-    public boolean isOptionEnabled(ConnectionOption option) {
-        return options.getOrDefault(option, false);
+        return false;
     }
 
     /**
@@ -63,7 +39,11 @@ public class PlayerConnectionHandler extends PlayerConnection {
      * @return {@code  true} if so
      */
     protected boolean isLocalPlayer(int id) {
-        return id == playerSupplier.getPlayer().getEntityId();
+        return id == player.getEntityId();
+    }
+
+    protected boolean doesPlayerExistInWorld(int entityId) {
+        return player.isInWorld() && player.getWorld().hasPlayer(entityId);
     }
 
     /**
@@ -71,116 +51,84 @@ public class PlayerConnectionHandler extends PlayerConnection {
      *
      * @param id     the entity ID
      * @param packet the packet
-     * @param option the option
-     * @return {@code  true} if so
+     * @return {@code true} if already handled, or should not be handled.
      */
-    protected boolean shouldHandle(int id, Packet packet, ConnectionOption option) {
-        return handle(option, packet) || !isLocalPlayer(id) && !isOptionEnabled(option);
-    }
-
-    /**
-     * Check if the provided packet should be handled
-     *
-     * @param packet the packet
-     * @param option the option
-     * @return {@code  true} if so
-     */
-    protected boolean shouldHandle(Packet packet, ConnectionOption option) {
-        return handle(option, packet) || !isOptionEnabled(option);
+    protected boolean shouldHandle(int id, Packet packet) {
+        return !isLocalPlayer(id) && checkRegisteredHandlers(packet);
     }
 
     @Override
-    public void handleAuthentication(SPacketAuthentication packet) {
-        if (!packet.isAllowed()) {
-            this.authenticationFailed = true;
+    public void handleAuthentication(S2CPacketAuthenticate packet) {
+        if (checkRegisteredHandlers(packet)) return;
+        if (!packet.isAuthenticationSuccessful()) {
             this.close();
-        } else {
-            this.authenticationFailed = false;
         }
     }
 
     @Override
-    public void handleDisconnect(SPacketDisconnect packet) {
-        handle(ConnectionOption.HANDLE_DISCONNECT, packet);
+    public void handleDisconnect(S2CPacketDisconnected packet) {
+        if (checkRegisteredHandlers(packet)) return;
         this.close();
     }
 
     @Override
-    public void handleCreatePlayer(SPacketCreatePlayer packet) {
-        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_JOIN)) return;
+    public void handleCreatePlayer(S2CPacketCreatePlayer packet) {
+        if (shouldHandle(packet.getEntityId(), packet)) return;
 
-        final NetworkPlayer player = new NetworkPlayer(true);
+        final LunarNetworkPlayer player = new LunarNetworkPlayer(true);
         player.loadEntity();
         player.disablePlayerCollision(true);
-        player.getProperties().setProperties(packet.getEntityId(), packet.getUsername());
-        player.spawnInWorld(getWorldIn(), new Vector2(packet.getX(), packet.getY()));
+        player.setProperties(packet.getUsername(), packet.getId());
+        player.spawnInWorld(this.player.getWorld(), new Vector2(packet.getX(), packet.getY()));
     }
 
     @Override
-    public void handleRemovePlayer(SPacketRemovePlayer packet) {
-        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_LEAVE)) return;
+    public void handleRemovePlayer(S2CPacketRemovePlayer packet) {
+        if (shouldHandle(packet.getEntityId(), packet)) return;
 
-        if (doesPlayerExistInWorld(packet.getEntityId()) && getWorldIn() != null) {
-            getWorldIn().removePlayerInWorld(packet.getEntityId());
+        if (doesPlayerExistInWorld(packet.getEntityId())) {
+            player.getWorld().removePlayerInWorld(packet.getEntityId(), true);
         }
     }
 
     @Override
-    public void handlePlayerPosition(SPacketPlayerPosition packet) {
-        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_POSITION)) return;
-        if (!doesPlayerExistInWorld(packet.getEntityId()) || getWorldIn() == null) return;
-        getWorldIn().updatePlayerPositionInWorld(packet.getEntityId(), packet.getX(), packet.getY(), packet.getRotation());
+    public void handlePlayerPosition(S2CPacketPlayerPosition packet) {
+        if (shouldHandle(packet.getEntityId(), packet)) return;
+        if (doesPlayerExistInWorld(packet.getEntityId())) {
+            player.getWorld().updatePlayerPositionInWorld(packet.getEntityId(), packet.getX(), packet.getY(), packet.getRotation());
+        }
     }
 
     @Override
-    public void handlePlayerVelocity(SPacketPlayerVelocity packet) {
-        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_VELOCITY)) return;
-        if (!doesPlayerExistInWorld(packet.getEntityId()) || getWorldIn() == null) return;
-        getWorldIn().updatePlayerVelocityInWorld(packet.getEntityId(), packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
+    public void handlePlayerVelocity(S2CPacketPlayerVelocity packet) {
+        if (shouldHandle(packet.getEntityId(), packet)) return;
+        if (doesPlayerExistInWorld(packet.getEntityId())) {
+            player.getWorld().updatePlayerVelocityInWorld(packet.getEntityId(), packet.getX(), packet.getY(), packet.getRotation());
+        }
     }
 
     @Override
-    public void handleEntityBodyForce(SPacketApplyEntityBodyForce packet) {
-        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_PLAYER_FORCE)) return;
-        if (!doesPlayerExistInWorld(packet.getEntityId()) || getWorldIn() == null) return;
-        // TODO: Update body force
+    public void handlePing(S2CPacketPing packet) {
+        checkRegisteredHandlers(packet);
     }
 
     @Override
-    public void handleSetEntityProperties(SPacketSetEntityProperties packet) {
-        if (shouldHandle(packet.getEntityId(), packet, ConnectionOption.HANDLE_SET_ENTITY_PROPERTIES)) return;
-        if (!doesPlayerExistInWorld(packet.getEntityId()) || getWorldIn() == null) return;
-        getWorldIn().updatePlayerProperties(packet.getEntityId(), packet.getEntityName(), packet.getEntityId());
+    public void handleJoinWorld(S2CPacketJoinWorld packet) {
+        checkRegisteredHandlers(packet);
     }
 
     @Override
-    public void handleWorldInvalid(SPacketWorldInvalid packet) {
-        if (shouldHandle(packet, ConnectionOption.HANDLE_WORLD_INVALID)) return;
-        Gdx.app.log("PlayerConnectionHandler", "World " + packet.getWorldName() + " does not exist! (" + packet.getReason() + ")");
+    public void handleWorldInvalid(S2CPacketWorldInvalid packet) {
+        checkRegisteredHandlers(packet);
     }
 
     @Override
-    public void handleCreateLobby(SPacketCreateLobby packet) {
-        // TODO
+    public void handleSetEntityProperties(S2CPacketSetEntityProperties packet) {
+        checkRegisteredHandlers(packet);
     }
 
     @Override
-    public void handleJoinLobbyDenied(SPacketJoinLobbyDenied packet) {
-        // TODO
-    }
-
-    @Override
-    public void handleJoinLobby(SPacketJoinLobby packet) {
-        // TODO
-    }
-
-    @Override
-    public void handleEnterInstance(SPacketEnterInstance packet) {
-        // TODO?
-    }
-
-    @Override
-    public void handlePlayerEnterInstance(SPacketPlayerEnterInstance packet) {
-        // TODO
+    public void handleStartGame(S2CPacketStartGame packet) {
+        checkRegisteredHandlers(packet);
     }
 }

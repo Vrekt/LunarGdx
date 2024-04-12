@@ -20,14 +20,14 @@ public interface LunarEntity extends Disposable, Spawnable {
      *
      * @return the world or {@code null} if none
      */
-    LunarWorld getWorldIn();
+    LunarWorld getWorld();
 
     /**
      * Set the current world in
      *
      * @param worldIn the world or {@code  null}
      */
-    void setWorldIn(LunarWorld worldIn);
+    void setWorld(LunarWorld worldIn);
 
     /**
      * @return {@code true} if the world in is not null.
@@ -167,6 +167,22 @@ public interface LunarEntity extends Disposable, Spawnable {
      * @param health health of this entity
      */
     void setHealth(float health);
+
+    /**
+     * Heal this entity by the provided amount
+     *
+     * @param amount the amount to heal by
+     * @return the entities new health
+     */
+    float heal(float amount);
+
+    /**
+     * Damage this entity by the provided amount
+     *
+     * @param amount the amount to damage by
+     * @return the entities new health
+     */
+    float damage(float amount);
 
     /**
      * @return position of this entity, defaulted to {@code 0.0f,0.0f}

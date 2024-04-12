@@ -3,7 +3,7 @@ package lunar.shared.entity.player;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.network.AbstractConnectionHandler;
 import gdx.lunar.world.LunarWorld;
 import lunar.shared.entity.texture.AbstractLunarTexturedEntity;
 
@@ -16,7 +16,7 @@ public abstract class AbstractLunarEntityPlayer extends AbstractLunarTexturedEnt
     protected boolean ignoreOtherPlayerCollision;
 
     // connection for this player
-    protected AbstractConnection connection;
+    protected AbstractConnectionHandler connection;
     protected long positionSendRate, velocitySendRate;
     protected long lastPosition, lastVelocity;
 
@@ -29,14 +29,14 @@ public abstract class AbstractLunarEntityPlayer extends AbstractLunarTexturedEnt
     }
 
     @Override
-    public AbstractConnection getConnection() {
+    public AbstractConnectionHandler getConnection() {
         return connection;
     }
 
     @Override
-    public void setConnection(AbstractConnection connection) {
+    public void setConnection(AbstractConnectionHandler connection) {
         this.connection = connection;
-        connection.setPlayerSupplier(this);
+        connection.setPlayer(this);
     }
 
     @Override
@@ -57,6 +57,7 @@ public abstract class AbstractLunarEntityPlayer extends AbstractLunarTexturedEnt
 
     @Override
     public void defineEntity(World world, float x, float y) {
+        if (this.body != null) return; // entity already defined
         getPosition().set(x, y);
         getPreviousPosition().set(x, y);
         getInterpolatedPosition().set(x, y);
@@ -70,6 +71,7 @@ public abstract class AbstractLunarEntityPlayer extends AbstractLunarTexturedEnt
     public void spawnInWorld(LunarWorld world, Vector2 position) {
         defineEntity(world.getEntityWorld(), position.x, position.y);
         world.spawnPlayerInWorld(this, position);
+        this.worldIn = world;
         this.inWorld = true;
     }
 
@@ -79,11 +81,17 @@ public abstract class AbstractLunarEntityPlayer extends AbstractLunarTexturedEnt
     }
 
     @Override
-    public void removeFromWorld(LunarWorld world) {
+    public void removeFromWorld() {
+        if (worldIn == null) return;
+
+        // don't destroy, we will do that ourselves.
+        worldIn.removePlayerInWorld(getEntityId(), false);
+
         if (body != null) {
-            world.getEntityWorld().destroyBody(body);
+            worldIn.getEntityWorld().destroyBody(body);
             body = null;
         }
+        worldIn = null;
         this.inWorld = false;
     }
 
@@ -92,12 +100,12 @@ public abstract class AbstractLunarEntityPlayer extends AbstractLunarTexturedEnt
         if (connection != null) {
             final long now = System.currentTimeMillis();
             if (lastPosition == 0 || (now - lastPosition) >= positionSendRate) {
-                connection.updatePosition(getAngle(), getX(), getY());
+                connection.updatePosition(getPosition(), getAngle());
                 lastPosition = now;
             }
 
             if (lastVelocity == 0 || (now - lastVelocity) >= velocitySendRate) {
-                connection.updateVelocity(getAngle(), getVelocity().x, getVelocity().y);
+                connection.updateVelocity(getVelocity(), getAngle());
                 lastVelocity = now;
             }
             connection.update();

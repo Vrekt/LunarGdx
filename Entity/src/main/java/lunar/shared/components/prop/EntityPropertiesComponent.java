@@ -11,15 +11,11 @@ public class EntityPropertiesComponent implements Component, Pool.Poolable {
 
     public int entityId;
     public String entityName;
-
     public float width, height, scaling;
-
     public float speed;
     public float health;
-
     public float angle;
     public BasicDirection direction;
-
     public boolean isMoving;
 
     public void setProperties(int entityId, String entityName) {
@@ -94,9 +90,8 @@ public class EntityPropertiesComponent implements Component, Pool.Poolable {
 
     @Override
     public void reset() {
-        entityId = 0;
+        entityId = -1;
         entityName = null;
-
         speed = 0.0f;
         health = 0.0f;
         isMoving = false;

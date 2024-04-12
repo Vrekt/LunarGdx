@@ -1,8 +1,8 @@
 package gdx.lunar.server.game;
 
-import gdx.lunar.protocol.LunarProtocol;
+import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.server.configuration.DefaultServerConfiguration;
-import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import gdx.lunar.server.entity.ServerPlayerEntity;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
 
 /**
@@ -12,13 +12,8 @@ public class GameServer extends LunarServer {
 
     private final DefaultServerConfiguration configuration = new DefaultServerConfiguration();
 
-    public GameServer(LunarProtocol protocol, String gameVersion) {
+    public GameServer(GdxProtocol protocol, String gameVersion) {
         super(protocol);
-        this.gameVersion = gameVersion;
-    }
-
-    public GameServer(int threads, LunarProtocol protocol, String gameVersion) {
-        super(threads, protocol);
         this.gameVersion = gameVersion;
     }
 
@@ -28,26 +23,25 @@ public class GameServer extends LunarServer {
     }
 
     @Override
-    public boolean handlePlayerAuthentication(String version, int protocolVersion) {
+    public boolean authenticatePlayer(String version, int protocolVersion) {
         return !isFull() && version.equalsIgnoreCase(gameVersion) && protocolVersion == protocol.getProtocolVersion();
     }
 
     @Override
-    public void handlePlayerDisconnect(LunarServerPlayerEntity player) {
+    public void handlePlayerDisconnect(ServerPlayerEntity player) {
         super.handlePlayerDisconnect(player);
 
         if (player.getWorld() != null) player.getWorld().removeEntityInWorld(player);
     }
 
     @Override
-    public boolean handleJoinProcess(ServerAbstractConnection connection) {
-        this.connections.add(connection);
-        return true;
+    public boolean addPlayerToServer(ServerAbstractConnection connection) {
+        return this.connections.add(connection);
     }
 
     @Override
     public boolean isUsernameValidInWorld(String world, String username) {
-        if (username == null) return false;
+        if (username == null || username.isEmpty()) return false;
         return worldManager.worldExists(world) && !worldManager.getWorld(world).doesUsernameExist(username);
     }
 }

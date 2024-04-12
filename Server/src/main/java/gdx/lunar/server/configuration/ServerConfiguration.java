@@ -13,9 +13,11 @@ public abstract class ServerConfiguration {
     // Max lobbies allowed in general.
     public int maxWorlds = 100, maxLobbies = 100;
 
+    public long ticksPerSecond = 20;
+
     // Default amount of time to sleep after each tick
     // only if the server is not behind.
-    public long tickSleepTime = 1;
+    public long tickSleepTime = 25;
     // allow players to join worlds before setting their username.
     public boolean allowJoinWorldBeforeSetUsername = false;
     public boolean allowChangeUsername = false;

@@ -9,7 +9,7 @@ public class WorldConfiguration {
     public boolean handlePhysics = true, updateLocalPlayer = true, updateNetworkPlayers = true;
     public boolean updateEntities = true;
     public boolean updateEntityEngine = true;
-    public float maxPlayerCapacity = 100;
+    public int maxPlayerCapacity = 100;
 
     // physics
     public int velocityIterations = 8, positionIterations = 3;

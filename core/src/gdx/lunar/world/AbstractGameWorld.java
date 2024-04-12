@@ -24,13 +24,15 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     protected final PlayerSupplier playerSupplier;
     protected final World world;
 
-    protected final WorldConfiguration configuration;
+    protected WorldConfiguration configuration;
     protected Engine engine;
 
     protected final Vector2 spawn = new Vector2();
 
     protected float accumulator;
     protected String worldName;
+    // current tick of this world
+    protected float currentTick;
 
     /**
      * An empty default constructor. You should use the setters to define configuration next.
@@ -44,6 +46,20 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
         this.playerSupplier = playerSupplier;
         this.world = world;
         this.configuration = configuration;
+        this.engine = engine;
+    }
+
+    /**
+     * An empty default constructor. You should use the setters to define configuration next.
+     *
+     * @param playerSupplier the player supplier
+     * @param world          the world
+     * @param engine         engine
+     */
+    public AbstractGameWorld(PlayerSupplier playerSupplier, World world, Engine engine) {
+        this.playerSupplier = playerSupplier;
+        this.world = world;
+        this.configuration = new WorldConfiguration();
         this.engine = engine;
     }
 
@@ -82,6 +98,11 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     }
 
     @Override
+    public void setConfiguration(WorldConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
+    @Override
     public void addDefaultPlayerCollisionListener() {
         if (world != null) world.setContactListener(new PlayerCollisionListener());
     }
@@ -98,7 +119,7 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
 
     @Override
     public boolean isFull() {
-        return false;
+        return players.size() >= configuration.maxPlayerCapacity;
     }
 
     @Override
@@ -152,25 +173,25 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     }
 
     @Override
-    public <T extends LunarEntity> void spawnEntityInWorld(T entity, Vector2 position) {
+    public void spawnEntityInWorld(LunarEntity entity, Vector2 position) {
         addEntity((E) entity);
         entity.setPosition(position, true);
     }
 
     @Override
-    public <T extends LunarEntity> void spawnEntityInWorld(T entity) {
+    public void spawnEntityInWorld(LunarEntity entity) {
         addEntity((E) entity);
         entity.setPosition(spawn, true);
     }
 
     @Override
-    public <T extends LunarEntityPlayer> void spawnPlayerInWorld(T player, Vector2 position) {
+    public void spawnPlayerInWorld(LunarEntityPlayer player, Vector2 position) {
         addPlayer((P) player);
         player.setPosition(position, true);
     }
 
     @Override
-    public <T extends LunarEntityPlayer> void spawnPlayerInWorld(T player) {
+    public void spawnPlayerInWorld(LunarEntityPlayer player) {
         addPlayer((P) player);
         player.setPosition(spawn, true);
     }
@@ -178,15 +199,16 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     @Override
     public void removeEntityInWorld(int entityId) {
         if (hasEntity(entityId)) {
-            getEntities().get(entityId).removeFromWorld(this);
+            // TODO Entity destroy
+            getEntities().get(entityId).removeFromWorld();
             getEntities().remove(entityId);
         }
     }
 
     @Override
-    public void removePlayerInWorld(int entityId) {
+    public void removePlayerInWorld(int entityId, boolean destroy) {
         if (hasPlayer(entityId)) {
-            getPlayers().get(entityId).removeFromWorld(this);
+            if (destroy) getPlayers().get(entityId).removeFromWorld();
             getPlayers().remove(entityId);
         }
     }
@@ -253,6 +275,7 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
 
             world.step(configuration.stepTime, configuration.velocityIterations, configuration.positionIterations);
             accumulator -= configuration.stepTime;
+            currentTick++;
         }
     }
 

@@ -10,6 +10,9 @@ repositories {
 }
 
 dependencies {
-    compile group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
-    implementation project(":core")
+    implementation group: 'io.netty', name: 'netty-all', version: '4.1.100.Final'
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.77'
+    implementation "com.badlogicgames.gdx:gdx:1.12.1"
+
+    implementation files("core")
 }

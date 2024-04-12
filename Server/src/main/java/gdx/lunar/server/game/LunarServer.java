@@ -1,17 +1,17 @@
 package gdx.lunar.server.game;
 
-import gdx.lunar.protocol.LunarProtocol;
+import com.badlogic.gdx.Gdx;
+import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.server.configuration.ServerConfiguration;
-import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import gdx.lunar.server.entity.ServerPlayerEntity;
 import gdx.lunar.server.game.utilities.Disposable;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
 import gdx.lunar.server.world.AbstractWorldManager;
 import gdx.lunar.server.world.impl.WorldManager;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Queue;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -21,43 +21,31 @@ public abstract class LunarServer implements Disposable {
 
     private static LunarServer instance;
 
-    // TODO: Probably low performance with a COW.
-    protected final List<LunarServerPlayerEntity> allPlayers = new CopyOnWriteArrayList<>();
+    protected final List<ServerPlayerEntity> allPlayers = new CopyOnWriteArrayList<>();
     // set of connections that are connected, but not in a world.
     protected final List<ServerAbstractConnection> connections = new CopyOnWriteArrayList<>();
     // the last time it took to tick all worlds.
     protected long worldTickTime;
     protected final AtomicBoolean running = new AtomicBoolean(true);
-    protected final ExecutorService service;
+    protected final ScheduledExecutorService service;
+
+    protected final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
 
     // game version this server supports.
     protected String gameVersion = "1.0";
 
-    protected LunarProtocol protocol;
+    protected GdxProtocol protocol;
     protected AbstractWorldManager worldManager;
 
-    public LunarServer(LunarProtocol protocol) {
+    public LunarServer(GdxProtocol protocol) {
         instance = this;
-        this.service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        this.service = Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
         this.worldManager = new WorldManager();
         this.protocol = protocol;
     }
 
-    public LunarProtocol getProtocol() {
+    public GdxProtocol getProtocol() {
         return protocol;
-    }
-
-    /**
-     * Initialize
-     *
-     * @param threads  amount of threads to use within server executor.
-     * @param protocol current protocol in use.
-     */
-    public LunarServer(int threads, LunarProtocol protocol) {
-        instance = this;
-        this.service = Executors.newFixedThreadPool(threads);
-        this.worldManager = new WorldManager();
-        this.protocol = protocol;
     }
 
     /**
@@ -67,7 +55,7 @@ public abstract class LunarServer implements Disposable {
      * @param protocolVersion the player protocol version
      * @return {@code true} if the player is allowed to join, other-wise connection will be closed.
      */
-    public abstract boolean handlePlayerAuthentication(String version, int protocolVersion);
+    public abstract boolean authenticatePlayer(String version, int protocolVersion);
 
     /**
      * Handle the join process of a new player connection
@@ -75,7 +63,7 @@ public abstract class LunarServer implements Disposable {
      * @param connection their connection
      * @return {@code true} if successful, other-wise connection will be closed.
      */
-    public abstract boolean handleJoinProcess(ServerAbstractConnection connection);
+    public abstract boolean addPlayerToServer(ServerAbstractConnection connection);
 
     /**
      * Check if a username is valid.
@@ -117,12 +105,23 @@ public abstract class LunarServer implements Disposable {
         return gameVersion;
     }
 
+    public int getProtocolVersion() {
+        return protocol.getProtocolVersion();
+    }
+
+    public long getWorldTickTime() {
+        return worldTickTime;
+    }
+
     /**
      * Set player joined
+     * TODO: Possibly remove
+     * TODO: Depending on config, maybe just handle max X amount of players per world
+     * TODO: Or max X amount of players per server
      *
      * @param player the player
      */
-    public void handlePlayerConnection(LunarServerPlayerEntity player) {
+    public void handlePlayerConnection(ServerPlayerEntity player) {
         this.allPlayers.add(player);
     }
 
@@ -139,9 +138,9 @@ public abstract class LunarServer implements Disposable {
      *
      * @param player the player
      */
-    public void handlePlayerDisconnect(LunarServerPlayerEntity player) {
+    public void handlePlayerDisconnect(ServerPlayerEntity player) {
         this.allPlayers.remove(player);
-        this.connections.remove(player.getServerConnection());
+        this.connections.remove(player.getConnection());
     }
 
     /**
@@ -153,7 +152,39 @@ public abstract class LunarServer implements Disposable {
         return allPlayers.size() + 1 >= getConfiguration().maxPlayers;
     }
 
-    public List<LunarServerPlayerEntity> getAllPlayers() {
+    public boolean isRunning() {
+        return running.get();
+    }
+
+    /**
+     * Execute an async task to be run the next server tick
+     *
+     * @param task the task
+     */
+    public void executeAsyncTaskOnNextTick(Runnable task) {
+        tasks.add(task);
+    }
+
+    /**
+     * Execute an async task and execute it now.
+     *
+     * @param task the task
+     */
+    public void executeAsyncTaskNow(Runnable task) {
+        service.schedule(task, 0L, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Execute an async task after the provided delay has elapsed.
+     *
+     * @param task  the task
+     * @param delay the delay
+     */
+    public void executeAsyncTaskLater(Runnable task, long delay) {
+        service.schedule(task, delay, TimeUnit.MILLISECONDS);
+    }
+
+    public List<ServerPlayerEntity> getAllPlayers() {
         return allPlayers;
     }
 
@@ -163,22 +194,20 @@ public abstract class LunarServer implements Disposable {
     public void start() {
         worldTickTime = 0;
 
-        service.execute(() -> {
-            Thread.currentThread().setName("LunarServerTick");
-            Thread.currentThread().setUncaughtExceptionHandler((t, e) -> e.printStackTrace());
-
-            while (running.get()) {
-                tick();
-            }
-        });
+        service.scheduleAtFixedRate(this::tick, 0L, (1000 / getConfiguration().ticksPerSecond), TimeUnit.MILLISECONDS);
     }
 
     /**
      * Tick this server.
      */
     public void tick() {
+        if (!running.get()) {
+            return;
+        }
+
         try {
             tickAllWorlds();
+            runAllTasks();
 
             // cap max ticks to skip to 50.
             final long time = worldTickTime / 50;
@@ -186,7 +215,7 @@ public abstract class LunarServer implements Disposable {
             long ticksToSkip = time >= 50 ? 50 : time;
 
             if (ticksToSkip > 1) {
-                System.err.println("[WARNING]: Running " + worldTickTime + " ms behind, skipping " + ticksToSkip + " ticks.");
+                Gdx.app.log("LunarServer", "WARNING: Running %d ms behind! Skipping %d ticks".formatted(worldTickTime, ticksToSkip));
             }
 
             if (ticksToSkip != 0) {
@@ -197,9 +226,8 @@ public abstract class LunarServer implements Disposable {
                 worldTickTime = System.currentTimeMillis();
             }
 
-            waitUntilNextTick();
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Gdx.app.log("LunarServer", "Exception caught during tick phase", exception);
             running.compareAndSet(true, false);
         }
     }
@@ -215,16 +243,6 @@ public abstract class LunarServer implements Disposable {
     }
 
     /**
-     * Wait until the next tick
-     * TODO: Not desirable, should be overridden if different implementation is desired.
-     *
-     * @throws InterruptedException e
-     */
-    protected void waitUntilNextTick() throws InterruptedException {
-        Thread.sleep(getConfiguration().tickSleepTime);
-    }
-
-    /**
      * Update all worlds within the server.
      */
     protected void tickAllWorlds() {
@@ -233,15 +251,26 @@ public abstract class LunarServer implements Disposable {
         worldTickTime = System.currentTimeMillis() - now;
     }
 
+    /**
+     * Run all tasks
+     */
+    protected void runAllTasks() {
+        while (tasks.peek() != null) {
+            tasks.remove().run();
+        }
+    }
+
     public static LunarServer getServer() {
         return instance;
     }
 
     @Override
     public void dispose() {
-        worldManager.dispose();
-        allPlayers.clear();
         running.set(false);
+        allPlayers.clear();
+        connections.clear();
+        tasks.clear();
+        worldManager.dispose();
         service.shutdown();
     }
 }

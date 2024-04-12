@@ -1,9 +1,10 @@
 package gdx.lunar.server.network.connection;
 
-import gdx.lunar.protocol.handler.ClientPacketHandler;
+import com.badlogic.gdx.Gdx;
 import gdx.lunar.protocol.packet.client.*;
 import gdx.lunar.protocol.packet.server.*;
-import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import gdx.lunar.server.entity.ServerPlayerEntity;
+import gdx.lunar.server.entity.impl.LunarServerPlayerEntity;
 import gdx.lunar.server.game.LunarServer;
 import gdx.lunar.server.world.World;
 import io.netty.channel.Channel;
@@ -11,20 +12,13 @@ import io.netty.channel.Channel;
 /**
  * Represents the default player connection handler.
  */
-public class ServerPlayerConnection extends ServerAbstractConnection implements ClientPacketHandler {
+public class ServerPlayerConnection extends ServerAbstractConnection {
 
-    /**
-     * The player who owns this connection.
-     */
-    protected LunarServerPlayerEntity player;
-    protected boolean disconnected;
+    protected ServerPlayerEntity player;
+    protected boolean disconnected, hasJoined;
 
     public ServerPlayerConnection(Channel channel, LunarServer server) {
         super(channel, server);
-    }
-
-    public void setPlayer(LunarServerPlayerEntity player) {
-        this.player = player;
     }
 
     /**
@@ -35,12 +29,14 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
     }
 
     @Override
-    public void handleAuthentication(CPacketAuthentication packet) {
-        if (server.handlePlayerAuthentication(packet.getGameVersion(), packet.getProtocolVersion())) {
-            if (!server.handleJoinProcess(this)) {
-                channel.close();
+    public void handleAuthentication(C2SPacketAuthenticate packet) {
+        if (server.authenticatePlayer(packet.getGameVersion(), packet.getProtocolVersion())) {
+            if (server.addPlayerToServer(this)) {
+                sendImmediately(new S2CPacketAuthenticate(true, server.getGameVersion(), server.getProtocolVersion()));
             } else {
-                sendImmediately(new SPacketAuthentication(true));
+                // adding the player to the server failed
+                sendImmediately(new S2CPacketDisconnected("Server rejected player"));
+                channel.close();
             }
         } else {
             channel.close();
@@ -48,120 +44,63 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
     }
 
     @Override
-    public void handleDisconnect(CPacketDisconnect packet) {
-        if (player != null) {
-            if (player.getWorld() != null) player.getWorld().removePlayerInWorld(player);
+    public void handleDisconnected(C2SPacketDisconnected packet) {
+        // ensure player has actually been connected first
+        if (hasJoined) {
+            if (player.isInWorld()) player.getWorld().removePlayerInWorld(player);
             server.handlePlayerDisconnect(player);
         }
         disconnect();
     }
 
     @Override
-    public void handlePlayerPosition(CPacketPosition packet) {
-        if (player != null && player.inWorld()) {
-            player.getWorld().handlePlayerPosition(player, packet.getX(), packet.getY(), packet.getRotation());
-        }
+    public void handlePing(C2SPacketPing packet) {
+        sendImmediately(new S2CPacketPing(packet.getTime(), player.getWorld().getTime()));
     }
 
     @Override
-    public void handlePlayerVelocity(CPacketVelocity packet) {
-        if (player != null && player.inWorld()) {
-            player.getWorld().handlePlayerVelocity(player, packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
-        }
-    }
-
-    @Override
-    public void handleJoinWorld(CPacketJoinWorld packet) {
-        if (packet.getUsername() == null) {
-            this.sendImmediately(new SPacketWorldInvalid(packet.getWorldName(), "Invalid username."));
-            return;
-        } else if (!server.getWorldManager().worldExists(packet.getWorldName())) {
-            this.sendImmediately(new SPacketWorldInvalid(packet.getWorldName(), "World does not exist."));
-            return;
+    public void handleJoinWorld(C2SPacketJoinWorld packet) {
+        if (!server.isUsernameValidInWorld(packet.getWorldName(), packet.getUsername())) {
+            // TODO: May be desirable to instead check specifically whats wrong
+            // TODO: Instead of just making the client guess
+            sendImmediately(new S2CPacketWorldInvalid(packet.getWorldName(), "Invalid username or world."));
         }
 
         final World world = server.getWorldManager().getWorld(packet.getWorldName());
         if (world.isFull()) {
+            sendImmediately(new S2CPacketWorldInvalid(packet.getWorldName(), "World is full."));
             return;
         }
 
-        this.player = new LunarServerPlayerEntity(true, server, this);
-        this.player.setName(packet.getUsername());
-        this.player.setServerWorldIn(world);
-        this.player.setEntityId(world.assignEntityIdFor(true));
-        sendImmediately(new SPacketJoinWorld(packet.getWorldName(), player.getEntityId()));
+        player = new LunarServerPlayerEntity(server, this);
+        player.setName(packet.getUsername());
+        player.setWorldIn(world);
+        player.setInWorld(true);
+        player.setEntityId(world.assignEntityIdFor(true));
+        sendImmediately(new S2CPacketJoinWorld(world.getName(), player.getEntityId(), world.getTime()));
+        hasJoined = true;
     }
 
     @Override
-    public void handleWorldLoaded(CPacketWorldLoaded packet) {
-        if (player != null) {
-            player.setLoaded(true);
+    public void handleWorldLoaded(C2SPacketWorldLoaded packet) {
+        if (hasJoined) {
+            player.setIsLoaded(true);
             player.getWorld().spawnPlayerInWorld(player);
         }
     }
 
     @Override
-    public void handleBodyForce(CPacketApplyEntityBodyForce packet) {
-        final int entityId = packet.getEntityId();
-        if (player != null && player.getWorld().hasPlayer(entityId)) {
-            //   player.getWorld()
-            //             .getPlayer(entityId)
-            //              .getVelocityComponent()
-            //              .setForce(packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY());
-            //      player.getWorld().broadcastWithExclusion(entityId, new SPacketApplyEntityBodyForce(entityId, packet.getForceX(), packet.getForceY(), packet.getPointX(), packet.getPointY()));
+    public void handlePlayerPosition(C2SPacketPlayerPosition packet) {
+        if (hasJoined && player.isInWorld()) {
+            player.getWorld().handlePlayerPosition(player, packet.getX(), packet.getY(), packet.getRotation());
         }
     }
 
     @Override
-    public void handleRequestSpawnEntity(CPacketRequestSpawnEntity packet) {
-
-    }
-
-    @Override
-    public void handleSetProperties(CPacketSetProperties packet) {
-        player.setName(packet.getUsername());
-    }
-
-    @Override
-    public void handleCreateLobby(CPacketCreateLobby packet) {
-
-    }
-
-    @Override
-    public void handleJoinLobby(CPacketJoinLobby packet) {
-
-    }
-
-    @Override
-    public void handleNetworkTile(CPacketNetworkedTile packet) {
-
-    }
-
-    @Override
-    public void handleEnterInstance(CPacketEnterInstance packet) {
-        System.err.println("requesting enter instance: " + packet.getInstanceId());
-      /*  if (this.player != null) {
-            final Instance instance = player.getWorld().getInstance(packet.getInstanceId());
-            if (instance != null) {
-                if (instance.isFull()) {
-                    sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), false, true, "Instance is full"));
-                } else {
-                    this.player.setInInstance(true);
-                    this.player.setInstanceIn(instance);
-                    sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), true, false, ""));
-                    System.err.println("player has joined instance " + packet.getInstanceId());
-                }
-            } else {
-                sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), false, false, "Invalid instance ID"));
-            }
-        } else {
-            sendImmediately(new SPacketEnterInstance(packet.getInstanceId(), false, false, "Invalid player"));
-        }*/
-    }
-
-    @Override
-    public void handlePing(CPacketPing packet) {
-        sendImmediately(new SPacketPing(packet.getTime(), System.currentTimeMillis()));
+    public void handlePlayerVelocity(C2SPacketPlayerVelocity packet) {
+        if (hasJoined && player.isInWorld()) {
+            player.getWorld().handlePlayerVelocity(player, packet.getVelocityX(), packet.getVelocityY(), packet.getRotation());
+        }
     }
 
     @Override
@@ -170,14 +109,18 @@ public class ServerPlayerConnection extends ServerAbstractConnection implements 
         this.disconnected = true;
 
         if (server != null) server.removePlayerConnection(this);
-        if (player != null && player.inWorld()) player.getWorld().removePlayerInWorld(player);
+        if (player != null) {
+            if (player.isInWorld()) player.getWorld().removePlayerInWorld(player);
+            player.dispose();
+        }
 
         channel.pipeline().remove(this);
-        channel.close();
+        if (channel.isOpen()) channel.close();
     }
 
     @Override
     public void connectionClosed(Throwable exception) {
-        disconnect();
+        if (exception != null) Gdx.app.log("ServerPlayerConnection", "Connection closed with exception!", exception);
+        if (!disconnected) disconnect();
     }
 }

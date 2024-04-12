@@ -1,6 +1,6 @@
 package gdx.lunar.server.netty;
 
-import gdx.lunar.protocol.LunarProtocol;
+import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.protocol.channel.ServerChannels;
 import gdx.lunar.protocol.codec.ProtocolPacketEncoder;
 import gdx.lunar.server.game.LunarServer;
@@ -19,8 +19,11 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import java.security.Security;
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -41,10 +44,13 @@ public class NettyServer {
     private Supplier<LengthFieldBasedFrameDecoder> decoderSupplier;
     private final SslContext sslContext;
 
-    private final LunarProtocol protocol;
-    private LunarServer server;
+    private final GdxProtocol protocol;
+    private final LunarServer server;
 
     private final LinkedList<ByteToMessageDecoder> decoders = new LinkedList<>();
+
+    // if connections are allowed to connect
+    private boolean connectionEnabled = true;
 
     /**
      * Initialize the bootstrap and server.
@@ -55,7 +61,7 @@ public class NettyServer {
      * @param bootstrap bootstrap
      * @param context   ssl
      */
-    public NettyServer(String ip, int port, LunarProtocol protocol, ServerBootstrap bootstrap, SslContext context, LunarServer server) {
+    public NettyServer(String ip, int port, GdxProtocol protocol, ServerBootstrap bootstrap, SslContext context, LunarServer server) {
         this.ip = ip;
         this.port = port;
         this.protocol = protocol;
@@ -74,15 +80,25 @@ public class NettyServer {
      * @param ip   the server IP address
      * @param port the server port
      */
-    public NettyServer(String ip, int port, LunarProtocol protocol, LunarServer server) {
+    public NettyServer(String ip, int port, GdxProtocol protocol, LunarServer server) {
         this.ip = ip;
         this.port = port;
         this.protocol = protocol;
         this.server = server;
 
+        // java.security.NoSuchProviderException: no such provider: BC
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            System.out.println("JVM Installing BouncyCastle Security Providers to the Runtime");
+            Security.addProvider(new BouncyCastleProvider());
+        } else {
+            System.out.println("JVM Installed with BouncyCastle Security Providers");
+        }
+
         try {
             final SelfSignedCertificate ssc = new SelfSignedCertificate();
+            final SslProvider provider = SslProvider.JDK;
             this.sslContext = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
+                    .sslProvider(provider)
                     .build();
         } catch (Exception any) {
             throw new RuntimeException(any);
@@ -127,11 +143,30 @@ public class NettyServer {
     }
 
     /**
+     * Disable any requests to connect to this server
+     */
+    public void disableIncomingConnections() {
+        connectionEnabled = false;
+    }
+
+    /**
+     * Enable any requests to connect to this server
+     */
+    public void enableIncomingConnections() {
+        connectionEnabled = true;
+    }
+
+    /**
      * Handle a new socket channel
      *
      * @param channel the channel
      */
     private void handleSocketConnection(SocketChannel channel) {
+        if (!connectionEnabled) {
+            channel.close();
+            return;
+        }
+
         final ServerAbstractConnection connection = connectionProvider == null ? new ServerPlayerConnection(channel, server) : connectionProvider.createConnection(channel);
         final LengthFieldBasedFrameDecoder decoder = this.decoderSupplier == null ? new ClientProtocolPacketDecoder(connection, protocol)
                 : decoderSupplier.get();

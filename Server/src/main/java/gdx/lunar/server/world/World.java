@@ -1,8 +1,11 @@
 package gdx.lunar.server.world;
 
 import gdx.lunar.protocol.packet.Packet;
-import gdx.lunar.server.entity.LunarServerPlayerEntity;
+import gdx.lunar.server.entity.ServerEntity;
+import gdx.lunar.server.entity.ServerPlayerEntity;
 import gdx.lunar.server.game.utilities.Disposable;
+
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Represents a world within the server with handling of basic functions
@@ -32,22 +35,30 @@ public interface World extends Disposable {
     boolean hasEntity(int entityId);
 
     /**
+     * @return a map of all players in this world
+     */
+    ConcurrentMap<Integer, ServerPlayerEntity> getPlayers();
+
+    /**
+     * @return a map of all entities in this world
+     */
+    ConcurrentMap<Integer, ServerEntity> getEntities();
+
+    /**
      * Check if a player is timed out based on the world configuration
      *
      * @param player the player
      * @param now    the current time
-     * @param <T>    type
      * @return {@code true} if the player is timed out
      */
-    <T extends LunarServerPlayerEntity> boolean isTimedOut(T player, float now);
+    boolean isTimedOut(ServerPlayerEntity player, float now);
 
     /**
      * Timeout the player
      *
      * @param player the player
-     * @param <T>    their type
      */
-    <T extends LunarServerPlayerEntity> void timeoutPlayer(T player);
+    void timeoutPlayer(ServerPlayerEntity player);
 
     /**
      * @param username the username to check
@@ -66,57 +77,64 @@ public interface World extends Disposable {
     /**
      * Handle a player position update
      *
-     * @param player the player
-     * @param x      their X
-     * @param y      their Y
-     * @param angle  their angle
-     * @param <T>    type
+     * @param player   the player
+     * @param x        their X
+     * @param y        their Y
+     * @param rotation their rotation
      */
-    <T extends LunarServerPlayerEntity> void handlePlayerPosition(T player, float x, float y, float angle);
+    void handlePlayerPosition(ServerPlayerEntity player, float x, float y, float rotation);
 
     /**
      * Handle a player velocity update
      *
-     * @param player the player
-     * @param x      their vel X
-     * @param y      their vel Y
-     * @param angle  their angle
-     * @param <T>    type
+     * @param player   the player
+     * @param x        their vel X
+     * @param y        their vel Y
+     * @param rotation their rotation
      */
-    <T extends LunarServerPlayerEntity> void handlePlayerVelocity(T player, float x, float y, float angle);
+    void handlePlayerVelocity(ServerPlayerEntity player, float x, float y, float rotation);
 
     /**
      * Spawn a player in this world
      *
      * @param player the player
-     * @param <T>    type
      */
-    <T extends LunarServerPlayerEntity> void spawnPlayerInWorld(T player);
+    void spawnPlayerInWorld(ServerPlayerEntity player);
+
+    /**
+     * Spawn an entity into the world
+     *
+     * @param entity the entity
+     */
+    void spawnEntityInWorld(ServerEntity entity);
 
     /**
      * Remove a player in this world
      *
      * @param player the player
-     * @param <T>    type
      */
-    <T extends LunarServerPlayerEntity> void removePlayerInWorld(T player);
+    void removePlayerInWorld(ServerPlayerEntity player);
 
     /**
      * Spawn an entity in this world
      *
      * @param entity the entity
-     * @param <T>    type
      */
-    <T extends LunarServerPlayerEntity> void removeEntityInWorld(T entity);
+    void removeEntityInWorld(ServerEntity entity);
 
     /**
      * Get a player from their entity ID
      *
      * @param entityId the entity ID
-     * @param <T>      type
      * @return the player or {@code  null} if none exists
      */
-    <T extends LunarServerPlayerEntity> T getPlayer(int entityId);
+    ServerPlayerEntity getPlayer(int entityId);
+
+    <T extends ServerPlayerEntity> T getPlayerAs(int entityId);
+
+    ServerEntity getEntity(int entityId);
+
+    <T extends ServerEntity> T getEntityAs(int entityId);
 
     /**
      * Broadcast a packet.
@@ -148,5 +166,15 @@ public interface World extends Disposable {
      * @param delta delta
      */
     void tick(float delta);
+
+    /**
+     * @return current time of the world
+     */
+    long getTime();
+
+    /**
+     * @return the current tick of the world
+     */
+    float getTick();
 
 }

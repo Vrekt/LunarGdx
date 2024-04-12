@@ -20,7 +20,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = "Lunar"
-        gdxVersion = '1.11.0'
+        gdxVersion = '1.12.1'
         roboVMVersion = '2.3.16'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.4'
@@ -35,6 +35,10 @@ allprojects {
         gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    }
+
+    dependencies {
+
     }
 
 }
@@ -57,13 +61,15 @@ project(":core") {
 
 
     dependencies {
-        api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         api "com.badlogicgames.ashley:ashley:$ashleyVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
-        api group: 'io.netty', name: 'netty-all', version: '4.1.87.Final'
-        api project(path: ':Protocol', configuration: 'default')
-        api project(path: ':Entity', configuration: 'default')
+        api group: 'io.netty', name: 'netty-all', version: '4.1.100.Final'
+        implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.77'
+
+        implementation project(":Protocol")
+        implementation project(":Entity")
     }
 }

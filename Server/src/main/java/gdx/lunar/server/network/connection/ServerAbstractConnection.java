@@ -1,7 +1,7 @@
 package gdx.lunar.server.network.connection;
 
 import gdx.lunar.protocol.PacketFactory;
-import gdx.lunar.protocol.handler.ClientPacketHandler;
+import gdx.lunar.protocol.handlers.ClientPacketHandler;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.server.game.LunarServer;
 import io.netty.buffer.ByteBuf;
@@ -17,17 +17,9 @@ import java.util.function.Consumer;
  */
 public abstract class ServerAbstractConnection extends ChannelInboundHandlerAdapter implements ClientPacketHandler {
 
-    /**
-     * The current channel of this connection.
-     */
     protected final Channel channel;
-
-    /**
-     * If we are connected in any way.
-     */
     protected boolean isConnected;
     private long lastPacketReceived;
-
     protected LunarServer server;
 
     public ServerAbstractConnection(Channel channel, LunarServer server) {
@@ -42,7 +34,7 @@ public abstract class ServerAbstractConnection extends ChannelInboundHandlerAdap
      * @param handler the handler
      */
     public <T> void registerPacket(int pid, PacketFactory<T> factory, Consumer<T> handler) {
-        server.getProtocol().registerCustomPacket(pid, in -> handler.accept(factory.create(in)));
+        server.getProtocol().registerPacket(pid, in -> handler.accept(factory.create(in)));
     }
 
     public long getLastPacketReceived() {
@@ -63,7 +55,6 @@ public abstract class ServerAbstractConnection extends ChannelInboundHandlerAdap
     public void update() {
 
     }
-
 
     /**
      * Disconnect

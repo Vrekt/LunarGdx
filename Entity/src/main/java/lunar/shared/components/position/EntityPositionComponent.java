@@ -8,11 +8,9 @@ import com.badlogic.gdx.utils.Pool;
  * Manages data for an entities position.
  */
 public class EntityPositionComponent implements Component, Pool.Poolable {
-
     public final Vector2 interpolated = new Vector2(0, 0);
     public final Vector2 previous = new Vector2(0, 0);
     public final Vector2 position = new Vector2(0, 0);
-
     @Override
     public void reset() {
         interpolated.set(0, 0);

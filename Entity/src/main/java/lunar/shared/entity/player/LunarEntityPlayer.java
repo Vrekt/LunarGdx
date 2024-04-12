@@ -1,7 +1,7 @@
 package lunar.shared.entity.player;
 
 import com.badlogic.gdx.physics.box2d.World;
-import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.network.AbstractConnectionHandler;
 import gdx.lunar.utilities.PlayerSupplier;
 import lunar.shared.entity.texture.LunarTexturedEntity;
 
@@ -15,15 +15,15 @@ public interface LunarEntityPlayer extends LunarTexturedEntity, PlayerSupplier {
      *
      * @return the connection
      */
-    AbstractConnection getConnection();
+    AbstractConnectionHandler getConnection();
 
     /**
      * Set the network connection of this player
-     * Default implementations will automatically inform {@link AbstractConnection} of this player
+     * Default implementations will automatically inform {@link AbstractConnectionHandler} of this player
      *
      * @param connection the connection
      */
-    void setConnection(AbstractConnection connection);
+    void setConnection(AbstractConnectionHandler connection);
 
     /**
      * Disable or enable collision between other players

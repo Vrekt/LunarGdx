@@ -13,7 +13,6 @@ import io.netty.handler.codec.MessageToByteEncoder;
  */
 @ChannelHandler.Sharable
 public class ProtocolPacketEncoder extends MessageToByteEncoder<Packet> {
-
     @Override
     protected void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) {
         try {
@@ -23,7 +22,6 @@ public class ProtocolPacketEncoder extends MessageToByteEncoder<Packet> {
             out.writeInt(length);
             out.writeBytes(packet.getBuffer());
         } catch (Exception any) {
-            any.printStackTrace();
             ctx.fireExceptionCaught(any);
         } finally {
             packet.release();

@@ -3,107 +3,42 @@ package gdx.lunar.protocol.packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
-import java.nio.charset.StandardCharsets;
-
 /**
- * Represents a base packet.
+ * Represents a basic packet outline
  */
-public abstract class Packet {
+public interface Packet {
 
     /**
-     * The buffer content of this packet.
+     * @return the packet ID of this packet
      */
-    protected ByteBuf buffer;
-
-    public Packet() {
-
-    }
-
-    protected Packet(ByteBuf buffer) {
-        this.buffer = buffer;
-        decode();
-    }
-
-    public void alloc(ByteBufAllocator alloc) {
-        this.buffer = alloc.ioBuffer();
-    }
+    int getId();
 
     /**
-     * @return the packet ID.
-     */
-    public abstract int getId();
-
-    /**
-     * Encode this packet
-     */
-    public void encode() {
-
-    }
-
-    /**
-     * Decode this packet.
-     */
-    public void decode() {
-
-    }
-
-    /**
-     * @return contents of this packet.
-     */
-    public ByteBuf getBuffer() {
-        return buffer;
-    }
-
-    public void release() {
-        buffer.release();
-    }
-
-    /**
-     * Write PID
-     */
-    protected void writeId() {
-        buffer.writeInt(getId());
-    }
-
-    /**
-     * Read bytes
+     * Allocate a buffer to this packet
+     * Usually done before writing this packet to a channel.
      *
-     * @param length the length
-     * @return the bytes
+     * @param allocator the allocator to use
      */
-    protected byte[] readBytes(int length) {
-        final byte[] contents = new byte[length];
-        buffer.readBytes(contents, 0, length);
-        return contents;
-    }
+    void alloc(ByteBufAllocator allocator);
 
     /**
-     * Read a string
-     *
-     * @return the string
+     * Encode the contents of this packet
      */
-    protected String readString() {
-        if (buffer.isReadable(4)) {
-            final int length = buffer.readInt();
-            if (buffer.isReadable(length)) {
-                final byte[] contents = readBytes(length);
-                return new String(contents, StandardCharsets.UTF_8);
-            }
-        }
-        return null;
-    }
+    void encode();
 
     /**
-     * Write a string.
-     *
-     * @param value the value
+     * Decode the contents of this packet
      */
-    protected void writeString(String value) {
-        if (value == null) return;
+    void decode();
 
-        final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-        buffer.writeInt(bytes.length);
-        buffer.writeBytes(bytes);
-    }
+    /**
+     * @return the buffer of this packet
+     */
+    ByteBuf getBuffer();
+
+    /**
+     * Release (discard) this packet after contents have been read.
+     */
+    void release();
 
 }

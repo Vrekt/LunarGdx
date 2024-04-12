@@ -1,6 +1,6 @@
 package gdx.lunar.server.netty.codec;
 
-import gdx.lunar.protocol.LunarProtocol;
+import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.server.network.connection.ServerAbstractConnection;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,19 +15,11 @@ public class ClientProtocolPacketDecoder extends LengthFieldBasedFrameDecoder {
      * The local session packet handler
      */
     private final ServerAbstractConnection handler;
-    private LunarProtocol protocol;
+    private final GdxProtocol protocol;
 
-    public ClientProtocolPacketDecoder(ServerAbstractConnection handler, LunarProtocol protocol) {
-        super(Integer.MAX_VALUE, 0, 4);
+    public ClientProtocolPacketDecoder(ServerAbstractConnection handler, GdxProtocol protocol) {
+        super(protocol.getMaxPacketFrameLength(), 0, 4);
         this.handler = handler;
-        this.protocol = protocol;
-    }
-
-    public LunarProtocol getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(LunarProtocol protocol) {
         this.protocol = protocol;
     }
 

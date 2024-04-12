@@ -40,14 +40,13 @@ public abstract class AbstractLunarEntity implements LunarEntity {
     }
 
     @Override
-    public LunarWorld getWorldIn() {
+    public LunarWorld getWorld() {
         return worldIn;
     }
 
     @Override
-    public void setWorldIn(LunarWorld worldIn) {
+    public void setWorld(LunarWorld worldIn) {
         this.worldIn = worldIn;
-        if (worldIn != null) this.setInWorld(true);
     }
 
     @Override
@@ -163,6 +162,16 @@ public abstract class AbstractLunarEntity implements LunarEntity {
     @Override
     public void setHealth(float health) {
         getProperties().health = health;
+    }
+
+    @Override
+    public float heal(float amount) {
+        return getProperties().health += amount;
+    }
+
+    @Override
+    public float damage(float amount) {
+        return getProperties().health -= amount;
     }
 
     @Override

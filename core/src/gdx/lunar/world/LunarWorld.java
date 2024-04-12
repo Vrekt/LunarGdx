@@ -64,6 +64,13 @@ public interface LunarWorld extends Disposable {
     WorldConfiguration getConfiguration();
 
     /**
+     * Set the configuration of this world
+     *
+     * @param configuration the config
+     */
+    void setConfiguration(WorldConfiguration configuration);
+
+    /**
      * Adds a default player collision listener to the {@link World}
      * With this, if any player comes in contact with another player
      * and that player has disabled collision on then it will be ignored
@@ -76,36 +83,32 @@ public interface LunarWorld extends Disposable {
      *
      * @param entity   the entity
      * @param position the position to spawn them at
-     * @param <T>      type
      */
-    <T extends LunarEntity> void spawnEntityInWorld(T entity, Vector2 position);
+    void spawnEntityInWorld(LunarEntity entity, Vector2 position);
 
     /**
      * Spawn an entity in this world
      * This method will spawn the provided entity at {@code getWorldSpawn}
      *
      * @param entity the entity
-     * @param <T>    type
      */
-    <T extends LunarEntity> void spawnEntityInWorld(T entity);
+    void spawnEntityInWorld(LunarEntity entity);
 
     /**
      * Spawn a player in this world
      *
      * @param player   the player
      * @param position the position to spawn them at
-     * @param <T>      type
      */
-    <T extends LunarEntityPlayer> void spawnPlayerInWorld(T player, Vector2 position);
+    void spawnPlayerInWorld(LunarEntityPlayer player, Vector2 position);
 
     /**
      * Spawn a player in this world
      * This method will spawn the provided player at {@code getWorldSpawn}
      *
      * @param player the player
-     * @param <T>    type
      */
-    <T extends LunarEntityPlayer> void spawnPlayerInWorld(T player);
+    void spawnPlayerInWorld(LunarEntityPlayer player);
 
     /**
      * Remove an entity from this world
@@ -118,8 +121,9 @@ public interface LunarWorld extends Disposable {
      * Remove a player from this world
      *
      * @param entityId the ID
+     * @param destroy  if the player should be destroyed. {@code false} if the player itself is calling this method.
      */
-    void removePlayerInWorld(int entityId);
+    void removePlayerInWorld(int entityId, boolean destroy);
 
     /**
      * @param entityId the player's entity ID

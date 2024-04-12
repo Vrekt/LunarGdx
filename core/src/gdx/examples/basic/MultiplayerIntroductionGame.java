@@ -13,15 +13,12 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import gdx.lunar.LunarClientServer;
-import gdx.lunar.network.types.ConnectionOption;
 import gdx.lunar.network.types.PlayerConnectionHandler;
-import gdx.lunar.protocol.LunarProtocol;
-import gdx.lunar.protocol.packet.client.CPacketJoinWorld;
-import gdx.lunar.protocol.packet.server.SPacketCreatePlayer;
-import gdx.lunar.protocol.packet.server.SPacketJoinWorld;
-import gdx.lunar.protocol.packet.server.SPacketRemovePlayer;
+import gdx.lunar.protocol.GdxProtocol;
+import gdx.lunar.protocol.packet.client.C2SPacketJoinWorld;
+import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.world.WorldConfiguration;
-import lunar.shared.entity.player.impl.NetworkPlayer;
+import lunar.shared.entity.player.impl.LunarNetworkPlayer;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -75,13 +72,10 @@ public final class MultiplayerIntroductionGame extends Game {
 
         // initialize the world with 0 gravity
         world = new MultiplayerGameWorld(player, player, new World(Vector2.Zero, false), configuration, engine, this);
-        // add default world systems
-        // world.addWorldSystems();
-        // ignore player collisions
-        //   world.addDefaultPlayerCollisionListener();
+        world.addDefaultPlayerCollisionListener();
 
         // initialize our default protocol and connect to the remote server,
-        final LunarProtocol protocol = new LunarProtocol(true);
+        final GdxProtocol protocol = new GdxProtocol(1, "1.0", true);
         final LunarClientServer server = new LunarClientServer(protocol, "localhost", 6969);
         // set provider because we want {@link PlayerConnectionHandler}
         server.setConnectionProvider(channel -> new PlayerConnectionHandler(channel, protocol));
@@ -102,20 +96,22 @@ public final class MultiplayerIntroductionGame extends Game {
         // protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> handler.handleJoinWorld(new TestCustomJoinWorldPacketServer(buf)));
 
         // enable options we want Lunar to handle by default.
-        connection.enableOptions(
-                ConnectionOption.HANDLE_PLAYER_POSITION,
-                ConnectionOption.HANDLE_PLAYER_VELOCITY,
-                ConnectionOption.HANDLE_AUTHENTICATION,
-                ConnectionOption.HANDLE_PLAYER_FORCE);
+        // connection.enableOptions(
+        //         ConnectionOption.HANDLE_PLAYER_POSITION,
+        //         ConnectionOption.HANDLE_PLAYER_VELOCITY,
+        //         ConnectionOption.HANDLE_AUTHENTICATION,
+        //         ConnectionOption.HANDLE_PLAYER_FORCE);
 
         // register handlers we want to process ourselves instead of the default player connection
-        connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> world.handleWorldJoin((SPacketJoinWorld) packet));
-        connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_JOIN, packet -> world.handlePlayerJoin((SPacketCreatePlayer) packet));
-        connection.registerHandlerSync(ConnectionOption.HANDLE_PLAYER_LEAVE, packet -> world.handlePlayerLeave((SPacketRemovePlayer) packet));
+        connection.registerHandlerSync(S2CPacketJoinWorld.PACKET_ID, packet -> world.handleWorldJoin((S2CPacketJoinWorld) packet));
+        connection.registerHandlerSync(S2CPacketCreatePlayer.PACKET_ID, packet -> world.handlePlayerJoin((S2CPacketCreatePlayer) packet));
+        connection.registerHandlerSync(S2CPacketRemovePlayer.PACKET_ID, packet -> world.handlePlayerLeave((S2CPacketRemovePlayer) packet));
+        connection.registerHandlerSync(S2CPacketWorldInvalid.PACKET_ID, packet -> System.err.println("World invalid!"));
+        connection.registerHandlerSync(S2CPacketStartGame.PACKET_ID, packet -> world.handleStartGame((S2CPacketStartGame) packet));
         // TODO: Implement a join world timeout if you desire.
 
         // finally, request to join the world
-        final CPacketJoinWorld packet = new CPacketJoinWorld("TutorialWorld", player.getName());
+        final C2SPacketJoinWorld packet = new C2SPacketJoinWorld("TutorialWorld", player.getName(), System.currentTimeMillis());
         player.getConnection().sendImmediately(packet);
     }
 
@@ -157,8 +153,8 @@ public final class MultiplayerIntroductionGame extends Game {
             // render our player
             player.render(batch, delta);
 
-            for (NetworkPlayer player : world.getPlayers().values()) {
-                batch.draw(player.getRegion("player"), player.getX(), player.getY(),
+            for (LunarNetworkPlayer player : world.getPlayers().values()) {
+                batch.draw(player.getRegion("player"), player.getInterpolatedPosition().x, player.getInterpolatedPosition().y,
                         player.getScaledWidth(), player.getScaledHeight());
             }
 

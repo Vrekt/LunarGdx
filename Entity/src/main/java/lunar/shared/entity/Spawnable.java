@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import gdx.lunar.world.LunarWorld;
 
 /**
- * Something that can be spawned into a world
+ * An entity that can be spawned into a world
  */
 public interface Spawnable {
 
@@ -28,11 +28,9 @@ public interface Spawnable {
     }
 
     /**
-     * Remove from a world
-     *
-     * @param world the world
+     * Remove from the current world in
      */
-    default void removeFromWorld(LunarWorld world) {
+    default void removeFromWorld() {
 
     }
 

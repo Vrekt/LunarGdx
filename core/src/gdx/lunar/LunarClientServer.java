@@ -1,12 +1,13 @@
 package gdx.lunar;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Disposable;
-import gdx.lunar.network.AbstractConnection;
-import gdx.lunar.network.PlayerConnection;
-import gdx.lunar.network.adapter.InboundNetworkHandler;
+import gdx.lunar.network.AbstractConnectionHandler;
+import gdx.lunar.network.adapter.FirstInboundConnectionHandler;
 import gdx.lunar.network.codec.ServerProtocolPacketDecoder;
 import gdx.lunar.network.provider.ConnectionProvider;
-import gdx.lunar.protocol.LunarProtocol;
+import gdx.lunar.network.types.PlayerConnectionHandler;
+import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.protocol.channel.ClientChannels;
 import gdx.lunar.protocol.codec.ProtocolPacketEncoder;
 import gdx.lunar.protocol.packet.Packet;
@@ -41,14 +42,14 @@ public final class LunarClientServer implements Disposable {
 
     private final SslContext ssl;
 
-    private final LunarProtocol protocol;
+    private final GdxProtocol protocol;
 
     private ChannelInboundHandlerAdapter adapter;
     private LengthFieldBasedFrameDecoder decoder;
     private MessageToByteEncoder<Packet> encoder;
     private ConnectionProvider provider;
 
-    private AbstractConnection connection;
+    private AbstractConnectionHandler connection;
 
     /**
      * Initialize a new instance with a pre-built bootstrap.
@@ -58,7 +59,7 @@ public final class LunarClientServer implements Disposable {
      * @param ip        the server IP address
      * @param port      the server port
      */
-    public LunarClientServer(LunarProtocol protocol, Bootstrap bootstrap, String ip, int port) {
+    public LunarClientServer(GdxProtocol protocol, Bootstrap bootstrap, String ip, int port) {
         this.protocol = protocol;
         this.bootstrap = bootstrap;
         this.group = bootstrap.config().group();
@@ -66,8 +67,7 @@ public final class LunarClientServer implements Disposable {
         this.port = port;
 
         try {
-            ssl = SslContextBuilder.forClient()
-                    .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+            ssl = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         } catch (SSLException exception) {
             throw new RuntimeException(exception);
         }
@@ -80,7 +80,7 @@ public final class LunarClientServer implements Disposable {
      * @param ip       the server IP address
      * @param port     the server port
      */
-    public LunarClientServer(LunarProtocol protocol, String ip, int port) {
+    public LunarClientServer(GdxProtocol protocol, String ip, int port) {
         this.protocol = protocol;
         this.ip = ip;
         this.port = port;
@@ -102,8 +102,7 @@ public final class LunarClientServer implements Disposable {
                 });
 
         try {
-            ssl = SslContextBuilder.forClient()
-                    .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+            ssl = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         } catch (SSLException exception) {
             throw new RuntimeException(exception);
         }
@@ -131,7 +130,7 @@ public final class LunarClientServer implements Disposable {
 
     /**
      * Set the connection provider.
-     * This provides incoming multiplayer connections a way to retrieve custom implementations of {@link AbstractConnection}
+     * This provides incoming multiplayer connections a way to retrieve custom implementations of {@link AbstractConnectionHandler}
      *
      * @param provider the provider
      */
@@ -156,9 +155,9 @@ public final class LunarClientServer implements Disposable {
      */
     private void handleSocketConnection(SocketChannel channel) {
         connection = this.provider == null
-                ? new PlayerConnection(channel, protocol)
+                ? new PlayerConnectionHandler(channel, protocol)
                 : this.provider.createConnection(channel);
-        if (this.adapter == null) adapter = new InboundNetworkHandler(connection);
+        if (this.adapter == null) adapter = new FirstInboundConnectionHandler(connection);
         if (this.decoder == null) decoder = new ServerProtocolPacketDecoder(connection, protocol);
         if (this.encoder == null) encoder = new ProtocolPacketEncoder();
 
@@ -168,11 +167,11 @@ public final class LunarClientServer implements Disposable {
         channel.pipeline().addLast(adapter);
     }
 
-    public AbstractConnection getConnection() {
+    public AbstractConnectionHandler getConnection() {
         return connection;
     }
 
-    public LunarProtocol getProtocol() {
+    public GdxProtocol getProtocol() {
         return protocol;
     }
 
@@ -186,7 +185,7 @@ public final class LunarClientServer implements Disposable {
             try {
                 bootstrap.connect(ip, port).sync();
             } catch (Exception any) {
-                any.printStackTrace();
+                Gdx.app.log("LunarClientServer", "Could not connect async", any);
             }
         });
     }
@@ -208,7 +207,7 @@ public final class LunarClientServer implements Disposable {
             bootstrap.connect(ip, port).sync();
             return true;
         } catch (Exception any) {
-            any.printStackTrace();
+            Gdx.app.log("LunarClientServer", "Could not connect", any);
         }
         return false;
     }

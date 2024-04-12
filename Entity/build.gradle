@@ -12,9 +12,10 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
+    implementation group: 'io.netty', name: 'netty-all', version: '4.1.100.Final'
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.77'
     implementation 'com.badlogicgames.ashley:ashley:1.7.4'
-    implementation "com.badlogicgames.gdx:gdx-box2d:1.11.0"
+    implementation "com.badlogicgames.gdx:gdx-box2d:1.12.1"
     implementation project(":Protocol")
     implementation project(":core")
 }

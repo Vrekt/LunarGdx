@@ -1,10 +1,10 @@
 package gdx.lunar.network.provider;
 
-import gdx.lunar.network.AbstractConnection;
+import gdx.lunar.network.AbstractConnectionHandler;
 import io.netty.channel.Channel;
 
 /**
- * Basic interface allowing custom implementations of {@link AbstractConnection} to be used.
+ * Basic interface allowing custom implementations of {@link AbstractConnectionHandler} to be used.
  */
 public interface ConnectionProvider {
 
@@ -14,6 +14,6 @@ public interface ConnectionProvider {
      * @param channel  the channel
      * @return the new connection.
      */
-    AbstractConnection createConnection(Channel channel);
+    AbstractConnectionHandler createConnection(Channel channel);
 
 }
