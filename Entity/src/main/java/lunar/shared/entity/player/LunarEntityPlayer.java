@@ -47,6 +47,11 @@ public interface LunarEntityPlayer extends LunarTexturedEntity, PlayerSupplier {
     void setNetworkSendRateInMs(long velocity, long position);
 
     /**
+     * Send related position and velocity packets if it's time to do so.
+     */
+    void updateNetworkPositionAndVelocity();
+
+    /**
      * Define this entities {@link com.badlogic.gdx.physics.box2d.Body} and spawn it in the provided {@link World}
      *
      * @param world the world

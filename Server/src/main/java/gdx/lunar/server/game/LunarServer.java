@@ -198,6 +198,21 @@ public abstract class LunarServer implements Disposable {
     }
 
     /**
+     * Suspend (pause) this server
+     * TODO: ExecutorService thread is still running, perhaps in the future stop that too.
+     */
+    public void suspend() {
+        running.set(false);
+    }
+
+    /**
+     * Resume this server
+     */
+    public void resume() {
+        running.set(true);
+    }
+
+    /**
      * Tick this server.
      */
     public void tick() {

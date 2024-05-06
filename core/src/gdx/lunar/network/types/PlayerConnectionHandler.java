@@ -1,5 +1,6 @@
 package gdx.lunar.network.types;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import gdx.lunar.network.AbstractConnectionHandler;
 import gdx.lunar.protocol.GdxProtocol;
@@ -129,6 +130,18 @@ public class PlayerConnectionHandler extends AbstractConnectionHandler {
 
     @Override
     public void handleStartGame(S2CPacketStartGame packet) {
-        checkRegisteredHandlers(packet);
+        if (checkRegisteredHandlers(packet)) return;
+
+        if (packet.hasPlayers() && player.isInWorld()) {
+            for (S2CPacketStartGame.BasicServerPlayer packetPlayer : packet.getPlayers()) {
+                Gdx.app.log("PlayerConnectionHandler", "New player joining %s".formatted(packetPlayer.username));
+
+                final LunarNetworkPlayer player = new LunarNetworkPlayer(true);
+                player.loadEntity();
+                player.disablePlayerCollision(true);
+                player.setProperties(packetPlayer.username, packetPlayer.entityId);
+                player.spawnInWorld(this.player.getWorld(), packetPlayer.position);
+            }
+        }
     }
 }

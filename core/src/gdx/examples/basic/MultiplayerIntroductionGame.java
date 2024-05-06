@@ -92,16 +92,6 @@ public final class MultiplayerIntroductionGame extends Game {
         final PlayerConnectionHandler connection = (PlayerConnectionHandler) server.getConnection();
         player.setConnection(connection);
 
-        // override a default handler in favor of our own
-        // protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> handler.handleJoinWorld(new TestCustomJoinWorldPacketServer(buf)));
-
-        // enable options we want Lunar to handle by default.
-        // connection.enableOptions(
-        //         ConnectionOption.HANDLE_PLAYER_POSITION,
-        //         ConnectionOption.HANDLE_PLAYER_VELOCITY,
-        //         ConnectionOption.HANDLE_AUTHENTICATION,
-        //         ConnectionOption.HANDLE_PLAYER_FORCE);
-
         // register handlers we want to process ourselves instead of the default player connection
         connection.registerHandlerSync(S2CPacketJoinWorld.PACKET_ID, packet -> world.handleWorldJoin((S2CPacketJoinWorld) packet));
         connection.registerHandlerSync(S2CPacketCreatePlayer.PACKET_ID, packet -> world.handlePlayerJoin((S2CPacketCreatePlayer) packet));

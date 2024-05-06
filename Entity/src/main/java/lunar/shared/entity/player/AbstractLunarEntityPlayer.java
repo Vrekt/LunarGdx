@@ -56,6 +56,21 @@ public abstract class AbstractLunarEntityPlayer extends AbstractLunarTexturedEnt
     }
 
     @Override
+    public void updateNetworkPositionAndVelocity() {
+        final long now = System.currentTimeMillis();
+        if (lastPosition == 0 || (now - lastPosition) >= positionSendRate) {
+            connection.updatePosition(getPosition(), getAngle());
+            lastPosition = now;
+        }
+
+        if (lastVelocity == 0 || (now - lastVelocity) >= velocitySendRate) {
+            connection.updateVelocity(getVelocity(), getAngle());
+            lastVelocity = now;
+        }
+        connection.update();
+    }
+
+    @Override
     public void defineEntity(World world, float x, float y) {
         if (this.body != null) return; // entity already defined
         getPosition().set(x, y);
@@ -98,17 +113,7 @@ public abstract class AbstractLunarEntityPlayer extends AbstractLunarTexturedEnt
     @Override
     public void update(float delta) {
         if (connection != null) {
-            final long now = System.currentTimeMillis();
-            if (lastPosition == 0 || (now - lastPosition) >= positionSendRate) {
-                connection.updatePosition(getPosition(), getAngle());
-                lastPosition = now;
-            }
-
-            if (lastVelocity == 0 || (now - lastVelocity) >= velocitySendRate) {
-                connection.updateVelocity(getVelocity(), getAngle());
-                lastVelocity = now;
-            }
-            connection.update();
+            updateNetworkPositionAndVelocity();
         }
     }
 

@@ -20,7 +20,6 @@ public final class DemoPlayer extends LunarPlayer {
         disablePlayerCollision(true);
         setMoving(true);
         setNetworkSendRateInMs(10, 10);
-        disablePlayerCollision(true);
 
         // default player texture
         addRegion("player", playerTexture);
