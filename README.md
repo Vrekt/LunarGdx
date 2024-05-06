@@ -1,37 +1,58 @@
 # Lunar
 
-#### What is Lunar?
+## What is Lunar?
+Lunar is a library for developing multiplayer games with LibGDX. In it's current state its more appropriate for small scale multiplayer games or prototypes.
 
-Lunar is a networking library for LibGDX. With Lunar you can quickly create multiplayer game prototypes or full multiplayer games, quickly and efficiently! Lunar provides many common utilities such as entities, worlds, protocol, and box2d support!
+## Headline features
+- Ashley and Box2d support
+- Fully customizable entity system
+- Networked players and entities with interpolation
+- A-lot of boilerplate written for you
+- Expandable protocol
 
-**Lunar is still in very early development, expect many, many changes.**
+### Beyond the headline features
+- Support for texture/sprite entities
+- Expandable networked worlds
+- Multiple entity types for players, network players, etc
+- A comprehensive server library
+- + more
 
-#### Features
-- Networked box2d worlds..
-- Networked player moving and velocity.
-- Networked player creation/removing.
-- Ashley entity system
-- A expandable protocol with SSL support.
-- Very customizable and extendable.
 
-### Get A Taste
+### A quick peek inside
+*provided without any context of course, but you get the idea.*
+
 ```java
-// apply a knock-back force to ourselves or another network player
-player.applyForce(x, y, 1.0f, 1.0f, true);
+final MyPlayer player = ...;
+world.spawnPlayerInWorld(player, 0.0f, 0.0f);
 ```
 
 ```java
-// spawn a new entity in the world
-world.spawnEntityInWorld(new MyEntity(), x, y);
+final PlayerConnectionHandler connection = clientServer.getConnection();
+connection.registerPacket(MyCustomPacket.ID, MyCustomPacket::new, packet -> handleMyPacket(packet));
 ```
 
 ```java
-// register a unique custom packet.
-connection.registerPacket(99, MyCustomPacket::new, packet -> handleEntityPropertiesPacket(packet));
-// Override default handlers
-connection.registerHandlerSync(ConnectionOption.HANDLE_JOIN_WORLD, packet -> handle(packet));
+// override default behaviour
+connection.registerHandlerSync(S2CPacketJoinWorld.PACKET_ID, packet -> world.handleWorldJoin((S2CPacketJoinWorld) packet));
 ```
 
+```java
+// an example of a basic player with many customizable configuration options
+public final class DemoPlayer extends LunarPlayer {
+
+    public DemoPlayer(boolean initializeComponents, TextureRegion playerTexture) {
+        super(initializeComponents);
+
+        setMoveSpeed(6.0f);
+        disablePlayerCollision(true);
+        setNetworkSendRateInMs(10, 10);
+        // default player texture
+        addRegion("player", playerTexture);
+        // default player configuration
+        setSize(16, 16, (1 / 16.0f));
+    }
+}
+```
 ```java
 // Create a networked world for others to join us.
 // By default the world will handle physics, player updates and network updates!
@@ -57,32 +78,25 @@ connection.joinWorld("MyWorld", player.getName());
 
 ```java
 // provide our own implementation for player connections
-server.setConnectionProvider(channel -> new PlayerConnectionHandler(channel, protocol));
-
-// override default server packet handlers
-protocol.changeDefaultServerPacketHandlerFor(SPacketJoinWorld.PID, (buf, handler) -> doSomething(buf, handler));
+server.setConnectionProvider(channel -> new MyPlayerConnectionHandler(channel, protocol));
 ```
 
-Want to jump in? Check out the [Quick Start Guide](https://github.com/Vrekt/LunarGdx/wiki/Quick-Start-Guide)
-
 ## Documentation and Examples
+The wiki includes most things you will need to get started. Not all methods are described, I encourage to explore the source of a few key components like `AbstractLunarEntity` and `AbstractGameWorld` as this is where most fundamentals reside.
 
-[Examples](https://github.com/Vrekt/LunarGdx/tree/main/core/src/gdx/examples)
-
-[Wiki](https://github.com/Vrekt/LunarGdx/wiki)
-
-# Planned Features
-- Networked collision
-- Networked textures, tiles, maps
-- Better protocol security [#9](https://github.com/Vrekt/LunarGdx/issues/9)
-- 'Instances' within worlds for interiors, rooms, dungeons, etc. Allows all the features as a normal world.
-- ...
+## Future Plans
+*things that should have been implemented forever ago*
+- Instances: basically just interiors and other things within a world you enter, like a dungeon for example.
+- Encryption and better authentication
+- And in general, expanding upon this library
 
 # Using Lunar
+**Lunar uses Java 21.**
+
 You can find releases in the releases section. Both client and server rely on the Protocol dependency.
 
-You must also add a dependency for netty-all.
-##### Gradle 6.7.2
+A netty dependency is also required:
 ```java
-implementation group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
+// or whatever version
+implementation group: 'io.netty', name: 'netty-all', version: '4.1.100.Final'
 ```
