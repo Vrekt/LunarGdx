@@ -14,7 +14,7 @@ public interface Spawnable {
      * @param world    the world
      * @param position the position
      */
-    default void spawnInWorld(LunarWorld world, Vector2 position) {
+    default <T extends LunarWorld> void spawnInWorld(T world, Vector2 position) {
 
     }
 
@@ -23,7 +23,7 @@ public interface Spawnable {
      *
      * @param world the world
      */
-    default void spawnInWorld(LunarWorld world) {
+    default <T extends LunarWorld> void spawnInWorld(T world) {
 
     }
 

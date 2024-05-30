@@ -1,13 +1,12 @@
-package gdx.lunar.network.types;
+package gdx.lunar.network;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
-import gdx.lunar.network.AbstractConnectionHandler;
 import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.server.*;
 import io.netty.channel.Channel;
-import lunar.shared.entity.player.impl.LunarNetworkPlayer;
+import lunar.shared.entity.player.adapter.NetworkPlayerAdapter;
 
 /**
  * A default handler for quick use.
@@ -76,7 +75,7 @@ public class PlayerConnectionHandler extends AbstractConnectionHandler {
     public void handleCreatePlayer(S2CPacketCreatePlayer packet) {
         if (shouldHandle(packet.getEntityId(), packet)) return;
 
-        final LunarNetworkPlayer player = new LunarNetworkPlayer(true);
+        final NetworkPlayerAdapter player = new NetworkPlayerAdapter(true);
         player.loadEntity();
         player.disablePlayerCollision(true);
         player.setProperties(packet.getUsername(), packet.getId());
@@ -136,7 +135,7 @@ public class PlayerConnectionHandler extends AbstractConnectionHandler {
             for (S2CPacketStartGame.BasicServerPlayer packetPlayer : packet.getPlayers()) {
                 Gdx.app.log("PlayerConnectionHandler", "New player joining %s".formatted(packetPlayer.username));
 
-                final LunarNetworkPlayer player = new LunarNetworkPlayer(true);
+                final NetworkPlayerAdapter player = new NetworkPlayerAdapter(true);
                 player.loadEntity();
                 player.disablePlayerCollision(true);
                 player.setProperties(packetPlayer.username, packetPlayer.entityId);

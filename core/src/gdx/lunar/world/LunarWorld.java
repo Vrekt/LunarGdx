@@ -47,16 +47,16 @@ public interface LunarWorld extends Disposable {
     boolean isFull();
 
     /**
-     * Set the spawn of this world
+     * Set the origin of this world
      *
      * @param position the position
      */
-    void setWorldSpawn(Vector2 position);
+    void setWorldOrigin(Vector2 position);
 
     /**
-     * @return the world spawn point or {@code  null} if none.
+     * @return the world origin point or {@code  null} if none.
      */
-    Vector2 getWorldSpawn();
+    Vector2 getWorldOrigin();
 
     /**
      * @return the world configuration
@@ -88,7 +88,7 @@ public interface LunarWorld extends Disposable {
 
     /**
      * Spawn an entity in this world
-     * This method will spawn the provided entity at {@code getWorldSpawn}
+     * This method will spawn the provided entity at {@code getWorldOrigin}
      *
      * @param entity the entity
      */
@@ -104,7 +104,7 @@ public interface LunarWorld extends Disposable {
 
     /**
      * Spawn a player in this world
-     * This method will spawn the provided player at {@code getWorldSpawn}
+     * This method will spawn the provided player at {@code getWorldOrigin}
      *
      * @param player the player
      */
@@ -114,8 +114,9 @@ public interface LunarWorld extends Disposable {
      * Remove an entity from this world
      *
      * @param entityId the ID
+     * @param destroy if the entity should be disposed of
      */
-    void removeEntityInWorld(int entityId);
+    void removeEntityInWorld(int entityId, boolean destroy);
 
     /**
      * Remove a player from this world

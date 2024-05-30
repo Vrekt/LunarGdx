@@ -8,18 +8,17 @@ import gdx.lunar.protocol.packet.server.S2CPacketCreatePlayer;
 import gdx.lunar.protocol.packet.server.S2CPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.S2CPacketRemovePlayer;
 import gdx.lunar.protocol.packet.server.S2CPacketStartGame;
-import gdx.lunar.utilities.PlayerSupplier;
 import gdx.lunar.world.WorldConfiguration;
 import gdx.lunar.world.impl.WorldAdapter;
-import lunar.shared.entity.player.impl.LunarNetworkPlayer;
+import lunar.shared.entity.player.adapter.NetworkPlayerAdapter;
 
 public final class MultiplayerGameWorld extends WorldAdapter {
 
     private final MultiplayerIntroductionGame game;
     private final DemoPlayer player;
 
-    public MultiplayerGameWorld(PlayerSupplier playerSupplier, DemoPlayer player, World world, WorldConfiguration configuration, Engine engine, MultiplayerIntroductionGame game) {
-        super(playerSupplier, world, configuration, engine);
+    public MultiplayerGameWorld(DemoPlayer player, World world, WorldConfiguration configuration, Engine engine, MultiplayerIntroductionGame game) {
+        super(world, configuration, engine);
         this.player = player;
         this.game = game;
     }
@@ -61,11 +60,13 @@ public final class MultiplayerGameWorld extends WorldAdapter {
     public void handlePlayerJoin(S2CPacketCreatePlayer packet) {
         Gdx.app.log(MultiplayerIntroductionGame.TAG, "Spawning new player " + packet.getUsername() + ":" + packet.getEntityId());
 
-        final LunarNetworkPlayer player = new LunarNetworkPlayer(true);
+        final NetworkPlayerAdapter player = new NetworkPlayerAdapter(true);
         // load player assets.
-        player.addRegion("player", new TextureRegion(game.getTexture()));
+        player.getTextureComponent().add("player", new TextureRegion(game.getTexture()));
         player.disablePlayerCollision(true);
         player.setProperties(packet.getUsername(), packet.getEntityId());
+
+
         // set your local game properties
         player.setSize(16, 16, (1 / 16.0f));
         // spawn player in your local world.
@@ -76,8 +77,8 @@ public final class MultiplayerGameWorld extends WorldAdapter {
         if (packet.hasPlayers()) {
             for (S2CPacketStartGame.BasicServerPlayer packetPlayer : packet.getPlayers()) {
                 System.err.println("found existing player: " + packetPlayer.username);
-                final LunarNetworkPlayer player = new LunarNetworkPlayer(true);
-                player.addRegion("player", game.getTexture());
+                final NetworkPlayerAdapter player = new NetworkPlayerAdapter(true);
+                player.getTextureComponent().add("player", game.getTexture());
                 player.disablePlayerCollision(true);
                 player.setProperties(packetPlayer.username, packetPlayer.entityId);
                 player.setSize(16, 16, (1 / 16.0f));

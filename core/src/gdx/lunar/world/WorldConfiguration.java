@@ -6,7 +6,7 @@ package gdx.lunar.world;
 public class WorldConfiguration {
 
     // world properties
-    public boolean handlePhysics = true, updateLocalPlayer = true, updateNetworkPlayers = true;
+    public boolean handlePhysics = true, updateNetworkPlayers = true;
     public boolean updateEntities = true;
     public boolean updateEntityEngine = true;
     public int maxPlayerCapacity = 100;

@@ -1,12 +1,12 @@
 package lunar.shared.utility;
 
 import com.badlogic.gdx.physics.box2d.*;
-import lunar.shared.components.prop.EntityPropertiesComponent;
+import lunar.shared.components.EntityPropertiesComponent;
 
 /**
  * A default definition creator for an entity
  */
-public class EntityBodyCreator implements EntityBodyHandler {
+public class EntityBodyHandlerAdapter implements EntityBodyHandler {
 
     private BodyDef definition;
     private FixtureDef fixture;

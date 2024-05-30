@@ -1,8 +1,8 @@
-package lunar.shared.components.prop;
+package lunar.shared.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool;
-import lunar.shared.utility.BasicDirection;
+import lunar.shared.utility.EntityFacingDirection;
 
 /**
  * Manages properties about an entity
@@ -15,7 +15,7 @@ public class EntityPropertiesComponent implements Component, Pool.Poolable {
     public float speed;
     public float health;
     public float angle;
-    public BasicDirection direction;
+    public EntityFacingDirection direction;
     public boolean isMoving;
 
     public void setProperties(int entityId, String entityName) {
@@ -80,11 +80,11 @@ public class EntityPropertiesComponent implements Component, Pool.Poolable {
         this.angle = angle;
     }
 
-    public BasicDirection getDirection() {
+    public EntityFacingDirection getDirection() {
         return direction;
     }
 
-    public void setDirection(BasicDirection direction) {
+    public void setDirection(EntityFacingDirection direction) {
         this.direction = direction;
     }
 

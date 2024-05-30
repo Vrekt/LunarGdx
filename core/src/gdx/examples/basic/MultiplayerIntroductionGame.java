@@ -13,12 +13,12 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import gdx.lunar.LunarClientServer;
-import gdx.lunar.network.types.PlayerConnectionHandler;
+import gdx.lunar.network.PlayerConnectionHandler;
 import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.protocol.packet.client.C2SPacketJoinWorld;
 import gdx.lunar.protocol.packet.server.*;
 import gdx.lunar.world.WorldConfiguration;
-import lunar.shared.entity.player.impl.LunarNetworkPlayer;
+import lunar.shared.entity.player.adapter.NetworkPlayerAdapter;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -71,7 +71,7 @@ public final class MultiplayerIntroductionGame extends Game {
         engine = new PooledEngine();
 
         // initialize the world with 0 gravity
-        world = new MultiplayerGameWorld(player, player, new World(Vector2.Zero, false), configuration, engine, this);
+        world = new MultiplayerGameWorld(player, new World(Vector2.Zero, false), configuration, engine, this);
         world.addDefaultPlayerCollisionListener();
 
         // initialize our default protocol and connect to the remote server,
@@ -130,6 +130,10 @@ public final class MultiplayerIntroductionGame extends Game {
         if (ready) {
             final float delta = Gdx.graphics.getDeltaTime();
             // update the world.
+
+            player.interpolatePosition();
+            player.update(delta);
+
             world.update(delta);
 
             // update our camera
@@ -143,8 +147,8 @@ public final class MultiplayerIntroductionGame extends Game {
             // render our player
             player.render(batch, delta);
 
-            for (LunarNetworkPlayer player : world.getPlayers().values()) {
-                batch.draw(player.getRegion("player"), player.getInterpolatedPosition().x, player.getInterpolatedPosition().y,
+            for (NetworkPlayerAdapter player : world.getPlayers().values()) {
+                batch.draw(player.getTextureComponent().get("player"), player.getPosition().x, player.getPosition().y,
                         player.getScaledWidth(), player.getScaledHeight());
             }
 

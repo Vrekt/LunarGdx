@@ -4,7 +4,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import lunar.shared.entity.player.LunarEntityPlayer;
 
 /**
- * A basic collision listener for {@link lunar.shared.entity.player.LunarEntityPlayer}
+ * A basic collision listener for players
  */
 public final class PlayerCollisionListener implements ContactListener {
 

@@ -6,7 +6,7 @@ import gdx.lunar.network.AbstractConnectionHandler;
 import gdx.lunar.network.adapter.FirstInboundConnectionHandler;
 import gdx.lunar.network.codec.ServerProtocolPacketDecoder;
 import gdx.lunar.network.provider.ConnectionProvider;
-import gdx.lunar.network.types.PlayerConnectionHandler;
+import gdx.lunar.network.PlayerConnectionHandler;
 import gdx.lunar.protocol.GdxProtocol;
 import gdx.lunar.protocol.channel.ClientChannels;
 import gdx.lunar.protocol.codec.ProtocolPacketEncoder;

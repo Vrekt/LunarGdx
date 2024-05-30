@@ -3,47 +3,40 @@ package gdx.lunar.world;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import gdx.lunar.utilities.PlayerSupplier;
+import com.badlogic.gdx.utils.IntMap;
 import lunar.shared.contact.PlayerCollisionListener;
 import lunar.shared.entity.LunarEntity;
-import lunar.shared.entity.player.mp.LunarEntityNetworkPlayer;
+import lunar.shared.entity.player.LunarEntityNetworkPlayer;
 import lunar.shared.entity.player.LunarEntityPlayer;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Represents a single game world that should be expanded upon
  */
-public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E extends LunarEntity> implements TypedGameWorld<P, E> {
+public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E extends LunarEntity>
+        implements TypedGameWorld<P, E> {
 
     // network players and entities
-    protected ConcurrentMap<Integer, P> players = new ConcurrentHashMap<>();
-    protected ConcurrentMap<Integer, E> entities = new ConcurrentHashMap<>();
+    protected IntMap<P> players = new IntMap<>();
+    protected IntMap<E> entities = new IntMap<>();
 
-    protected final PlayerSupplier playerSupplier;
-    protected final World world;
+    protected World world;
 
     protected WorldConfiguration configuration;
     protected Engine engine;
 
-    protected final Vector2 spawn = new Vector2();
+    protected final Vector2 worldOrigin = new Vector2();
 
     protected float accumulator;
     protected String worldName;
-    // current tick of this world
-    protected float currentTick;
 
     /**
      * An empty default constructor. You should use the setters to define configuration next.
      *
-     * @param playerSupplier the player supplier
-     * @param world          the world
-     * @param configuration  config
-     * @param engine         engine
+     * @param world         the world
+     * @param configuration config
+     * @param engine        engine
      */
-    public AbstractGameWorld(PlayerSupplier playerSupplier, World world, WorldConfiguration configuration, Engine engine) {
-        this.playerSupplier = playerSupplier;
+    public AbstractGameWorld(World world, WorldConfiguration configuration, Engine engine) {
         this.world = world;
         this.configuration = configuration;
         this.engine = engine;
@@ -52,19 +45,13 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     /**
      * An empty default constructor. You should use the setters to define configuration next.
      *
-     * @param playerSupplier the player supplier
-     * @param world          the world
-     * @param engine         engine
+     * @param world  the world
+     * @param engine engine
      */
-    public AbstractGameWorld(PlayerSupplier playerSupplier, World world, Engine engine) {
-        this.playerSupplier = playerSupplier;
+    public AbstractGameWorld(World world, Engine engine) {
         this.world = world;
         this.configuration = new WorldConfiguration();
         this.engine = engine;
-    }
-
-    public <T extends LunarEntityPlayer> T getPlayer() {
-        return playerSupplier.getPlayer();
     }
 
     @Override
@@ -83,13 +70,13 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     }
 
     @Override
-    public void setWorldSpawn(Vector2 position) {
-        spawn.set(position);
+    public void setWorldOrigin(Vector2 position) {
+        worldOrigin.set(position);
     }
 
     @Override
-    public Vector2 getWorldSpawn() {
-        return spawn;
+    public Vector2 getWorldOrigin() {
+        return worldOrigin;
     }
 
     @Override
@@ -119,7 +106,7 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
 
     @Override
     public boolean isFull() {
-        return players.size() >= configuration.maxPlayerCapacity;
+        return players.size >= configuration.maxPlayerCapacity;
     }
 
     @Override
@@ -163,12 +150,12 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     }
 
     @Override
-    public ConcurrentMap<Integer, P> getPlayers() {
+    public IntMap<P> getPlayers() {
         return players;
     }
 
     @Override
-    public ConcurrentMap<Integer, E> getEntities() {
+    public IntMap<E> getEntities() {
         return entities;
     }
 
@@ -181,7 +168,7 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     @Override
     public void spawnEntityInWorld(LunarEntity entity) {
         addEntity((E) entity);
-        entity.setPosition(spawn, true);
+        entity.setPosition(worldOrigin, true);
     }
 
     @Override
@@ -193,23 +180,29 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
     @Override
     public void spawnPlayerInWorld(LunarEntityPlayer player) {
         addPlayer((P) player);
-        player.setPosition(spawn, true);
+        player.setPosition(worldOrigin, true);
     }
 
     @Override
-    public void removeEntityInWorld(int entityId) {
+    public void removeEntityInWorld(int entityId, boolean destroy) {
         if (hasEntity(entityId)) {
-            // TODO Entity destroy
-            getEntities().get(entityId).removeFromWorld();
-            getEntities().remove(entityId);
+            final E entity = getEntities().remove(entityId);
+            entities.remove(entityId);
+
+            entity.removeFromWorld();
+            if (destroy) entity.dispose();
         }
     }
 
     @Override
     public void removePlayerInWorld(int entityId, boolean destroy) {
         if (hasPlayer(entityId)) {
-            if (destroy) getPlayers().get(entityId).removeFromWorld();
-            getPlayers().remove(entityId);
+            final P player = getPlayers().get(entityId);
+            players.remove(entityId);
+
+            player.removeFromWorld();
+
+            if (destroy) player.dispose();
         }
     }
 
@@ -232,12 +225,6 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
         // update all types of entities
         if (configuration.updateEntities)
             for (E entity : getEntities().values()) entity.update(capped);
-
-        // update local
-        if (configuration.updateLocalPlayer) {
-            getPlayer().interpolatePosition();
-            getPlayer().update(capped);
-        }
 
         // update network
         if (configuration.updateNetworkPlayers) {
@@ -267,26 +254,19 @@ public abstract class AbstractGameWorld<P extends LunarEntityNetworkPlayer, E ex
                 }
             }
 
-            // update our local player
-            if (configuration.updateLocalPlayer) {
-                getPlayer().getPreviousPosition().set(getPlayer().getPosition());
-                getPlayer().setPosition(getPlayer().getBody().getPosition(), false);
-            }
-
             world.step(configuration.stepTime, configuration.velocityIterations, configuration.positionIterations);
             accumulator -= configuration.stepTime;
-            currentTick++;
         }
     }
 
     @Override
     public void updatePlayerPositionInWorld(int entityId, float x, float y, float angle) {
-        getPlayers().get(entityId).updatePosition(x, y, angle);
+        getPlayers().get(entityId).updatePositionFromNetwork(x, y, angle);
     }
 
     @Override
     public void updatePlayerVelocityInWorld(int entityId, float x, float y, float angle) {
-        getPlayers().get(entityId).updateVelocity(x, y, angle);
+        getPlayers().get(entityId).updateVelocityFromNetwork(x, y, angle);
     }
 
     @Override

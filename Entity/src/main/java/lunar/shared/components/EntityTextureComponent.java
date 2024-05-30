@@ -1,4 +1,4 @@
-package lunar.shared.components.drawing;
+package lunar.shared.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,4 +13,13 @@ import java.util.Map;
 public class EntityTextureComponent implements Component {
     public Map<String, TextureRegion> textureRegions = new HashMap<>();
     public Map<String, Texture> textures = new HashMap<>();
+
+    public void add(String name, TextureRegion region) {
+        textureRegions.put(name, region);
+    }
+
+    public TextureRegion get(String name) {
+        return textureRegions.get(name);
+    }
+
 }

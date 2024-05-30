@@ -10,7 +10,7 @@ import gdx.lunar.protocol.packet.Packet;
 import gdx.lunar.protocol.packet.client.*;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
-import lunar.shared.entity.player.AbstractLunarEntityPlayer;
+import lunar.shared.entity.player.LunarEntityPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 public abstract class AbstractConnectionHandler implements ServerPacketHandler, Disposable {
 
     // the player this connection belongs to
-    protected AbstractLunarEntityPlayer player;
+    protected LunarEntityPlayer player;
 
     protected final Channel channel;
     protected GdxProtocol protocol;
@@ -57,7 +57,7 @@ public abstract class AbstractConnectionHandler implements ServerPacketHandler, 
         this.lastPacketReceived = lastPacketReceived;
     }
 
-    public void setPlayer(AbstractLunarEntityPlayer player) {
+    public void setPlayer(LunarEntityPlayer player) {
         this.player = player;
     }
 

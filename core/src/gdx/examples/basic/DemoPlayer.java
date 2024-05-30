@@ -6,55 +6,66 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import gdx.lunar.world.LunarWorld;
-import lunar.shared.entity.player.impl.LunarPlayer;
+import lunar.shared.entity.player.adapter.PlayerAdapter;
 
 /**
  * Represents a basic player.
  */
-public final class DemoPlayer extends LunarPlayer {
+public final class DemoPlayer extends PlayerAdapter {
+
+    private MultiplayerGameWorld world;
 
     public DemoPlayer(boolean initializeComponents, TextureRegion playerTexture) {
         super(initializeComponents);
 
         setMoveSpeed(6.0f);
         disablePlayerCollision(true);
-        setMoving(true);
         setNetworkSendRateInMs(10, 10);
-
-        // default player texture
-        addRegion("player", playerTexture);
-
-        // default player configuration
+        getTextureComponent().add("player", playerTexture);
         setSize(16, 16, (1 / 16.0f));
+    }
+
+    @Override
+    public void setWorld(LunarWorld world) {
+        this.world = (MultiplayerGameWorld) world;
+    }
+
+    @Override
+    public LunarWorld getWorld() {
+        return world;
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
+        pollInput();
     }
 
-    @Override
+    /**
+     * Poll the input of the player
+     */
     public void pollInput() {
-        setVelocity(0.0f, 0.0f);
+        // do not update the body velocity
+        // we do that ourselves in the super update method!
+        setVelocity(0, 0, false);
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             setAngle(0f);
-            setVelocity(0.0f, -getMoveSpeed());
+            setVelocity(0.0f, -getMoveSpeed(), false);
         } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             setAngle(1f);
-            setVelocity(0.0f, getMoveSpeed());
+            setVelocity(0.0f, getMoveSpeed(), false);
         } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             setAngle(2f);
-            setVelocity(getMoveSpeed(), 0.0f);
+            setVelocity(getMoveSpeed(), 0.0f, false);
         } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             setAngle(3f);
-            setVelocity(-getMoveSpeed(), 0.0f);
+            setVelocity(-getMoveSpeed(), 0.0f, false);
         }
     }
 
-    @Override
     public void render(SpriteBatch batch, float delta) {
-        batch.draw(getRegion("player"), getInterpolatedPosition().x, getInterpolatedPosition().y, getScaledWidth(), getScaledHeight());
+        batch.draw(getTextureComponent().get("player"), getInterpolatedPosition().x, getInterpolatedPosition().y, getScaledWidth(), getScaledHeight());
     }
 
     @Override

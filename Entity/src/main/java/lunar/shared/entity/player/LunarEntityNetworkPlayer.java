@@ -1,11 +1,13 @@
-package lunar.shared.entity.player.mp;
+package lunar.shared.entity.player;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import lunar.shared.entity.player.AbstractLunarEntityPlayer;
 
-public abstract class AbstractLunarEntityNetworkPlayer extends AbstractLunarEntityPlayer implements LunarEntityNetworkPlayer {
+/**
+ * Represents the base of a network player.
+ */
+public abstract class LunarEntityNetworkPlayer extends LunarEntityPlayer {
 
     protected boolean interpolatePosition, doPositionInterpolation;
     protected float interpolateToX, interpolateToY;
@@ -15,36 +17,59 @@ public abstract class AbstractLunarEntityNetworkPlayer extends AbstractLunarEnti
     // Default distance that player will interpolate to if they are too far away from server position.
     protected float interpolateDesyncDistance = 3.0f;
 
-    public AbstractLunarEntityNetworkPlayer(Entity entity, boolean addDefaultComponents) {
+    public LunarEntityNetworkPlayer(Entity entity, boolean addDefaultComponents) {
         super(entity, addDefaultComponents);
     }
 
-    public AbstractLunarEntityNetworkPlayer(boolean addDefaultComponents) {
+    public LunarEntityNetworkPlayer(boolean addDefaultComponents) {
         super(addDefaultComponents);
     }
 
-    @Override
+    /**
+     * Enable or disable interpolating of a network players position
+     *
+     * @param interpolatePosition the state
+     */
     public void setInterpolatePosition(boolean interpolatePosition) {
         this.interpolatePosition = interpolatePosition;
     }
 
-    @Override
+    /**
+     * If {@code true} once a certain threshold is met of de-sync between positions
+     * This player will be snapped to back to its intended position
+     *
+     * @param snap the state
+     */
     public void setSnapToPositionIfDesynced(boolean snap) {
         this.snapToPositionIfDesync = snap;
     }
 
-    @Override
+    /**
+     * Set the distance required for de-sync between positions for the player to
+     * snap-back to its intended or server position
+     * Only required if {@code setSnapToPositionIfDesynced} if {@code true}
+     * Usual values of this would be between 1.0 (harsh) and 3.0 (more lenient)
+     *
+     * @param distance the distance
+     */
     public void setDesyncDistanceToInterpolate(float distance) {
         this.interpolateDesyncDistance = distance;
     }
 
-    @Override
-    public void updatePosition(float x, float y, float angle) {
+    /**
+     * Update position of this player from the server
+     *
+     * @param x     the X
+     * @param y     the Y
+     * @param angle angle or rotation
+     */
+    public void updatePositionFromNetwork(float x, float y, float angle) {
         final float dst = getPosition().dst2(x, y);
 
         // interpolate to position if too far away (de sync)
         if (dst >= interpolateDesyncDistance) {
             if (snapToPositionIfDesync) {
+                setAngle(angle);
                 setPosition(x, y, true);
             } else {
                 doPositionInterpolation = true;
@@ -55,10 +80,15 @@ public abstract class AbstractLunarEntityNetworkPlayer extends AbstractLunarEnti
         setAngle(angle);
     }
 
-    @Override
-    public void updateVelocity(float x, float y, float angle) {
+    /**
+     * Update velocity of this player from the server
+     *
+     * @param x     the X
+     * @param y     the Y
+     * @param angle angle or rotation
+     */
+    public void updateVelocityFromNetwork(float x, float y, float angle) {
         getVelocity().set(x, y);
-        setMoving(x != 0 || y != 0);
         setAngle(angle);
     }
 
@@ -67,12 +97,13 @@ public abstract class AbstractLunarEntityNetworkPlayer extends AbstractLunarEnti
         if (interpolatePosition && doPositionInterpolation) {
             final Vector2 interpolated = getInterpolatedPosition();
 
-            interpolated.x = Interpolation.linear.apply(body.getPosition().x, interpolateToX, interpolationAlpha);
-            interpolated.y = Interpolation.linear.apply(body.getPosition().y, interpolateToY, interpolationAlpha);
+            interpolated.x = Interpolation.linear.apply(getPosition().x, interpolateToX, interpolationAlpha);
+            interpolated.y = Interpolation.linear.apply(getPosition().y, interpolateToY, interpolationAlpha);
 
             // update body position.
-            final float diffX = body.getPosition().x - interpolateToX;
-            final float diffY = body.getPosition().y - interpolateToY;
+            final float diffX = getPosition().x - interpolateToX;
+            final float diffY = getPosition().y - interpolateToY;
+
             body.setLinearVelocity(diffX * interpolationAlpha, diffY * interpolationAlpha);
             setPosition(body.getPosition().x, body.getPosition().y, false);
 

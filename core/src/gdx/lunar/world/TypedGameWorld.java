@@ -1,9 +1,8 @@
 package gdx.lunar.world;
 
+import com.badlogic.gdx.utils.IntMap;
 import lunar.shared.entity.LunarEntity;
-import lunar.shared.entity.player.mp.LunarEntityNetworkPlayer;
-
-import java.util.concurrent.ConcurrentMap;
+import lunar.shared.entity.player.LunarEntityNetworkPlayer;
 
 /**
  * Represents a game world that is typed for custom entities
@@ -30,11 +29,11 @@ public interface TypedGameWorld<P extends LunarEntityNetworkPlayer, E extends Lu
     /**
      * @return a list of all players in this world
      */
-    ConcurrentMap<Integer, P> getPlayers();
+    IntMap<P> getPlayers();
 
     /**
      * @return a list of all entities in this world
      */
-    ConcurrentMap<Integer, E> getEntities();
+    IntMap<E> getEntities();
 
 }

@@ -6,85 +6,114 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Disposable;
 import gdx.lunar.world.LunarWorld;
-import lunar.shared.components.prop.EntityPropertiesComponent;
-import lunar.shared.utility.BasicDirection;
+import lunar.shared.components.EntityPropertiesComponent;
+import lunar.shared.components.EntityTextureComponent;
+import lunar.shared.components.EntityTransformComponent;
+import lunar.shared.components.GlobalEntityMapper;
 import lunar.shared.utility.EntityBodyHandler;
+import lunar.shared.utility.EntityBodyHandlerAdapter;
+import lunar.shared.utility.EntityFacingDirection;
 
 /**
- * Represents a base entity that all other entities are expanded from
+ * Represents a base entity all other entities are derived from
  */
-public interface LunarEntity extends Disposable, Spawnable {
+public abstract class LunarEntity implements Spawnable, Disposable {
+
+    protected boolean inWorld;
+
+    protected Entity entity;
+    protected Body body;
+
+    protected float interpolationAlpha = 1.0f;
+    protected EntityBodyHandler definitionHandler = new EntityBodyHandlerAdapter();
+
+    public LunarEntity(Entity entity, boolean addDefaultComponents) {
+        this(addDefaultComponents);
+        this.entity = entity;
+    }
+
+    public LunarEntity(boolean addDefaultComponents) {
+        if (addDefaultComponents) addComponents();
+    }
 
     /**
-     * Get the current {@link  LunarWorld} this entity is in
+     * Override this method and provie your world method
      *
-     * @return the world or {@code null} if none
+     * @return the world this player is in
      */
-    LunarWorld getWorld();
-
-    /**
-     * Set the current world in
-     *
-     * @param worldIn the world or {@code  null}
-     */
-    void setWorld(LunarWorld worldIn);
+    public abstract LunarWorld getWorld();
 
     /**
      * @return {@code true} if the world in is not null.
      */
-    boolean isInWorld();
+    public boolean isInWorld() {
+        return inWorld;
+    }
 
     /**
      * Set if this entity is in a world
-     * if the provided world passed through in {@code setWorldIn} is NOT {@code  null} then this field
-     * will be automatically set to {@code  true}
      *
      * @param inWorld in world
      */
-    void setInWorld(boolean inWorld);
+    public void setInWorld(boolean inWorld) {
+        this.inWorld = inWorld;
+    }
 
     /**
      * @return the entities unique ID
      */
-    int getEntityId();
+    public int getEntityId() {
+        return getPropertiesComponent().entityId;
+    }
 
     /**
      * @param entityId the entities unique ID
      */
-    void setEntityId(int entityId);
+    public void setEntityId(int entityId) {
+        getPropertiesComponent().entityId = entityId;
+    }
 
     /**
      * @return the name of this entity
      */
-    String getName();
+    public String getName() {
+        return getPropertiesComponent().entityName;
+    }
 
     /**
      * @param name the name of this entity
      */
-    void setName(String name);
+    public void setName(String name) {
+        getPropertiesComponent().entityName = name;
+    }
 
     /**
-     * }
      * Set properties within {@link EntityPropertiesComponent}
      *
      * @param name the entity name
      * @param id   the entity unique ID
      */
-    void setProperties(String name, int id);
+    public void setProperties(String name, int id) {
+        getPropertiesComponent().setProperties(id, name);
+    }
 
     /**
      * The body handler used to create {@link Body}s
      *
      * @return the handler or {@code  null} if none
      */
-    EntityBodyHandler getBodyHandler();
+    public EntityBodyHandler getBodyHandler() {
+        return definitionHandler;
+    }
 
     /**
      * Set the body handler to use to create a {@link Body}
      *
      * @param handler the handler
      */
-    void setBodyHandler(EntityBodyHandler handler);
+    public void setBodyHandler(EntityBodyHandler handler) {
+        this.definitionHandler = handler;
+    }
 
     /**
      * Set if this entity has fixed rotation
@@ -92,52 +121,51 @@ public interface LunarEntity extends Disposable, Spawnable {
      *
      * @param rotation state
      */
-    void setHasFixedRotation(boolean rotation);
+    public void setHasFixedRotation(boolean rotation) {
+        if (definitionHandler != null) definitionHandler.setHasFixedRotation(rotation);
+    }
 
     /**
      * @return the width of this entity
      */
-    float getWidth();
+    public float getWidth() {
+        return getPropertiesComponent().width;
+    }
 
     /**
      * @return the height of this entity
      */
-    float getHeight();
+    public float getHeight() {
+        return getPropertiesComponent().height;
+    }
 
     /**
-     * The world or entity scale for this entity
-     * Typically this is the game/world scale that is used globally.
-     *
-     * @return the world or entity scale
+     * @return the scaled width defined with {@code setSize}
      */
-    float getWorldScale();
-
-    /**
-     * @return {@code  getWidth} * {@code getWorldScale}
-     */
-    float getScaledWidth();
+    public float getScaledWidth() {
+        return getPropertiesComponent().getScaledWidth();
+    }
 
     /**
      * @return {@code  getHeight} * {@code getWorldScale}
      */
-    float getScaledHeight();
+    public float getScaledHeight() {
+        return getPropertiesComponent().getScaledHeight();
+    }
 
     /**
      * @param width the width of this entity
      */
-    void setWidth(float width);
+    public void setWidth(float width) {
+        getPropertiesComponent().width = width;
+    }
 
     /**
      * @param height the height of this entity
      */
-    void setHeight(float height);
-
-    /**
-     * Set the world or entity scale
-     *
-     * @param scale the scale
-     */
-    void setWorldScale(float scale);
+    public void setHeight(float height) {
+        getPropertiesComponent().height = height;
+    }
 
     /**
      * Set size and world/entity scaling
@@ -146,27 +174,37 @@ public interface LunarEntity extends Disposable, Spawnable {
      * @param height height
      * @param scale  scale
      */
-    void setSize(float width, float height, float scale);
+    public void setSize(float width, float height, float scale) {
+        getPropertiesComponent().setEntitySize(width, height, scale);
+    }
 
     /**
      * @return the movement speed of this entity
      */
-    float getMoveSpeed();
+    public float getMoveSpeed() {
+        return getPropertiesComponent().getSpeed();
+    }
 
     /**
      * @param speed the movement speed of this entity
      */
-    void setMoveSpeed(float speed);
+    public void setMoveSpeed(float speed) {
+        getPropertiesComponent().speed = speed;
+    }
 
     /**
      * @return health of this entity defaulted to {@code  100.0f}
      */
-    float getHealth();
+    public float getHealth() {
+        return getPropertiesComponent().health;
+    }
 
     /**
      * @param health health of this entity
      */
-    void setHealth(float health);
+    public void setHealth(float health) {
+        getPropertiesComponent().health = health;
+    }
 
     /**
      * Heal this entity by the provided amount
@@ -174,7 +212,9 @@ public interface LunarEntity extends Disposable, Spawnable {
      * @param amount the amount to heal by
      * @return the entities new health
      */
-    float heal(float amount);
+    public float heal(float amount) {
+        return getPropertiesComponent().health += amount;
+    }
 
     /**
      * Damage this entity by the provided amount
@@ -182,69 +222,69 @@ public interface LunarEntity extends Disposable, Spawnable {
      * @param amount the amount to damage by
      * @return the entities new health
      */
-    float damage(float amount);
+    public float damage(float amount) {
+        return getPropertiesComponent().health -= amount;
+    }
 
     /**
      * @return position of this entity, defaulted to {@code 0.0f,0.0f}
      */
-    Vector2 getPosition();
+    public Vector2 getPosition() {
+        return GlobalEntityMapper.transform.get(entity).position;
+    }
 
     /**
      * @return x position
      */
-    float getX();
+    public float getX() {
+        return getPosition().x;
+    }
 
     /**
      * @return y position
      */
-    float getY();
+    public float getY() {
+        return getPosition().y;
+    }
 
     /**
      * Set the position of this entity
-     * If {@code  transform} is {@code  true} then if the entity has a {@link Body}
-     * That bodies position will be set to that position using {@code setTransform}
-     * Otherwise if {@code false} only the {@link Vector2} position will be changed
      *
      * @param position  the position
-     * @param transform if transforming
+     * @param transform if the box2d body should be transformed
      */
-    void setPosition(Vector2 position, boolean transform);
+    public void setPosition(Vector2 position, boolean transform) {
+        getPosition().set(position);
+        if (transform && body != null) body.setTransform(position, getAngle());
+    }
 
     /**
      * Set the position of this entity
-     * If {@code  transform} is {@code  true} then if the entity has a {@link Body}
-     * That bodies position will be set to that position using {@code setTransform}
-     * Otherwise if {@code false} only the {@link Vector2} position will be changed
      *
      * @param x         x position
      * @param y         y position
-     * @param transform if transforming
+     * @param transform if the box2d body should be transformed
      */
-    void setPosition(float x, float y, boolean transform);
-
-    /**
-     * This is defined by a variable and not by their velocity
-     *
-     * @return {@code true} if moving
-     */
-    boolean isMoving();
-
-    /**
-     * @param moving state
-     */
-    void setMoving(boolean moving);
+    public void setPosition(float x, float y, boolean transform) {
+        getPosition().set(x, y);
+        if (transform && body != null) body.setTransform(x, y, getAngle());
+    }
 
     /**
      * @return previous position of this entity used for interpolation
      */
-    Vector2 getPreviousPosition();
+    public Vector2 getPreviousPosition() {
+        return GlobalEntityMapper.transform.get(entity).previous;
+    }
 
     /**
      * Usually set right before updating an entities current position
      *
      * @param position set previous position
      */
-    void setPreviousPosition(Vector2 position);
+    public void setPreviousPosition(Vector2 position) {
+        getPreviousPosition().set(position);
+    }
 
     /**
      * Usually set right before updating an entities current position
@@ -252,39 +292,31 @@ public interface LunarEntity extends Disposable, Spawnable {
      * @param x position
      * @param y y position
      */
-    void setPreviousPosition(float x, float y);
+    public void setPreviousPosition(float x, float y) {
+        getPreviousPosition().set(x, y);
+    }
 
     /**
      * @return interpolated position for drawing or anything else that requires smoothing
      */
-    Vector2 getInterpolatedPosition();
+    public Vector2 getInterpolatedPosition() {
+        return GlobalEntityMapper.transform.get(entity).interpolated;
+    }
 
     /**
      * @param position position
      */
-    void setInterpolatedPosition(Vector2 position);
+    public void setInterpolatedPosition(Vector2 position) {
+        getInterpolatedPosition().set(position);
+    }
 
     /**
      * @param x x position
      * @param y y position
      */
-    void setInterpolatedPosition(float x, float y);
-
-    /**
-     * @return current linear velocity of this entity
-     */
-    Vector2 getVelocity();
-
-    /**
-     * @param velocity the linear velocity
-     */
-    void setVelocity(Vector2 velocity);
-
-    /**
-     * @param x linear X velocity
-     * @param y linear Y velocity
-     */
-    void setVelocity(float x, float y);
+    public void setInterpolatedPosition(float x, float y) {
+        getInterpolatedPosition().set(x, y);
+    }
 
     /**
      * Set amount of alpha or 'smoothing' to use when interpolating
@@ -292,19 +324,25 @@ public interface LunarEntity extends Disposable, Spawnable {
      *
      * @param alpha alpha
      */
-    void setInterpolationAlpha(float alpha);
+    public void setInterpolationAlpha(float alpha) {
+        this.interpolationAlpha = alpha;
+    }
 
     /**
      * Interpolate the position of this entity
      */
-    void interpolatePosition();
+    public void interpolatePosition() {
+        interpolatePosition(Interpolation.linear, interpolationAlpha);
+    }
 
     /**
      * Interpolate the position of this entity
      *
      * @param alpha alpha to use for 'smoothing'
      */
-    void interpolatePosition(float alpha);
+    public void interpolatePosition(float alpha) {
+        interpolatePosition(Interpolation.linear, alpha);
+    }
 
     /**
      * Interpolate the position of this entity
@@ -312,83 +350,151 @@ public interface LunarEntity extends Disposable, Spawnable {
      * @param interpolation interpolation method to use
      * @param alpha         alpha to use for 'smoothing'
      */
-    void interpolatePosition(Interpolation interpolation, float alpha);
+    public void interpolatePosition(Interpolation interpolation, float alpha) {
+        final Vector2 previous = getPreviousPosition();
+        final Vector2 current = body.getPosition();
+        setInterpolatedPosition(interpolation.apply(previous.x, current.x, alpha), interpolation.apply(previous.y, current.y, alpha));
+    }
+
+    /**
+     * @return current linear velocity of this entity
+     */
+    public Vector2 getVelocity() {
+        return GlobalEntityMapper.transform.get(entity).velocity;
+    }
+
+    /**
+     * @param velocity the linear velocity
+     */
+    public void setVelocity(Vector2 velocity, boolean updateBody) {
+        getVelocity().set(velocity);
+        if (updateBody && body != null) body.setLinearVelocity(velocity);
+    }
+
+    /**
+     * @param x linear X velocity
+     * @param y linear Y velocity
+     */
+    public void setVelocity(float x, float y, boolean updateBody) {
+        getVelocity().set(x, y);
+        if (updateBody && body != null) body.setLinearVelocity(x, y);
+    }
 
     /**
      * @return the angle or rotation of this entity
      */
-    float getAngle();
+    public float getAngle() {
+        return getPropertiesComponent().angle;
+    }
 
     /**
      * @param angle angle or rotation
      */
-    void setAngle(float angle);
+    public void setAngle(float angle) {
+        getPropertiesComponent().angle = angle;
+    }
 
     /**
      * Return a basic direction only supporting LEFT, RIGHT, UP, DOWN
      *
      * @return direction
      */
-    BasicDirection getDirection();
+    public EntityFacingDirection getFacingDirection() {
+        return getPropertiesComponent().direction;
+    }
 
     /**
      * Set direction
      *
      * @param direction the direction
      */
-    void setDirection(BasicDirection direction);
+    public void setFacingDirection(EntityFacingDirection direction) {
+        getPropertiesComponent().direction = direction;
+    }
 
     /**
      * @return the box2d {@link Body} or {@code  null} if none yet
      */
-    Body getBody();
+    public Body getBody() {
+        return body;
+    }
 
     /**
      * Set the body
      *
      * @param body the body
      */
-    void setBody(Body body);
+    public void setBody(Body body) {
+        this.body = body;
+    }
 
     /**
      * The ashley {@link Entity} of this entity
      *
      * @return the entity
      */
-    Entity getEntity();
+    public Entity getEntity() {
+        return entity;
+    }
 
     /**
-     * Set a new entity and dispose the old current entity if needed.
-     * It is up to you to remove the entity from any systems you have using it.
-     *
-     * @param entity           the entity
-     * @param disposeOldEntity if {@code true} the old {@link Entity} will be disposed of and removed.
+     * @param entity the entity
      */
-    void setEntity(Entity entity, boolean disposeOldEntity);
+    public void setEntity(Entity entity) {
+        this.entity = entity;
+    }
 
     /**
      * Add default components
      * {@link EntityPropertiesComponent}
-     * {@link lunar.shared.components.position.EntityPositionComponent}
-     * {@link lunar.shared.components.position.EntityVelocityComponent}
+     * {@link EntityTransformComponent}
+     * {@link EntityTextureComponent}
      */
-    void addComponents();
+    public void addComponents() {
+        if (entity == null) entity = new Entity();
+        entity.add(new EntityPropertiesComponent());
+        entity.add(new EntityTransformComponent());
+        entity.add(new EntityTextureComponent());
+    }
 
     /**
-     * @return the properties of this entity
+     * @return the transform component of this entity
      */
-    EntityPropertiesComponent getProperties();
+    public EntityTransformComponent getTransformComponent() {
+        return GlobalEntityMapper.transform.get(entity);
+    }
+
+    /**
+     * @return the properties component of this entity
+     */
+    public EntityPropertiesComponent getPropertiesComponent() {
+        return GlobalEntityMapper.properties.get(entity);
+    }
+
+    /**
+     * @return texture component of this entity
+     */
+    public EntityTextureComponent getTextureComponent() {
+        return GlobalEntityMapper.texture.get(entity);
+    }
 
     /**
      * Update this entity
      *
-     * @param delta the delta time
+     * @param delta delta
      */
-    void update(float delta);
+    public abstract void update(float delta);
 
     /**
-     * Load any required assets or data for this entity
+     * Load this entity if required
      */
-    void loadEntity();
+    public void loadEntity() {
 
+    }
+
+    @Override
+    public void dispose() {
+        entity.removeAll();
+        inWorld = false;
+    }
 }
